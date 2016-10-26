@@ -664,45 +664,92 @@ Static Function ExistLan(cMat,cData)
 	
 Return(lRet)
 
+Static Function getQueRat(FILIAL,MAT,CODIGO)
+Local StrQuery := ""
+/*##RATEIO DE HORAS POR SUBCONTA NAS VERBAS DE HORAS NORMAIS########################################################*/
+StrQuery +="SELECT SRZ.RZ_FILIAL,SRZ.RZ_MAT,RA_NOME,RZ_CC,RZ_PD,SRV.RV_LPADRAO,FIP.FIPCUSTO,"
+/*##PEGA QUANTIDADE DE MINUTOS POR LANCAMENTO E POR LINHA###########################################################*/
+StrQuery +="SUM("
+StrQuery +="    (CAST(Left(Convert( VARCHAR(5),"
+StrQuery +="	 Cast(replace(CAST(FIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
+StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)*60)"
+StrQuery +="	+"
+StrQuery +="	 CAST(RIGHT(Convert( VARCHAR(5),"
+StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
+StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)"
+StrQuery +="	) as HORASFIP,"
+/*##PEGA TOTAL DE MINUTOS LANCADOS INDEPENDENTE DA SUBCONTAS########################################################*/
+StrQuery +="(SELECT SUM("
+StrQuery +="			(CAST(Left(Convert( VARCHAR(5),"
+StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
+StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)*60)"
+StrQuery +="			+"
+StrQuery +="			 CAST(RIGHT(Convert( VARCHAR(5),"
+StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
+StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)"
+StrQuery +="			)		"
+StrQuery +="	 FROM FIPEPC SUBFIP     "
+StrQuery +="	 INNER JOIN "+RetSqlName("SZ2")+" SZ2 ON (SUBFIP.FIPCUSTO = Substring(SZ2.Z2_COD,1,5) + '-' + Substring(SZ2.Z2_OS,1,2) + '-' + Substring(SZ2.Z2_SUBC,1,5))	"
+StrQuery +="	 WHERE SUBFIP.FIPEMPRESA = '"+CODIGO+"' AND SUBFIP.CHAPA='"+MAT+"' AND SUBFIP.FIPANOMES ='"+cAnoMes+"' AND 	 (SUBSTRING(FIPCUSTO,10,1)<>'9' OR RIGHT(FIPCUSTO,1) NOT IN ('F')) AND SUBFIP.FIPHORAI<SUBFIP.FIPHORAF AND SUBFIP.FIPATIVIDADES IS NOT NULL"
+StrQuery +=") as HORASTOT,"
+/*###################################################################################################################*/
+StrQuery +="RZ_VAL  "
+StrQuery +="FROM FIPEPC AS FIP  "
+StrQuery +="INNER JOIN "+RetSqlName("SZ2")+" SZ2 ON (FIP.FIPEMPRESA = '"+CODIGO+"' AND FIP.FIPCUSTO = Substring(SZ2.Z2_COD,1,5) + '-' + Substring(SZ2.Z2_OS,1,2) + '-' + Substring(SZ2.Z2_SUBC,1,5)) "
+StrQuery +="INNER JOIN "+RetSqlName("SRA")+" SRA ON (SRA.RA_MAT=FIP.CHAPA AND SRA.D_E_L_E_T_<>'*') "
+StrQuery +="INNER JOIN "+RetSqlName("SRZ")+" SRZ ON (SRZ.RZ_FILIAL=SRA.RA_FILIAL AND SRZ.RZ_MAT=CHAPA AND SRZ.D_E_L_E_T_<>'*') "
+StrQuery +="INNER JOIN "+RetSqlName("SRV")+" SRV ON (SRV.RV_FILIAL='"+Xfilial("SRV")+"' AND SRV.RV_COD=SRZ.RZ_PD AND SRV.RV_LPADRAO<>'' AND SRV.D_E_L_E_T_<>'*' AND SRV.RV_COD NOT IN (293,294,114,337,345,109,105,106)) "
+StrQuery +="WHERE  CHAPA='"+MAT+"' AND  RA_FILIAL='"+FILIAL+"' AND  FIP.FIPANOMES ='"+cAnoMes+"' AND (SUBSTRING(FIPCUSTO,10,1)<>'9' OR RIGHT(FIPCUSTO,1) NOT IN ('F')) AND FIP.FIPHORAI<FIP.FIPHORAF and FIP.FIPATIVIDADES IS NOT NULL  "
+StrQuery +="GROUP BY RZ_FILIAL,RZ_MAT,RA_NOME,RZ_CC,RZ_PD,RV_LPADRAO,FIP.FIPCUSTO,RZ_VAL "
+
+
+StrQuery +=" UNION "
+
+
+/*##RATEIO DE HORAS POR SUBCONTA NAS VERBAS DE HORAS EXTRAS#########################################################*/
+StrQuery +="SELECT SRZ.RZ_FILIAL,SRZ.RZ_MAT,RA_NOME,RZ_CC,RZ_PD,SRV.RV_LPADRAO,FIP.FIPCUSTO,"
+/*##PEGA QUANTIDADE DE MINUTOS POR LANCAMENTO E POR LINHA###########################################################*/
+StrQuery +="SUM("
+StrQuery +="    (CAST(Left(Convert( VARCHAR(5),"
+StrQuery +="	 Cast(replace(CAST(FIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
+StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)*60)"
+StrQuery +="	+"
+StrQuery +="	 CAST(RIGHT(Convert( VARCHAR(5),"
+StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
+StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)"
+StrQuery +="	) as HORASFIP,"
+/*##PEGA TOTAL DE MINUTOS LANCADOS INDEPENDENTE DA SUBCONTAS########################################################*/
+StrQuery +="(SELECT SUM("
+StrQuery +="			(CAST(Left(Convert( VARCHAR(5),"
+StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
+StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)*60)"
+StrQuery +="			+"
+StrQuery +="			 CAST(RIGHT(Convert( VARCHAR(5),"
+StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
+StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)"
+StrQuery +="			)		"
+StrQuery +="	 FROM FIPEPC SUBFIP     "
+StrQuery +="	 INNER JOIN "+RetSqlName("SZ2")+" SZ2 ON (SUBFIP.FIPCUSTO = Substring(SZ2.Z2_COD,1,5) + '-' + Substring(SZ2.Z2_OS,1,2) + '-' + Substring(SZ2.Z2_SUBC,1,5))	"
+StrQuery +="	 WHERE SUBFIP.FIPEMPRESA = '"+CODIGO+"' AND SUBFIP.CHAPA='"+MAT+"' AND SUBFIP.FIPANOMES ='"+cAnoMes+"' AND 	 (SUBSTRING(FIPCUSTO,10,1)<>'9' OR RIGHT(FIPCUSTO,1) NOT IN ('F')) AND SUBFIP.FIPHORAI<SUBFIP.FIPHORAF AND SUBFIP.FIPATIVIDADES IS NULL"
+StrQuery +=") as HORASTOT,"
+/*###################################################################################################################*/
+StrQuery +="RZ_VAL  "
+StrQuery +="FROM FIPEPC AS FIP  "
+StrQuery +="INNER JOIN "+RetSqlName("SZ2")+" SZ2 ON (FIP.FIPEMPRESA = '"+CODIGO+"' AND FIP.FIPCUSTO = Substring(SZ2.Z2_COD,1,5) + '-' + Substring(SZ2.Z2_OS,1,2) + '-' + Substring(SZ2.Z2_SUBC,1,5)) "
+StrQuery +="INNER JOIN "+RetSqlName("SRA")+" SRA ON (SRA.RA_MAT=FIP.CHAPA AND SRA.D_E_L_E_T_<>'*') "
+StrQuery +="INNER JOIN "+RetSqlName("SRZ")+" SRZ ON (SRZ.RZ_FILIAL=SRA.RA_FILIAL AND SRZ.RZ_MAT=CHAPA AND SRZ.D_E_L_E_T_<>'*') "
+StrQuery +="INNER JOIN "+RetSqlName("SRV")+" SRV ON (SRV.RV_FILIAL='"+Xfilial("SRV")+"' AND SRV.RV_COD=SRZ.RZ_PD AND SRV.RV_LPADRAO<>'' AND SRV.D_E_L_E_T_<>'*' AND SRV.RV_COD IN (293,294,114,337,345,109,105,106)) "
+StrQuery +="WHERE  CHAPA='"+MAT+"' AND  RA_FILIAL='"+FILIAL+"' AND  FIP.FIPANOMES ='"+cAnoMes+"' AND (SUBSTRING(FIPCUSTO,10,1)<>'9' OR RIGHT(FIPCUSTO,1) NOT IN ('F')) AND FIP.FIPHORAI<FIP.FIPHORAF and FIP.FIPATIVIDADES IS NULL  "
+StrQuery +="GROUP BY RZ_FILIAL,RZ_MAT,RA_NOME,RZ_CC,RZ_PD,RV_LPADRAO,FIP.FIPCUSTO,RZ_VAL "
+
+return (StrQuery)
+
+
 Static Function GerRatFol()
 
 	dbSelectArea("SRA")
 	ProcRegua(RecCount()) // Ajusta numero de elementos da regua
 	        
-	cQuery :=""
-	cQuery1:=""
-	cQuery2:=""
-	cQuery3:=""
-	//Complementa a Query de Rateio para que a execução seja por matricula
-	cQuery :=" SELECT SRZ.RZ_FILIAL,SRZ.RZ_MAT,RA_NOME,RZ_CC,RZ_PD,SRV.RV_LPADRAO,FIP.FIPCUSTO, "
-	cQuery +="	SUM( "
-	cQuery +="		(CAST(Left(Convert( VARCHAR(5), "
-	cQuery +="	 	Cast(replace( CAST(FIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)"
-	cQuery +="		-Cast(replace( CAST(FIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)*60)"
-	cQuery +="	+"
-	cQuery +="		CAST(RIGHT(Convert( VARCHAR(5), "
-	cQuery +="	 	 Cast(replace( CAST(FIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)"
-	cQuery +="		-Cast(replace( CAST(FIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)"
-	cQuery +="	) HORASFIP "
-	cQuery +="	,"
-	cQuery +="	("
-	cQuery +="		SELECT SUM( "
-	cQuery +="			(CAST(Left(Convert( VARCHAR(5), "
-	cQuery +="	 		Cast(replace( CAST(SUBFIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)"
-	cQuery +="			-Cast(replace( CAST(SUBFIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)*60)"
-	cQuery +="		+"
-	cQuery +="			CAST(RIGHT(Convert( VARCHAR(5), "
-	cQuery +="	 	 	Cast(replace( CAST(SUBFIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)"
-	cQuery +="			-Cast(replace( CAST(SUBFIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC))"
-	cQuery +="		FROM FIPEPC SUBFIP"
-	cQuery +="     INNER JOIN "+RetSqlName("SZ2")+" SZ2 ON (SUBFIP.FIPCUSTO = Substring(SZ2.Z2_COD,1,5) + '-' + Substring(SZ2.Z2_OS,1,2) + '-' + Substring(SZ2.Z2_SUBC,1,5))"
-	
-	cQuery2 +=" INNER JOIN "+RetSqlName("SZ2")+" SZ2 ON (FIP.FIPEMPRESA = '"+SM0->M0_CODIGO+"' AND FIP.FIPCUSTO = Substring(SZ2.Z2_COD,1,5) + '-' + Substring(SZ2.Z2_OS,1,2) + '-' + Substring(SZ2.Z2_SUBC,1,5))"
-	cQuery2 +=" INNER JOIN "+RetSqlName("SRA")+" SRA ON (SRA.RA_MAT=FIP.CHAPA AND SRA.D_E_L_E_T_<>'*')"
-	cQuery2 +=" INNER JOIN "+RetSqlName("SRZ")+" SRZ ON (SRZ.RZ_FILIAL=SRA.RA_FILIAL AND SRZ.RZ_MAT=CHAPA AND SRZ.D_E_L_E_T_<>'*')"
-	cQuery2 +=" INNER JOIN "+RetSqlName("SRV")+" SRV ON (SRV.RV_FILIAL='"+Xfilial("SRV")+"' AND SRV.RV_COD=SRZ.RZ_PD AND SRV.RV_LPADRAO<>'' AND SRV.D_E_L_E_T_<>'*')"
-	cQuery2 +=" WHERE "
-	
 	cQueryMat:=" SELECT DISTINCT RZ_FILIAL,RZ_MAT "
 	cQueryMat+=" FROM "+RetSqlName("SRZ")+" SRZ "
 	cQueryMat+=" INNER JOIN "+RetSqlName("SRA")+" SRA ON (RA_MAT=RZ_MAT AND RA_FILIAL=RZ_FILIAL AND SRA.D_E_L_E_T_<>'*') "
@@ -726,24 +773,10 @@ Static Function GerRatFol()
 		IncProc("Efetuando Rateio.... Mat "+QMAT->RZ_MAT ,"Aguarde...")
 		cMatTemp += QMAT->RZ_MAT +chr(13)+chr(10)
 		
-		cQuery1 :="		WHERE SUBFIP.FIPEMPRESA = '"+SM0->M0_CODIGO+"' AND SUBFIP.CHAPA='"+QMAT->RZ_MAT+"' AND SUBFIP.FIPANOMES ='"+cAnoMes+"' AND "
-		cQuery1 +="	 (SUBSTRING(FIPCUSTO,10,1)<>'9' OR RIGHT(FIPCUSTO,1) NOT IN ('F')) "
-		cQuery1 +="		  AND SUBFIP.FIPHORAI<SUBFIP.FIPHORAF"
-		cQuery1 +="	) HORASTOT,RZ_VAL "
-		cQuery1 +=" FROM FIPEPC AS FIP "	
-		
-		cQuery3 :=" CHAPA='"+QMAT->RZ_MAT+"' AND "
-		cQuery3 +=" RA_FILIAL='"+QMAT->RZ_FILIAL+"' AND "
-		cQuery3 +=" FIP.FIPANOMES ='"+cAnoMes+"' AND (SUBSTRING(FIPCUSTO,10,1)<>'9' OR RIGHT(FIPCUSTO,1) NOT IN ('F')) AND FIP.FIPHORAI<FIP.FIPHORAF "
-		cQuery3 +=" GROUP BY RZ_FILIAL,RZ_MAT,RA_NOME,RZ_CC,RZ_PD,RV_LPADRAO,FIP.FIPCUSTO,RZ_VAL"
-		cQuery3 +=" ORDER BY RZ_FILIAL,RZ_MAT,RA_NOME,RZ_CC,RZ_PD,RV_LPADRAO,FIP.FIPCUSTO,RZ_VAL"
-		
-		Fwrite(Fcreate('\Log_Rateio\Rateio_'+QMAT->RZ_MAT+'.txt'),cQuery+cQuery1+cQuery2+cQuery3)
+		Fwrite(Fcreate('\Log_Rateio\Rateio_'+QMAT->RZ_MAT+'.txt'),getQueRat(QMAT->RZ_FILIAL,QMAT->RZ_MAT,SM0->M0_CODIGO))
 		//Executa a Query com o Rateio já realizado
-		TCQUERY cQuery+cQuery1+cQuery2+cQuery3 Alias QRATMAT NEW 
-		
-		//AVISO("TESTE2",cQuery+cQuery1+cQuery2+cQuery3,{"Ok"},3)		
-		
+		TCQUERY getQueRat(QMAT->RZ_FILIAL,QMAT->RZ_MAT,SM0->M0_CODIGO) Alias QRATMAT NEW 
+				
 		dbSelectArea("QRATMAT")
 		dbGotop()                                                
 		
