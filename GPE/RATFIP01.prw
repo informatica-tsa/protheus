@@ -17,7 +17,8 @@
  * @Alterações  31/07/2013 Alterado para considerar horas fracionadas
  * @Alteraçoõe  21/10/2013 Renomeado para RATFIP01.prw para trabalho no sentido de uni-
  *				ficar os fontes que agora fará o rateio de horas  nos lançamentos  men-
- *				sais e também na rescisão. 
+ *				sais e também na rescisão.
+ * @Alterações  03/11/2016 Alterado local de verificação de verbas para rateio. ThiagoSantos 
  ****************************************************************************************/
 User Function RATFIP01(_cAlias)              
 	Private cAlias := _cAlias
@@ -25,20 +26,15 @@ User Function RATFIP01(_cAlias)
 	Private oDl002
 	Private oDlMont
 	Private oFont1   := TFont():New("Arial Black",,024,,.T.,,,,,.F.,.F.)
-	
-	Private cVebHExt := SuperGetMv ( "CN_VEBHEXT", .T. , Space(100))
+	Private cVebHExt := GetVerbRat() // PEGA AS VERBAS DA TABELA SRV COM RV_TIPORAT = 2 OU 3
 	Private cFolMes  := SuperGetMv ( "MV_FOLMES" , .T. , Space(100))
-	
 	Private dUltimoDiaMes := LastDay(ctod('01/'+Substr(cFolMes, 5, 2) + '/' + Substr(cFolMes, 1, 4)))
-//	cFolMes := "201208"
-	
 	Private aSubHora := {}
 	Private lLancErro := .F.                 
 	Private cMatric := SRA->RA_MAT      
-	
 	Private aAreaAlias := GetArea(cAlias)
-	// Buscando Verbas e Horas FIP
-	Private aVerbas := BuscarVerbas(cAlias)
+
+	Private aVerbas := BuscarVerbas(cAlias) // VERIFICA SE A MATRICULA POSSUIR VERBAR PARA RATEIO 
 	Private aItens  := BuscarHoras(cFolMes)
 	
 	if len(aVerbas) == 0
@@ -46,11 +42,37 @@ User Function RATFIP01(_cAlias)
 		Return
 	endif
 	
-	// Exibe o formulario principal
+	// EXIBE FORMULARIO PRINCIPAL
 	Mostra()
 	
 	RestArea(aAreaAlias)
 Return
+
+static Function GetVerbRat()
+	Local cVerbas := ""
+	Local nCont := 0
+	Local cQuery := " SELECT RV_COD FROM SRV010 WHERE RV_TIPORAT = 2 OR RV_TIPORAT = 3 " 
+  	if select("Q1") <> 0
+		Q1->(dbCloseArea())
+	endif 
+  	TCQUERY cQuery NEW ALIAS "Q1"
+  	                                         
+	WHILE !(Q1->(EOF()))
+		if nCont > 0
+			cVerbas += ";"+alltrim(Q1->RV_COD)
+		else
+			cVerbas += alltrim(Q1->RV_COD)
+		endif
+		
+		nCont++
+		
+		Q1->(dbSkip())
+	Enddo
+	
+	if select("Q1") <> 0
+		Q1->(dbCloseArea())
+	endif 
+Return cVerbas
 
 Static Function Mostra()
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -105,9 +127,6 @@ Static Function BuscarVerbas(cAlias)
 	
 	WHILE !((cAlias)->(EOF())) .AND. (cAlias)->(&c_Filial) == xFilial(cAlias) .AND. (cAlias)->(&c_Mat) == cMatric	
 	
-//		if ( MsgYesNo('Usuário ' + (cAlias)->(&c_Mat) + ', Verba '+ (cAlias)->(&c_PD) +' cVebHExt '+ cVebHExt +' : Terminar?') )
-//			return aVerbas
-//		endif
 		if alltrim((cAlias)->(&c_PD)) $ alltrim(cVebHExt)
 			AADD(aVerbas,{(cAlias)->(&c_PD),0,(cAlias)->(&c_Horas)})
 		endif
