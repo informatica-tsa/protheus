@@ -473,7 +473,7 @@ If nPgAtu == 1
         
 	oPrint:Say(0075,0400,OemToAnsi("ORDEM DE COMPRA / SERVIÇO"),oFontTit,100)
 	oPrint:Say(0075,1850,OemToAnsi("Pagina:")+StrZero(nPgAtu,2)+' de '+StrZero(nTotPg,2),oFontRos,100)
-	oPrint:SayBitmap(210,1920,"\SYSTEM\lgrl02.bmp",300,120)
+	oPrint:SayBitmap(210,1920,"\SYSTEM\lgrl"+cEmpAnt+".bmp",300,120)
 	oPrint:Box(0150,0050,0152,2300) //Lina dupla separador horizontal Box cabecalho
 	oPrint:Box(0050,1800,0750,1800) //Lina dupla separador vertical Box cabecalho
 	
