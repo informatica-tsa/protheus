@@ -104,15 +104,7 @@ If nOpcx<>5
 		If !GdDeleted(nGrvSZp)
 			dbSelectArea("SZP")
 			dbSetOrder(1)			
-/*			If Reclock("SZP",!dbSeek(Xfilial("SZP")+M->ZP_CODIGO+GdFieldGet("ZP_ITEM",nGrvSZp))) */
 			If Reclock("SZP",!dbSeek(Xfilial("SZP")+M->ZP_CODIGO+M->ZP_ITEM))
-/*            If nOpcx = 4
-               dbSeek(Xfilial("SZP")+M->ZP_CODIGO+M->ZP_ITEM)
-               Reclock("SZP",.F.)
-            Else
-               Reclock("SZP",.F.)
-            EndIf
-*/
 				//Grava os campos chaves
                    Replace  ZP_CODIGO  With M->ZP_CODIGO,;
 							ZP_TIPO    With M->ZP_TIPO  ,;
