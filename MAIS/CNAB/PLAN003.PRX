@@ -1,0 +1,67 @@
+#include "rwmake.ch"     
+
+User Function PLAN003()    
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ PLAN003  ³ Autor ³ Gustav Koblinger  ³ Data ³ 09/10/08 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ ExecBlock para obter a agencia para 341REM.PAG        ±±
+±±³            Posicoes 024 a 043                                    ±±
+³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ PLANAR                                             ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+*/
+Local _cRet     := replicate("0",20)
+Local _nPostraco := 0
+Local _cbanco   := U_PLAN002()
+Local _cAgencia := "0000"
+Local _cConta   := "00000"
+Local _cDV      := "0"
+Local _aModel   := SUBSTR(SEA->EA_MODELO,1,2)
+
+If ! Empty(SE2->E2_CODBAR)
+	_cAgencia := Subs(SE2->E2_CODBAR,20,4)
+	_cConta   := Alltrim(Str(Val(Subs(SE2->E2_CODBAR,37,7))))
+    If _cBanco == "341"
+	    If Len(_cDV) <= 5
+		   _cDV := Right(Subs(SE2->E2_CODBAR,37,7),1)
+	    Else
+		   _cDV := Right(Subs(SE2->E2_CODBAR,37,7),2)
+	    EndIf
+    Else
+	   _cDV := Right(Subs(SE2->E2_CODBAR,37,7),1)
+    EndIf
+Else
+	//Caso nao tenha boleto com Codigo de Barra
+	//Para que o CNAB funcione, tem que se cadastrar a conta no SA2 com "-" e DV
+	//Para evitar esta rotina
+	_cAgencia := SA2->A2_AGENCIA
+	_nPostraco := AT("-",SA2->A2_NUMCON)
+	If _nPostraco > 0
+	   _cConta := LEFT(SA2->A2_NUMCON,_nPostraco-1)
+	   _cDV    := Subs(SA2->A2_NUMCON,_nPostraco+1)
+	Else
+	   _cConta := Alltrim(Str(Val(SA2->A2_NUMCON)))
+	   _cConta := LEFT(SA2->A2_NUMCON,5)
+	   If Len(_cConta) <= 5
+		_cDV    := Right(SA2->A2_NUMCON,1)
+	   Else
+		_cDV    := Right(SA2->A2_NUMCON,2)
+	   EndIf
+	EndIf
+EndIf
+
+If _cBanco == "341"
+	_cDV := Strzero(Val(_cDV),2,0)
+	_Ret := "0"+Strzero(Val(_cAgencia),4,0)+" "+"0000000"+Strzero(Val(_cConta),5,0)+" "+StrZero(Val(_cDV),2,0)
+Else
+	If _aModel $ "03,07,41,43"
+		_Ret := Strzero(Val(_cAgencia),4,0)+" "+Strzero(Val(_cConta),5,0)+" "
+	EndIf
+EndIf		
+
+Return(_cRet)

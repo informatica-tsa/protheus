@@ -423,7 +423,7 @@ Group Projetos TSA
       End
    End
    Project Financeiro
-      FoldersCount=5
+      FoldersCount=6
       Folder Cadastros
          VSSPath=Cadastros
          FilesCount=5
@@ -555,6 +555,52 @@ Group Projetos TSA
              Type=T
          End
          File \Protheus11\Projetos\FIN\VNatAnali.prw
+             Type=T
+         End
+      End
+      Folder SISPAG
+         VSSPath=Nova Pasta6
+         FilesCount=14
+         File \Projetos\MAIS\CNAB\AGEFITAU.PRW
+             Type=T
+         End
+         File \Projetos\MAIS\CNAB\campfree.prx
+             Type=T
+         End
+         File \Projetos\MAIS\CNAB\CodBar.prx
+             Type=T
+         End
+         File \Projetos\MAIS\CNAB\CONVLD.PRW
+             Type=T
+         End
+         File \Projetos\MAIS\CNAB\digver.prx
+             Type=T
+         End
+         File \Projetos\MAIS\CNAB\NomeBco.PRX
+             Type=T
+         End
+         File \Projetos\MAIS\CNAB\OFINP090.PRW
+             Type=T
+         End
+         File \Projetos\MAIS\CNAB\PLAN002.PRX
+             Type=T
+         End
+         File \Projetos\MAIS\CNAB\PLAN003.PRX
+             Type=T
+         End
+         File \Projetos\MAIS\CNAB\SISP003.PRX
+             Type=T
+         End
+         File \Projetos\MAIS\CNAB\SISP004.PRX
+             Type=T
+         End
+         File \Projetos\MAIS\CNAB\VALIMP.PRX
+             Type=T
+         End
+         File \Projetos\MAIS\CNAB\VALRPGTO.PRW
+             Type=T
+         End
+         File \Projetos\MAIS\CNAB\ValSispag.prw
              Type=T
          End
       End
