@@ -15,13 +15,13 @@
 
 User Function AGEFITAU
 
-Local _cAgen
+Local _cAgen   
 Local _cNumCon
 Local _cDac
 
 _cAgen		:= ""
 _cNumCon	:= ALLTRIM(SA2->A2_NUMCON)
-_cDac		:= ALLTRIM(SA2->A2_DIGCON)
+_cDac		:= ALLTRIM(SA2->A2_DIGCONT)
 
 
 Do Case
