@@ -28,8 +28,6 @@ Local nOpcX    := aRefer[3]
 Local cCodUser := PswID()
 Local aAreaOld := GetArea()
 
-
-
 If ValType(aRefer) == "A"
    // Esta instrução é para forçar o posicionamento na tabela scr dbseek nao funciona de forma nenhuma.
    cAliasTMP := GetNextAlias()  
@@ -39,7 +37,7 @@ If ValType(aRefer) == "A"
             AND CR_FILIAL  = %xFilial:SCR%
             AND CR_TIPO    = %Exp:aRefer[2]%
             AND CR_NUM     = %Exp:aRefer[1]%
-            AND CR_NIVEL   = %Exp:aRefer[4]%
+//AND CR_NIVEL   = %Exp:aRefer[4]%
             AND CR_USER    = %Exp:__CUSERID%
    EndSql
    dbSelectArea(cAliasTMP)
@@ -70,7 +68,7 @@ If nOpcX == 2
       If PswSeek((cAliasTMP)->CR_USER,.T.)
          aUser := PswRet() // Retorna vetor com informações do usuário
          If !Empty(aUser[1][14])
-            Aadd(aMailTo,{Alltrim(aUser[1][14]),(cAliasTMP)->REGSRC,'AVISO_LIB_PC.HTML'})
+            Aadd(aMailTo,{Alltrim(aUser[1][14]),(cAliasTMP)->REGSRC,'_AVISO_LIB_PC.HTML'})
          EndIf
       EndIf
       (cAliasTMP)->(dbSkip())
@@ -93,7 +91,7 @@ If nOpcX == 2
          If PswSeek(SC7->C7_USER,.T.)
             aUser := PswRet() // Retorna vetor com informações do usuário
             If !Empty(aUser[1][14])
-               Aadd(aMailTo,{Alltrim(aUser[1][14]),0,'AVISO_LIB_COM.HTML'})
+               Aadd(aMailTo,{Alltrim(aUser[1][14]),0,'_AVISO_LIB_COM.HTML'})
             EndIf
          EndIf
          If !Empty(aMailTo)
@@ -142,7 +140,7 @@ If nOpcX == 2
    If Upper(SC7->C7_CONAPRO)=="L"
       If !Empty(cMailGer)
          cMailGer := Left(cMailGer,Len(cMailGer)-1)
-         Aadd(aMailTo,{Alltrim(cMailGer),0,'AVISO_LIB_COM.HTML'})
+         Aadd(aMailTo,{Alltrim(cMailGer),0,'_AVISO_LIB_COM.HTML'})
          U_MailPed(xFilial("SC7"),cDocto,aMailTo,"")
       EndIf
    EndIf
@@ -159,7 +157,7 @@ ElseIf nOpcX == 3
    If PswSeek(SC7->C7_USER,.T.)
       aUser := PswRet() // Retorna vetor com informações do usuário
       If !Empty(aUser[1][14])
-         Aadd(aMailTo,{Alltrim(aUser[1][14]),0,'AVISO_LIB_BLQ.HTML'})
+         Aadd(aMailTo,{Alltrim(aUser[1][14]),0,'_AVISO_LIB_BLQ.HTML'})
       EndIf
    EndIf
 
@@ -187,7 +185,7 @@ ElseIf nOpcX == 3
       If PswSeek((cAliasTMP)->CR_USER,.T.)
          aUser := PswRet() // Retorna vetor com informações do usuário
          If !Empty(aUser[1][14])
-            Aadd(aMailTo,{Alltrim(aUser[1][14]),0,'AVISO_LIB_BLQ.HTML'})
+            Aadd(aMailTo,{Alltrim(aUser[1][14]),0,'_AVISO_LIB_BLQ.HTML'})
          EndIf
       EndIf
       (cAliasTMP)->(dbSkip())
@@ -252,6 +250,7 @@ While !SC7->(Eof()) .And.SC7->(C7_FILIAL+C7_NUM) == cFilPed+cNumPed
        EndIf
        
        nTotPed += SC7->C7_TOTAL
+       AADD(oProcess:oHtml:ValByName("It.Sub")    ,SC7->C7_CC)
        AADD(oProcess:oHtml:ValByName("It.Item")    ,SC7->C7_ITEM)
        AADD(oProcess:oHtml:ValByName("It.Prod")    ,SC7->C7_PRODUTO)
        AADD(oProcess:oHtml:ValByName("It.Desc")    ,SC7->C7_DESCRI)
