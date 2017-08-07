@@ -1,7 +1,7 @@
 #Include 'RwMake.ch'
 /*
 +-----------------------------------------------------------------------+
-¦Programa  ¦PCOMGRF    ¦ Autor ¦ Gilson Lucas          ¦Data ¦14.09.2012¦
+¦Programa  ¦ReproAut   ¦ Autor ¦ Gilson Lucas          ¦Data ¦14.09.2012¦
 +----------+------------------------------------------------------------¦
 ¦Descricao ¦Envio de E-mail no pedido de compra            		   		¦
 +----------+------------------------------------------------------------¦
