@@ -330,9 +330,6 @@ DbSetOrder(2) //Filial+Sub-Conta
 nSeq := 1
 
 For nxI := 1 To Len(aCols)
-    iF nxI == 157
-       ConOut('')
-    EndIf   
     If ! Empty(aCols[nxI,nPos2])
        dbSeek(xFilial("SZ2")+M->Z1_COD+aCols[nxI,nPos1])
        RecLock("SZ2",Eof())
