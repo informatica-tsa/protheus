@@ -29,7 +29,7 @@ SetPrvt("ACOLS,AHEADER,AHEADERAFL,NY,OGETDADOS,LOK")
 SetPrvt("ARATAFL,N,nx")
 
 
-lOk
+lOk				:= .T.		
 nTotPerc		:= 0
 nPosPerc		:= 0
 nPosItem		:= aScan(aHeader,{|x| Alltrim(x[2]) == "ZO_ITEM"})

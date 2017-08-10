@@ -68,7 +68,6 @@ AADD(aPerg,{cPerg,"Converter na Data  ?","D",08,0,"G","","","","","","",""})
 AADD(aPerg,{cPerg,"Tipo               ?","N",01,0,"C","","","Analítico","Sintético","","",""})
 AADD(aPerg,{cPerg,"Imp Real. a partir ?","C",04,0,"G","","","","","","",""})
 
-y
 
 Pergunte(cPerg,.F.)
 

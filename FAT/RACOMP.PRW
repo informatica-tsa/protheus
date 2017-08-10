@@ -47,7 +47,7 @@ Private li       := 440
 Private m_pag    := 1
 
 //Verifica as perguntas selecionadas                           
-y
+
 
 pergunte(cPerg,.F.)
 //旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴커
