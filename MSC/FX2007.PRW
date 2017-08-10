@@ -41,7 +41,7 @@ If cEmpAnt # '02' .and. cEmpAnt # '03'
 Else
 	If !File("CalcFluxo-"+cEmpAnt+".txt")              
 	
-		MsgBox("O Fluxo Gerencial 2016 vai ser processado  ...")
+		MsgBox("O Fluxo Gerencial 2017 vai ser processado  ...")
 
 		//Cria o Arquivo com as informações de Quem esta Executando
 		nFile:=FCreate("CalcFluxo-"+cEmpAnt+".txt")
@@ -72,7 +72,7 @@ Else
 		Endif
 		FWrite(FCreate("Fluxo-"+cEmpAnt+".txt"),"Usuário: "+cUserName+Chr(13)+Chr(10)+" Data da Ultima geração do Fluxo:"+Dtoc(Date())+" - "+Time())
 	  	FErase("CalcFluxo-"+cEmpAnt+".txt")
-		MsgBox("O Fluxo Gerencial 2016 processado com sucesso.")
+		MsgBox("O Fluxo Gerencial 2017 processado com sucesso.")
 	Else
 		MsgBox("O Fluxo Gerencial já esta sendo processado por "+Chr(13)+Chr(10)+MemoRead("CalcFluxo"+cEmpAnt+".txt"))
 	Endif	
