@@ -14,7 +14,7 @@
 ¦            ¦        ¦                                                 ¦
 +-----------------------------------------------------------------------+
 */
-User Function MT097END()
+User Function MT094END()
 *************************************************************************
 *
 **
@@ -50,7 +50,7 @@ If ValType(aRefer) == "A"
   (cAliasTMP)->(dbCloseArea())
 EndIf
    
-If nOpcX == 2
+If nOpcX == 1
    cAliasTMP := GetNextAlias()  
    BeginSql Alias cAliasTMP //Inicio do Embedded SQL
       SELECT CR_USER ,R_E_C_N_O_ REGSRC FROM %table:SCR% SCR
@@ -147,7 +147,7 @@ If nOpcX == 2
 
    PswSeek(cCodUser,.T.)
    RestArea(aAreaOld)
-ElseIf nOpcX == 3
+ElseIf nOpcX == 6
    // e-mail para o comprador
    dbSelectArea("SC7")
    SC7->(dbsetOrder(1))
@@ -212,7 +212,7 @@ Local oProcess
 Local cMailto  := ""
 Local lFirst   := .T.   
 Local nTotPed  := 0 
-
+Local nXi       := 0
 
 
 For nXi := 1 To Len(aUser)

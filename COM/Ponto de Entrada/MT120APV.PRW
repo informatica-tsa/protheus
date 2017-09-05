@@ -61,7 +61,7 @@ While !SC7->(Eof()) .And. xFilial("SC7")+cNumPed == SC7->(C7_FILIAL+C7_NUM)
           EndIf
        EndIf
     EndIf
-    If AllTrim(FunName()) == "MATA160"
+    If AllTrim(FunName()) == "MATA160" .Or. AllTrim(FunName()) == "MATA161"
        If RecLock("SC7",.F.)
           Replace C7_DESTINA With SC8->C8_DESTINA,;
                   C7_CONDGER With MemoRead( "\Cond_Gerais\Cond_gerais.txt"),;
@@ -124,7 +124,7 @@ EndIf
 RestArea(aAreaOld)
 RestArea(aAreaSC7)
 
-If AllTrim(FunName()) == "MATA160"
+If AllTrim(FunName()) == "MATA160" .Or. AllTrim(FunName()) == "MATA161"
    If RecLock("SC7",.F.)
       Replace C7_CONTA    With SC8->C8_CONTA,;
               C7_CC       With SC8->C8_CC,;     
