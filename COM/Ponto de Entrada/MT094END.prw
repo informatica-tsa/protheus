@@ -1,7 +1,7 @@
 #Include 'RwMake.ch'
 /*
 +-----------------------------------------------------------------------+
-¦Programa  ¦MT097END   ¦ Autor ¦ Gilson Lucas          ¦Data ¦19.08.2011¦
+¦Programa  MT094END   ¦ Autor ¦ Gilson Lucas          ¦Data ¦19.08.2011¦
 +----------+------------------------------------------------------------¦
 ¦Descricao ¦Envia o E-mail para o proximo aprovador                     ¦
 +----------+------------------------------------------------------------¦
@@ -11,8 +11,10 @@
 +-----------------------------------------------------------------------¦
 ¦PROGRAMADOR ¦ DATA   ¦ MOTIVO DA ALTERACAO                             ¦
 +------------+--------+-------------------------------------------------¦
-¦            ¦        ¦                                                 ¦
+¦LEANDRO FARIA¦11/09/17¦ ALTERADO PONTO DE ENTRADA MT097END PARA        ¦
+¦             ¦        ¦ MT094END. MIGRAVACAO V12                       ¦
 +-----------------------------------------------------------------------+
+
 */
 User Function MT094END()
 *************************************************************************
@@ -51,6 +53,7 @@ If ValType(aRefer) == "A"
 EndIf
    
 If nOpcX == 1
+
    cAliasTMP := GetNextAlias()  
    BeginSql Alias cAliasTMP //Inicio do Embedded SQL
       SELECT CR_USER ,R_E_C_N_O_ REGSRC FROM %table:SCR% SCR

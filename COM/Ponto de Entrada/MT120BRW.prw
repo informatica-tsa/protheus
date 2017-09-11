@@ -33,7 +33,7 @@ User Function MailLib()
 
 If MsgBox("Deseja Enviar o e-mail para o aprovador ?","Atencao","YESNO",2)
    // Nao substituir o execblock. Chamada de ponto de entrada com passagem de paramxib.Nao funciona passagem por referencia.
-   ExecBlock("MT097END",.F.,.F.,{SC7->C7_NUM,'',2})
+   ExecBlock("MT094END",.F.,.F.,{SC7->C7_NUM,'',1})
 EndIf
 
 Return
