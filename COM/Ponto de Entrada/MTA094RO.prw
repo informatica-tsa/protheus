@@ -1,7 +1,7 @@
 #Include 'RwMake.ch'
 /*
 +-----------------------------------------------------------------------+
-¦Programa  ¦MTA097MNU  ¦ Autor ¦ Gilson Lucas          ¦Data ¦19.09.2011¦
+¦Programa  ¦MTA094RO  ¦ Autor ¦ Gilson Lucas          ¦Data ¦19.09.2011¦
 +----------+------------------------------------------------------------¦
 ¦Descricao ¦Adiciona impressao da ordem de compra na liberacao do PC    ¦
 +----------+------------------------------------------------------------¦
@@ -9,19 +9,22 @@
 +-----------------------------------------------------------------------¦
 ¦           ATUALIZACOES SOFRIDAS DESDE A CONSTRUCAO INICIAL            ¦
 +-----------------------------------------------------------------------¦
-¦PROGRAMADOR ¦ DATA   ¦ MOTIVO DA ALTERACAO                             ¦
+¦PROGRAMADOR  ¦ DATA   ¦ MOTIVO DA ALTERACAO                            ¦
 +------------+--------+-------------------------------------------------¦
-¦            ¦        ¦                                                 ¦
+¦LEANDRO FARIA¦11/09/17¦ ALTERADO PONTO DE ENTRADA MTA097MNU PARA       ¦
+¦             ¦        ¦ MTA094RO. MIGRAVACAO V12                       ¦
 +-----------------------------------------------------------------------+
 */
-User Function MTA097MNU
+User Function MTA094RO
 *************************************************************************
 *
 **
 
+Local aRotina:= PARAMIXB[1]
+
 aAdd(aRotina,{OemToAnsi("Ordem de Compra"),'U_ImpOrdCr()',  0 , 2, 0, nil})
-//aAdd(aRotina,{"Conhecimento" ,"MsDocument", 0, 4, 0, Nil }) //
-Return
+
+Return (aRotina)
 
 
 
