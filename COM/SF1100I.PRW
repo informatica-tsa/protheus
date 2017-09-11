@@ -37,6 +37,8 @@ Local oDlgPar
 Local oBar
 Local lOk := .f.
 
+Private cCadastro := "Observação"
+
 If !EMPTY(SF1->F1_DUPL)
 	cHistF1 := "CTO"
 	dbSelectArea("SD1")
@@ -58,7 +60,7 @@ If !EMPTY(SF1->F1_DUPL)
 	oDlgPar:lEscClose:=.F.  //Nao permite sair ao se pressionar a tecla ESC.
 	
 	oBar:=tBar():New(oDlgPar,,,.t.,,,,.f.)
-	TBtnBmp():NewBar("OK"    ,,,,OemToAnsi("Confirma"),{|| lOk:=.t.,oDlgPar:End()},,oBar,,,OemToAnsi("Confirma Execução"),,,,,,,,,)
+	TBtnBmp():NewBar("OK"    ,,,,OemToAnsi("Confirma"),{|| lOk:=.t.,oDlgPar:End()},,oBar,,,,,,,,,,,,)
 	//    TBtnBmp():NewBar("CANCEL",,,,OemToAnsi("Cancela") ,{|| lOk:=.f.,oDlgPar:End()},,oBar,,,OemToAnsi("Sai da Rotina"),,,,,,,,,)
 	
 	TGroup():New(015,005,050,172,"",oDlgPar,,,.T.,.T.)
@@ -67,6 +69,7 @@ If !EMPTY(SF1->F1_DUPL)
 	TGet():New(035,055,{|u| if(PCount()>0,cHistF1:=u,cHistF1)}, oDlgPar, 100, 10, , {|| ! Empty(cHistF1) }, CLR_HBLUE, CLR_WHITE,,,,.T.,,,{|| .t. },,,/*CHANGE*/,.F.,.F.,,"cHistF1")
 	
 	oDlgPar:Activate(,,,.T.,{|| AllwaysTrue() },,)
+
 EndIf
 
 If SF1->F1_TIPO <> "D"
