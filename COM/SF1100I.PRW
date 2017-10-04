@@ -33,8 +33,8 @@ Local nVretCsl := 0
 Local nVretSes := 0
 Local cHistF1 := Space(TamSx3("E2_HIST")[1])
 Local oFont    := TFont():New( "Times New Roman",,16,,.T.,,,,.F.,.F. )
-Local oDlgPar
-Local oBar
+Local oDlgPar := nil
+Local oBar := nil
 Local lOk := .f.
 
 Private cCadastro := "Observação"
