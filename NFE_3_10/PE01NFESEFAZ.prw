@@ -12,7 +12,7 @@
 +-----------------------------------------------------------------------¦
 ¦PROGRAMADOR ¦ DATA   ¦ MOTIVO DA ALTERACAO                             ¦
 +------------+--------+-------------------------------------------------¦
-¦            ¦        ¦                                                 ¦
+¦THIAGOSANTOS|04/10/17|INCLUSÃO DE NOVAS VARIAVEIS NO RETORNO DO P.E    ¦
 +-----------------------------------------------------------------------+
 */
 User Function PE01NFESEFAZ
@@ -33,6 +33,11 @@ Local aEntrega   := ParamIxb[09]
 Local aRetirada  := ParamIxb[10]
 Local aVeiculo   := ParamIxb[11]
 Local aReboque   := ParamIxb[12]
+
+Local aNfVincRur := ParamIxb[13]
+Local aEspVol    := ParamIxb[14]
+//Local aNfVinc    := ParamIxb[15]
+
 Local aAreaOld   := GetArea()
 Local aAreaSD2   := SD2->(GetArea())
 Local aAreaSC6   := SC6->(GetArea())
@@ -58,7 +63,7 @@ RestArea(aAreaSC6)
 RestArea(aAreaSB1)
 
 
-Return({aProd,cMensCli,cMensFis,aDest,aNota,aInfoItem,aDupl,aTransp,aEntrega,aRetirada,aVeiculo,aReboque})
+Return({aProd,cMensCli,cMensFis,aDest,aNota,aInfoItem,aDupl,aTransp,aEntrega,aRetirada,aVeiculo,aReboque,aNfVincRur,aEspVol})
 
 
 
