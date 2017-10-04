@@ -62,9 +62,9 @@ Else
         U_EXEQUERY('2015') //Query de atualizaçao do dados 
         U_EXEQUERY('2016') //Query de atualizaçao do dados
  		if ExistBlock("GerBcHora")
- 			if MsgYesNo("Deseja calcular o banco de horas?")
+ 			//if MsgYesNo("Deseja calcular o banco de horas?")
 				U_GerBcHora()
-			endif
+			//endif
 		endif
 		Close(oDlg1)
 		If File("Fluxo-"+cEmpAnt+".txt")'
