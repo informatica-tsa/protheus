@@ -44,7 +44,7 @@ User Function GerBcHora()
 	cQuery += "        PI_FILIAL, " 
 	cQuery += "        SUM(PI_QUANTMP) AS PI_QUANT, "
 	cQuery += "        (Round(SUM((PI_QUANTMP*(RA_SALARIO/RA_HRSMES))),2)*1.5)*(-1) AS VALOR "
-	cQuery += " FROM "+RetSqlName("SZU")+" AS SPI "
+	cQuery += " FROM SZU"+cEmpAnt+"0 AS SPI "
 	cQuery += " INNER JOIN "+RetSqlName("SRA")+" AS SRA ON RA_MAT = PI_MAT "
 	cQuery += " WHERE PI_PD = '023' "      
 	cQuery += " AND SPI.PI_DATA >= '20140801' " 
