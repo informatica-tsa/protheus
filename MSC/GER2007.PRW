@@ -48,11 +48,11 @@ Private nSeqDoc :=0
 Private nValMulta:=0
 Private cLote
 
-//Define o Lote contábil da Folha de pagamento.
+/*Define o Lote contábil da Folha de pagamento.
 // Este será necessário porque no presente momento a contabilização geral da empresa
 // considera o campo Centro de custo como SubConta e a SubConta no folha de Pagamento
 // é o campo Item Contábil e não o Centro de Custo.Futuramente este tratamento será modificado
-// toda a empresa tratará o campo Centro de Custo Como SETOR e Item Contábil como SubConta
+// toda a empresa tratará o campo Centro de Custo Como SETOR e Item Contábil como SubConta*/
 dbSelectArea( "SX5" )
 dbSeek( XFILIAL("SX5")+"09FIS" )
 If At(UPPER("EXEC"),SX5->X5_DESCRI) > 0  // Se for ExecBlock
@@ -84,7 +84,7 @@ somente para as contas de Débito ou Crédito que tenha um grupo gerencial
 ou as contas que tem o grupo gerencial e o grupo gerencial esteja com o campo
 GERAFLUXO = SIM
 */
-/*
+
 
 cQuery:= " SELECT CT2.R_E_C_N_O_  CT2RECNO "
 cQuery+= " FROM "+RetSqlName("CT2")+" CT2 "
@@ -92,32 +92,7 @@ cQuery+= " LEFT OUTER JOIN "+RetSqlName("CT1")+" CT1C ON (CT2_CREDIT=CT1C.CT1_CO
 cQuery+= " LEFT OUTER JOIN "+RetSqlName("CT1")+" CT1D ON (CT2_DEBITO=CT1D.CT1_CONTA AND CT1D.CT1_FILIAL='"+Xfilial("CT1")+"' AND CT1D.D_E_L_E_T_<>'*')"
 cQuery+= " LEFT OUTER JOIN "+RetSqlName("SZA")+" SZAC ON (SZAC.ZA_GRUPGER=CT1C.CT1_GRUPO AND SZAC.ZA_FLUXO<>'N' AND SZAC.D_E_L_E_T_<>'*')"
 cQuery+= " LEFT OUTER JOIN "+RetSqlName("SZA")+" SZAD ON (SZAD.ZA_GRUPGER=CT1D.CT1_GRUPO AND SZAD.ZA_FLUXO<>'N' AND SZAD.D_E_L_E_T_<>'*')"
-cQuery+= " WHERE  CT2.CT2_DATA>='20070101'  AND CT2.CT2_DC IN ('1','2','3') AND CT2.CT2_TPSALD IN ('1') AND CT2.D_E_L_E_T_<>'*'"
-
-If cEmpAnt<>'02'
-cQuery+= "   AND (ISNULL(SZAD.ZA_GRUPGER,'') <> '' OR ISNULL(SZAC.ZA_GRUPGER,'') <> '')"
-Else
-cQuery+= "   AND (((ISNULL(SZAC.ZA_GRUPGER,'') <> '') "
-cQuery+= "       OR (ISNULL(SZAC.ZA_GRUPGER,'') = '' AND LEFT(CT1C.CT1_CONTA,1) IN ('4','5')) )"
-cQuery+= "    OR ((ISNULL(SZAD.ZA_GRUPGER,'') <> '') "
-cQuery+= "       OR (ISNULL(SZAD.ZA_GRUPGER,'') = '' AND LEFT(CT1D.CT1_CONTA,1) IN ('4','5'))))"
-Endif
-
-TcQuery cQuery Alias QCT2 New
-
-*/
-
-cQuery:= " SELECT CT2.R_E_C_N_O_  CT2RECNO "
-cQuery+= " FROM "+RetSqlName("CT2")+" CT2 "
-cQuery+= " LEFT OUTER JOIN "+RetSqlName("CT1")+" CT1C ON (CT2_CREDIT=CT1C.CT1_CONTA AND CT1C.CT1_FILIAL='"+Xfilial("CT1")+"' AND CT1C.D_E_L_E_T_<>'*')"
-cQuery+= " LEFT OUTER JOIN "+RetSqlName("CT1")+" CT1D ON (CT2_DEBITO=CT1D.CT1_CONTA AND CT1D.CT1_FILIAL='"+Xfilial("CT1")+"' AND CT1D.D_E_L_E_T_<>'*')"
-cQuery+= " LEFT OUTER JOIN "+RetSqlName("SZA")+" SZAC ON (SZAC.ZA_GRUPGER=CT1C.CT1_GRUPO AND SZAC.ZA_FLUXO<>'N' AND SZAC.D_E_L_E_T_<>'*')"
-cQuery+= " LEFT OUTER JOIN "+RetSqlName("SZA")+" SZAD ON (SZAD.ZA_GRUPGER=CT1D.CT1_GRUPO AND SZAD.ZA_FLUXO<>'N' AND SZAD.D_E_L_E_T_<>'*')"
-cQuery+= " WHERE  CT2_FILIAL IN ('01','02','03','04','05' ,'20', '21', '22','23','24','25','26','27','28','29','30') AND CT2.CT2_DATA>='20070101'  AND CT2.CT2_DC IN ('1','2','3') AND CT2.CT2_TPSALD IN ('1') AND CT2.D_E_L_E_T_<>'*'"
-//QcQuery+= " WHERE  CT2_FILIAL IN ('05') AND CT2.CT2_DATA>='20070101'  AND CT2.CT2_DC IN ('1','2','3') AND CT2.CT2_TPSALD IN ('1') AND CT2.D_E_L_E_T_<>'*'"
-
-//09/12/11//cQuery+= " WHERE  CT2_FILIAL IN ('01','02')	AND CT2.CT2_DATA>='20070101'  AND CT2.CT2_DC IN ('1','2','3') AND CT2.CT2_TPSALD IN ('1') AND CT2.D_E_L_E_T_<>'*'"
-
+cQuery+= " WHERE  CT2_FILIAL IN ('01','02','03','04','05', '20', '21', '22','23','24','25','26','27','28','29','30') AND CT2.CT2_DATA>='20070101'  AND CT2.CT2_DC IN ('1','2','3') AND CT2.CT2_TPSALD IN ('1') AND CT2.D_E_L_E_T_<>'*'"
 cQuery+= "   AND (((ISNULL(SZAC.ZA_GRUPGER,'') <> '') "
 cQuery+= "       OR (ISNULL(SZAC.ZA_GRUPGER,'') = '' AND LEFT(CT1C.CT1_CONTA,1) IN ('4','5')) )"
 cQuery+= "    OR ((ISNULL(SZAD.ZA_GRUPGER,'') <> '') "
@@ -132,7 +107,6 @@ cQuery+= " LEFT OUTER JOIN "+RetSqlName("CT1")+" CT1C ON (CT2_CREDIT=CT1C.CT1_CO
 cQuery+= " LEFT OUTER JOIN "+RetSqlName("CT1")+" CT1D ON (CT2_DEBITO=CT1D.CT1_CONTA AND CT1D.CT1_FILIAL='"+Xfilial("CT1")+"' AND CT1D.D_E_L_E_T_<>'*')"
 cQuery+= " LEFT OUTER JOIN "+RetSqlName("SZA")+" SZAC ON (SZAC.ZA_GRUPGER=CT1C.CT1_GRUPO AND SZAC.ZA_FLUXO<>'N' AND SZAC.D_E_L_E_T_<>'*')"
 cQuery+= " LEFT OUTER JOIN "+RetSqlName("SZA")+" SZAD ON (SZAD.ZA_GRUPGER=CT1D.CT1_GRUPO AND SZAD.ZA_FLUXO<>'N' AND SZAD.D_E_L_E_T_<>'*')"
-
 cQuery+= "WHERE  CT2_FILIAL = '97'	AND "
 cQuery+= "	CT2.CT2_DATA>='20080101'   "
 cQuery+= "	AND CT2.D_E_L_E_T_<>'*'    "
@@ -161,12 +135,12 @@ While !Eof()
 	If  CT2->CT2_FILIAL = '01' .AND. CT2->CT2_DATA >= STOD('20080101') .AND. (Left(CT2->CT2_DEBITO,4) == '0000' .or. Left(CT2->CT2_CREDIT,4) == '0000' )
 		dbSelectArea("CT2")
 		dbSkip()
-	ElseIf CT2->CT2_FILIAL = '01' /*.AND. CT2->CT2_DATA <= STOD('20071231')*/ .AND. (Left(CT2->CT2_DEBITO,4) == '4119' .or. Left(CT2->CT2_CREDIT,4) == '4119' )
+	ElseIf CT2->CT2_FILIAL = '01' .AND. (Left(CT2->CT2_DEBITO,4) == '4119' .or. Left(CT2->CT2_CREDIT,4) == '4119' )
 		ConOut('Descartando Registro. Data '+ dtoc(CT2->CT2_DATA) + ' CD '+ CT2->CT2_DEBITO + ' CC '+CT2->CT2_CREDIT)
 		dbSelectArea("CT2")
 		dbSkip()
 	Else
-		//		If CT2->CT2_DC='3' .And. (Left(CT2_CREDIT,6)='115102' .OR. Left(CT2_DEBITO,6)='115102')  - Ricardo(NM) acrescimo conta 118103 - 18/07/2012
+		// Ricardo(NM) acrescimo conta 118103 - 18/07/2012
 		If CT2->CT2_DC='3' .And. ((Left(CT2_CREDIT,6)='115102' .OR. Left(CT2_DEBITO,6)='115102') .or. (Left(CT2_CREDIT,6)='118103' .OR. Left(CT2_DEBITO,6)='118103'))
 			nForIni=1   //Partida Dobrada, desta forma será feito dois lançamentos
 			nForFim=2
@@ -247,7 +221,6 @@ While !Eof()
 					Z0_SETORIG With cSetor       ,;
 					Z0_DTLANC  with CT2->CT2_DATA
 					
-					///If SubStr(cConta,1,1) == "4" .OR. Alltrim(cConta) $ "41410000_41420000_41430000_42410000_42420000_42430000"
 					If SubStr(cConta,1,1) == "4" .OR. Alltrim(cConta) $ "3112020001_3112020002_3112020003_3121030001_3121030002_3121030003"
 						Replace Z0_CUSTO   With ABS(nValor)      //N, 14, 2
 					Else
@@ -256,8 +229,7 @@ While !Eof()
 					MsUnlock()
 					
 					// Registro já esta gravado e agora será contas de encargos,Provisões, Licenças e Auxilios
-					///If cEmpAnt<>'02' .And. Left(cConta,4)>='3121' .And. Left(cConta,4)<='3124'
-//					If cEmpAnt<>'02' .And. ((cConta>='5111010001' .And. cConta<='5111010008') .OR.;
+
 					If cEmpAnt = '01' .And. ((cConta>='5111010001' .And. cConta<='5111010008') .OR.;
 						(cConta>='4111010001' .And. cConta<='4111010008'))
 						RegToMemory("SZ0",.F.)
@@ -345,68 +317,12 @@ While !Eof()
 	DbSkip()
 EndDo
 
+/*Fechando area, a mesma é utilizada na GER102013*/
 DbSelectArea("QCT2")
 dbclosearea()
-
-DbSelectArea("SC7") //Pedido de Compras
-DbSetOrder(5)
-DbGoTop()
-ProcRegua(RecCount())
-While ! Eof()
-	IncProc("Gerando Registro de Medicao...")
-	
-	If C7_RESIDUO='S' .Or. C7_ENCER == "E" .OR. SC7->C7_LOCAL<>'04' ////!SubStr(C7_PRODUTO,1,2) $ "SA_SP_SI"
-		DbSelectArea("SC7")
-		DbSkip()
-		Loop
-	EndIf
-	dbSelectArea("SB1")
-	dbSeek(Xfilial("SB1")+SC7->C7_PRODUTO)
-	dbSelectArea("CTD")
-	dbSeek(Xfilial("CTD")+SC7->C7_ITEMCTA)
-	dbSelectArea("SZ0")
-	
-	cSetor:=Posicione("SZ2",3,Xfilial("cCusto")+Alltrim(SC7->C7_CC),"Z2_SETOR")
-	//Calculando Datas
-	cDataCx :=Space(05)
-	cDataRf :=Space(05)
-	cNumMed :=Space(06)
-	//Calculando Data Caixa e Referencia
-	cDataCx :=Space(05)
-	cDataRf :=SubStr(DToC(SC7->C7_DATPRF),4,5)
-	//Calculando Conta
-	//Gravando Registros
-    /* Alterado por gilson a pedido da simone dia 09 de agosto de 2012
-	If RecLock("SZ0",.T.)
-		Replace Z0_FILIAL  With Xfilial("SZ0") ,;
-		Z0_LINHA   With "MM"  ,; //Medicao
-		Z0_DATA    With SubStr(dToc(SC7->C7_EMISSAO),4,5),;
-		Z0_HIST    With "MEDICAO-" + SC7->C7_NUM ,;
-		Z0_LOTE    With "990000"    ,;
-		Z0_DOC     With "99"+STRZERO(nCont,4) ,;
-		Z0_VALOR   With ((SC7->C7_QUJE - SC7->C7_QUANT)* SC7->C7_PRECO) ,;
-		Z0_DTREF   With cDataRf           ,;
-		Z0_CONTA   With if(CTD->CTD_CLASSI<>'D',SB1->B1_CTACONS,SB1->B1_CTADESP),;
-		Z0_CC      With SC7->C7_CC        ,;
-		Z0_DTLANC  with DATE() ,;
-		Z0_SETORIG With cSetor
-		//               Z0_VALOR   With 0-(SC7->C7_TOTAL) ,;
-		If SubStr(SC7->C7_CONTA,1,1) == "3"
-			Replace Z0_CUSTO   With ((SC7->C7_QUJE - SC7->C7_QUANT)* SC7->C7_PRECO) //SC7->C7_TOTAL
-		Else
-			Replace Z0_RECEITA With ((SC7->C7_QUJE - SC7->C7_QUANT)* SC7->C7_PRECO) //SC7->C7_TOTAL
-		EndIf
-		MsUnlock()
-		nCont:=nCont+1
-	EndIf
-	*/
-	DbSelectArea("SC7")
-	DbSkip()
-End
 
 //Restaurando Ambiente
 DbSelectArea(aArq[1])
 DbSetOrder(aArq[2])
 DbGoTo(aArq[3])
-///MsgBox("Geracao Finalizada Com Exito, Arquivo SZ0 Atualizado!","Termino","INFO")
 Return(.T.)

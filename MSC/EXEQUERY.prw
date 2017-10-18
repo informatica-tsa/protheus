@@ -23,41 +23,7 @@ User Function EXEQUERY(cAno)
 *
 ****
 Local cQuery:=""
-/*
-cQuery:=" UPDATE "+RetSqlName("SZ0")+" SET Z0_SITUACA ='PROPOSTA EM ANDAMENTO' "
-cQuery+=" WHERE LEFT(Z0_DTLANC,4)='"+cAno+"' AND LEFT(Z0_CC,4)='8100' " 
-cQuery+="       AND Z0_REVISAO<>'' "
-cQuery+="       AND NOT '000034' IN (SELECT ZA_GRUPGER FROM SZA010 WHERE ZA_CONTA=Z0_CONTA ) "
-TcSqlExec(cQuery)
 
-cQuery:=" UPDATE "+RetSqlName("SZ0")+" SET Z0_SITUACA ='METAS DE VENDAS' "
-cQuery+=" WHERE LEFT(Z0_DTLANC,4)='"+cAno+"' AND LEFT(Z0_CC,4)='8110' "
-cQuery+="       AND Z0_REVISAO<>''   "
-cQuery+="       AND NOT '000034' IN (SELECT ZA_GRUPGER FROM SZA010 WHERE ZA_CONTA=Z0_CONTA) "
-TcSqlExec(cQuery)
-
-cQuery:=" UPDATE "+RetSqlName("SZ0")+" SET Z0_SITUACA ='ESTIMADO' "
-cQuery+=" WHERE LEFT(Z0_DTLANC,4)='"+cAno+"' AND (NOT LEFT(Z0_CC,4) IN ('8100','8110')) "
-cQuery+="       AND Z0_REVISAO<>''                      "
-cQuery+="       AND (NOT '000034' IN (SELECT ZA_GRUPGER FROM SZA010 WHERE ZA_CONTA=Z0_CONTA )) "
-TcSqlExec(cQuery)
-
-cQuery:=" UPDATE "+RetSqlName("SZ0")+" SET Z0_SITUACA ='Mao de Obra a Disposicao' "
-cQuery+=" WHERE LEFT(Z0_DTLANC,4)='"+cAno+"' AND (NOT LEFT(Z0_CC,4) IN ('8100','8110')) "
-cQuery+="       AND Z0_REVISAO<>'' "
-cQuery+="       AND LEFT(Z0_CC,3) IN ('932') "
-cQuery+="       AND right(Z0_CC,1)IN ('H')  "
-cQuery+="       AND (NOT '000034' IN (SELECT ZA_GRUPGER FROM SZA010 WHERE ZA_CONTA=Z0_CONTA )) "
-TcSqlExec(cQuery)
-
-cQuery:=" UPDATE "+RetSqlName("SZ0")+"0 SET Z0_SITUACA ='REALIZADO' "
-cQuery+=" WHERE LEFT(Z0_DTLANC,4)='"+cAno+"' AND Z0_REVISAO='' "
-TcSqlExec(cQuery)
-
-cQuery:=" UPDATE "+RetSqlName("SZ0")+" SET Z0_SITUACA ='INVESTIMENTO' "
-cQuery+=" WHERE LEFT(Z0_DTLANC,4)='"+cAno+"' AND Z0_REVISAO<>''     "
-cQuery+="       AND ('000034' IN (SELECT ZA_GRUPGER FROM SZA010 WHERE ZA_CONTA=Z0_CONTA )) "
-*/
    	nFile:=FCreate("ExecQueryFluxo.txt")
 //	FWrite(nFile,"Ano:"+cAno+Chr(13)+Chr(10))
 	FWrite(nFile,"Inicio do Calculo:"+Dtoc(Date())+" - "+Time()+Chr(13)+Chr(10))

@@ -14,7 +14,6 @@ User Function GerBcHora()
 
 	Local cQuery := "" 
 	Local nSeq   := 0
-	Local nValor := 0
 	Local aErros := {}
 	Local cLote  := "95"+StrZero(0,4)
 	Local lInserie := .T.
@@ -27,12 +26,6 @@ User Function GerBcHora()
 	Local cConta00  := Alltrim(GetMV("CN_BCHOCC1")) 
 	Local cConta97  := Alltrim(GetMV("CN_BCHOCC2"))
 	
-/*	cQuery  := " DELETE "+RetSqlName("SZ0")
-	cQuery  += " WHERE Z0_DTLANC >= '20070101' AND Z0_REVISAO='' AND Z0_VEICULO != 'S' AND Z0_LOTE = '"+cLote+"' "
-	TCSQLExec(cQuery)*/ 
-	
-	U_Pn200CalMp()
-
 	if select("TMP") <> 0
 		TMP->(dbCloseArea())
 	endif 	
@@ -52,21 +45,7 @@ User Function GerBcHora()
 	cQuery += " AND SRA.D_E_L_E_T_ = '' "
 	cQuery += " GROUP BY YEAR(PI_DATA), MONTH(PI_DATA),PI_FILIAL,PI_CC,PI_PD,PI_CONTA "
 	cQuery += " ORDER BY YEAR(PI_DATA), MONTH(PI_DATA),PI_FILIAL,PI_CC,PI_PD,PI_CONTA "
-		
-/*	cQuery := " SELECT * FROM "+RetSqlName("SPI")+" AS SPI "
-	cQuery += " LEFT JOIN "+RetSqlName("SRA")+" AS SRA ON RA_MAT = PI_MAT " 
-	cQuery += " LEFT JOIN "+RetSqlName("CTT")+" AS CTT ON PI_CC = CTT_CUSTO " 
-	cQuery += " LEFT JOIN "+RetSqlName("SZ1")+" AS SZ1 ON Z1_COD = CTT_CODCON " 
-	cQuery += " LEFT JOIN "+RetSqlName("SZA")+" AS SZA ON ZA_GRUPGER = '000008' " 
-	cQuery += " LEFT JOIN "+RetSqlName("SP9")+" AS SP9 ON P9_CODIGO = PI_PD "
-	cQuery += " WHERE SPI.D_E_L_E_T_ = '' "
-	cQuery += " AND ISNULL(SRA.D_E_L_E_T_,'') = '' " 
-	cQuery += " AND ISNULL(CTT.D_E_L_E_T_,'') = '' " 
-	cQuery += " AND ISNULL(SZ1.D_E_L_E_T_,'') = '' " 
-	cQuery += " AND ISNULL(SZA.D_E_L_E_T_,'') = '' " 
-	cQuery += " AND ISNULL(SP9.D_E_L_E_T_,'') = '' " */
-	
-	//u_impt2(ChangeQuery(cQuery))
+
 	
 	dbUseArea(.T.,"TOPCONN",TCGenQry(,,ChangeQuery(cQuery)),"TMP", .T., .F.)
 
@@ -110,8 +89,6 @@ User Function GerBcHora()
 			RecLock("SZ0",.T.)//FLUXO ECONOMICO               
 				Replace Z0_FILIAL  with xFilial('SZ0') // Filial (C,  2,  0)* Campo não usado
 				Replace Z0_LINHA   with 'PV' // Linha Doc. (C,  2,  0)
-				//Replace Z0_REVISAO with 'Se estimado "AnoMes"' // REVISAO (C,  6,  0)
-				//Replace Z0_VRPREV  with TMP->AK2_VALOR // Vlr Prev (N, 12,  2)
 				Replace Z0_HIST    with SP9->P9_CODIGO + " - " + SP9->P9_DESC // Historico (C, 40,  0)
 				Replace Z0_LOTE    with cLote // Lote (C,  6,  0)
 				Replace Z0_DOC     with StrZero(nSeq,9) // Documento (C,  9,  0)
@@ -128,29 +105,7 @@ User Function GerBcHora()
 				Replace Z0_CODCONT with CTT->CTT_CODCON // CodCont (C,  5,  0)
 				Replace Z0_DTREF   with StrZero(TMP->MES,2)+"/"+right(cValToChar(TMP->ANO),2) // Dt. Refer. (C,  5,  0)
 				Replace Z0_DTLANC  with Date() // Dt Lancament (D,  8,  0)
-																
-	/*			Replace Z0_DTREF   with CAMPO09 // Dt. Refer. (C,  5,  0)
-				Replace Z0_DATA    with CAMPO10 // Data (C,  5,  0)
-				Replace Z0_DTCAIXA with CAMPO11 // Dt. Caixa (C,  5,  0)
-				Replace Z0_DTVENC  with CAMPO12 // Vencto (C,  5,  0)
-				Replace Z0_SITUACA with CAMPO17 // Situacao (C, 45,  0)
-				Replace Z0_RECEITA with CAMPO14 // Receita (N, 14,  2)
-				Replace Z0_DTRF1   with CAMPO16 // DATA REF (C,  4,  0)
-				Replace Z0_CLASSIF with CAMPO18 // CLASSIF (C, 45,  0)
-				Replace Z0_GRUPO   with CAMPO19 // GRUPO_GERAL (C, 45,  0)
-				Replace Z0_DRE     with CAMPO20 // DRE (C, 15,  0)
-				Replace Z0_DTLANC  with CAMPO21 // Dt Lancament (D,  8,  0)
-				Replace Z0_FATORE  with CAMPO27 // Fator Receit (N, 12,  2)
-				Replace Z0_SITUAC  with CAMPO29 // Sit. Contrat (C,  1,  0)
-				Replace Z0_PROP    with CAMPO30 // Prop (C, 20,  0)
-				Replace Z0_OS      with CAMPO31 // os (C,  2,  0)
-				Replace Z0_SETOR   with CAMPO32 // Setor (C,  5,  0)
-				Replace Z0_DESCSET with CAMPO33 // Setor (C, 40,  0)
-				Replace Z0_SUBCTA  with CAMPO35 // SubCta (C,  6,  0)
-				Replace Z0_SETORIG with CAMPO36 // Setor Origem (C,  5,  0)
-				Replace Z0_VEICULO with CAMPO37 // Veiculos (C,  1,  0)
-				Replace Z0_DESC2   with CAMPO40 // Desc.Despesa (C, 40,  0)
-				Replace Z0_CODPLA  with CAMPO41 // Planilha (C, 15,  0) */
+															
 			MsUnLock("SZ0")      
 
 		Endif
