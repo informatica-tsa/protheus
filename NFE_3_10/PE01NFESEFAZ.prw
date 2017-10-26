@@ -1,6 +1,6 @@
 #Include 'RwMake.ch'
-#DEFINE MAXMENLIN  080
-/*
+#DEFINE MAXMENLIN  90
+/*  
 +-----------------------------------------------------------------------+
 ¦Programa  ¦EtiqPlas   ¦ Autor ¦ Gilson Lucas          ¦Data ¦05.11.2014¦
 +----------+------------------------------------------------------------¦
@@ -36,7 +36,7 @@ Local aReboque   := ParamIxb[12]
 
 Local aNfVincRur := ParamIxb[13]
 Local aEspVol    := ParamIxb[14]
-//Local aNfVinc    := ParamIxb[15]
+Local aNfVinc    := ParamIxb[15]
 
 Local aAreaOld   := GetArea()
 Local aAreaSD2   := SD2->(GetArea())
@@ -63,7 +63,7 @@ RestArea(aAreaSC6)
 RestArea(aAreaSB1)
 
 
-Return({aProd,cMensCli,cMensFis,aDest,aNota,aInfoItem,aDupl,aTransp,aEntrega,aRetirada,aVeiculo,aReboque,aNfVincRur,aEspVol})
+Return({aProd,cMensCli,cMensFis,aDest,aNota,aInfoItem,aDupl,aTransp,aEntrega,aRetirada,aVeiculo,aReboque,aNfVincRur,aEspVol,aNfVinc})
 
 
 
