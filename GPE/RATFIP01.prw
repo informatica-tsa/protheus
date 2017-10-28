@@ -19,8 +19,10 @@
  *				ficar os fontes que agora fará o rateio de horas  nos lançamentos  men-
  *				sais e também na rescisão.
  * @Alterações  03/11/2016 Alterado local de verificação de verbas para rateio. ThiagoSantos 
+ * @Alterações  27/10/2017 Alterado Tabela de verificação de lancamentos SRC e SRR = RGB
  ****************************************************************************************/
-User Function RATFIP01(_cAlias)              
+User Function RATFIP01(_cAlias, _cOrigem)
+	Private cOriRot := _cOrigem   //Origem do roteiro     
 	Private cAlias := _cAlias
 	Private cTitForm     := "Rateio de Horas " 
 	Private oDl002
@@ -51,7 +53,7 @@ Return
 static Function GetVerbRat()
 	Local cVerbas := ""
 	Local nCont := 0
-	Local cQuery := " SELECT RV_COD FROM SRV010 WHERE RV_TIPORAT = 2 OR RV_TIPORAT = 3 " 
+	Local cQuery := " SELECT RV_COD FROM "+RetSqlName("SRV")+" WHERE RV_TIPORAT = 2 OR RV_TIPORAT = 3 " 
   	if select("Q1") <> 0
 		Q1->(dbCloseArea())
 	endif 
@@ -114,25 +116,19 @@ Static Function BuscarVerbas(cAlias)
 	(cAlias)->(dbSetOrder(1))
 	(cAlias)->(dbGoTop())
 	
-	if (cAlias == "SRC")
-		(cAlias)->(dbSeek(xFilial(cAlias)+cMatric))	   // RC_FILIAL + RC_MAT + RC_PD
-	else // SRR
-		(cAlias)->(dbSeek(xFilial(cAlias)+AllTrim(cMatric)+"R"))	   // RC_FILIAL + RC_MAT + RC_TIPO3 (Rescisão = 'R')
-	endif
-			
-	c_Filial := Alltrim(Alltrim(subStr(cAlias, 2, 2)) + "_FILIAL")
-	c_Mat	 := Alltrim(Alltrim(subStr(cAlias, 2, 2)) + "_MAT"	 )
-	c_PD	 := Alltrim(Alltrim(subStr(cAlias, 2, 2)) + "_PD"	 )    
-	c_Horas	 := Alltrim(Alltrim(subStr(cAlias, 2, 2)) + "_HORAS" )       
+	(cAlias)->(dbSeek(xFilial(cAlias)+cMatric))	   // RGB_FILIAL + RGB_MAT
+	c_Filial := alltrim(cAlias) + "_FILIAL"
+	c_Mat	  := alltrim(cAlias) + "_MAT"	 
+	c_PD	  := alltrim(cAlias) + "_PD"	    
+	c_Horas  := alltrim(cAlias) +  "_HORAS" 
 	
-	WHILE !((cAlias)->(EOF())) .AND. (cAlias)->(&c_Filial) == xFilial(cAlias) .AND. (cAlias)->(&c_Mat) == cMatric	
-	
+	WHILE !((cAlias)->(EOF())) .AND. (cAlias)->(&c_Filial) == xFilial(cAlias) .AND. (cAlias)->(&c_Mat) == cMatric	.AND. Alltrim((cAlias)->RGB_ROTEIR) $ "RES,FOL"
 		if alltrim((cAlias)->(&c_PD)) $ alltrim(cVebHExt)
 			AADD(aVerbas,{(cAlias)->(&c_PD),0,(cAlias)->(&c_Horas)})
 		endif
 		(cAlias)->(dbSkip())
+	Enddo
 		
-	Enddo    
 Return aVerbas
 
 Static Function BuscarHoras(cFolMes)
@@ -146,11 +142,7 @@ Static Function BuscarHoras(cFolMes)
 	cQuery += " Convert(VARCHAR(10),FIPDATA,103) AS FIPDATA, "
 	cQuery += " replace(CAST(FIPHORAI AS VarChar(5)) ,'.',':') AS INICIO, "
 	cQuery += " replace(CAST(FIPHORAF AS VarChar(5)) ,'.',':') AS FIM, "
-//	cQuery += " Cast((FIPHORAF - FIPHORAI) as int) AS HORAS" 
 	cQuery += " Cast(FIPHORAS as numeric(8,2)) AS HORAS" 
-//	cQuery += " DATEDIFF (hour, "
-//	cQuery += " Cast(replace(CAST(FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime), "
-//	cQuery += " Cast(replace(CAST(FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)) AS HORAS "
 	cQuery += " FROM FIPEPC "
 	cQuery += " WHERE FIPANOMES = '"+alltrim(cFolMes)+"' "
 	cQuery += "   AND CHAPA     = '"+alltrim(cMatric)+"' "
@@ -379,16 +371,7 @@ Static function fMontNovasHoras()
 	endif
 	                        
 	fSubSetArray(aItens, oItens)
-/*	oItens:SetArray(aItens)
-	oItens:bLine 		:= {|| {;
-		aItens[oItens:nAT,01],;
-		aItens[oItens:nAT,02],;
-		aItens[oItens:nAT,03],;
-		aItens[oItens:nAT,04],;
-		aItens[oItens:nAT,05],;
-		aItens[oItens:nAT,06]}} 
-	
-	oItens:Refresh()*/
+
 Return                
 
 Static Function fSubSetArray(_aItens, _oItens)
@@ -534,11 +517,7 @@ Static Function Sair(lRet)
 				Return                            
 			else
 				dAux := cTod(aItens[nI][2])
-				
-				//if !(val(SubStr(cFolMes,5,2)) == Month(dAux) .and. val(SubStr(cFolMes,1,4)) == Year(dAux))
-				//	MSGSTOP("O mês e o ano devem ser o de lançamento da folha. ")
-				//	Return                            
-				//endif            
+				         
 			endif                
 			
 			// Verificando as horas iniciais e finais
@@ -575,58 +554,24 @@ Static Function Sair(lRet)
 					cInsert += "           ([CHAPA]"
 					cInsert += "           ,[FIPCUSTO]"
 					cInsert += "           ,[FIPDATA]"
-//					cInsert += "           ,[FIPCRONOGRAMA]"
-//					cInsert += "           ,[FIPATIVIDADES]"
-//					cInsert += "           ,[FIPDOCUMENTOS]"
 					cInsert += "           ,[FIPHORAI]"
 					cInsert += "           ,[FIPHORAF]"
 					cInsert += "           ,[FIPHORAS]"
-//					cInsert += "           ,[FIPHRNORMAL]"
-//					cInsert += "           ,[FIPMINNORMAL]"
-//					cInsert += "           ,[FIPHREXTRA]"
-//					cInsert += "           ,[FIPHRCOMP]"
-//					cInsert += "           ,[FIPHRBANCO]"
 					cInsert += "           ,[FIPANOMES]"
-//					cInsert += "           ,[FIPESCOPO]"
-//					cInsert += "           ,[FIPFATURAVEL]"
 					cInsert += "           ,[FIPEXTRAS]"
-//					cInsert += "           ,[FIPSITUACAO]"
-//					cInsert += "           ,[FIPGERADO]"
-//					cInsert += "           ,[FIPREVISAO]"
 					cInsert += "           ,[FIPANOMESDATA]"
-//					cInsert += "           ,[SETORFIPIMPORTADAS]"
-//					cInsert += "           ,[FIPEMPRESA]"
-//					cInsert += "           ,[FIPFILIAL]"
-//					cInsert += "           ,[FIPORIGEM]"
 					cInsert += "           ,[FIPPD]"
 					cInsert += "           ,[FIPEMPRESA])"
 					cInsert += "    VALUES"
 					cInsert += "          ('"+cMatric+"'"//, varchar(6),>"
 					cInsert += "           ,'"+aItens[nI][1]+"'"//, varchar(14),>"
 					cInsert += "           ,Convert( datetime, '" + cDataAtual + "' , 103)"//, datetime,>     "
-//					cInsert += "           ,'"+QTEMPFIP->FIPCRONOGRAMA+"'"//, varchar(21),>"
-//					cInsert += "           ,'"+QTEMPFIP->FIPATIVIDADES+"'"//, varchar(10),>"
-//					cInsert += "           ,'"+QTEMPFIP->FIPDOCUMENTOS+"'"//, varchar(19),>"
 					cInsert += "           ,replace( CAST('"+aItens[nI][3]+"' AS VarChar(5)) ,':','.')"//, numeric(8,2),>"
 					cInsert += "           ,replace( CAST('"+aItens[nI][4]+"' AS VarChar(5)) ,':','.')"//, numeric(8,2),>"
 					cInsert += "           ,replace( '"+CVALTOCHAR(aItens[nI][5])+"', ',' , '.')"//, numeric(8,2),>"
-//					cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPHRNORMAL)+""//, numeric(8,2),>"
-//					cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPMINNORMAL)+""//, numeric(18,0),>"
-//					cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPHREXTRA)+""//, numeric(8,2),>"
-//					cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPHRCOMP)+""//, numeric(8,2),>"
-//					cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPHRBANCO)+""//, numeric(8,2),>"
 					cInsert += "           ,'"+cFolMes+"'"//, varchar(6),>"
-//					cInsert += "           ,'"+QTEMPFIP->FIPESCOPO+"'"//, varchar(1),>"
-//					cInsert += "           ,'"+QTEMPFIP->FIPFATURAVEL+"'"//, varchar(1),>"
 					cInsert += "           ,'S'"//, varchar(1),>"
-//					cInsert += "           ,'"+QTEMPFIP->FIPSITUACAO+"'"//, varchar(2),>"
-//					cInsert += "           ,'"+QTEMPFIP->FIPGERADO+"'"//, varchar(1),>"
-//					cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPREVISAO)+""//, int,>"
 					cInsert += "           ,'"+cFolMes+"'"//, varchar(6),>"
-//					cInsert += "           ,'"+QTEMPFIP->SETORFIPIMPORTADAS+"'"//, char(10),>"
-//					cInsert += "           ,'"+QTEMPFIP->FIPEMPRESA+"'"//, varchar(2),>"
-//					cInsert += "           ,'"+QTEMPFIP->FIPFILIAL+"'"//, varchar(2),>"
-//					cInsert += "           ,'"+QTEMPFIP->FIPORIGEM+"'"//, varchar(10),>"
 					cInsert += "           ,'"+cvaltochar(aItens[nI][6])+"'
 					cInsert += "           ,'"+SM0->M0_CODIGO+"')"//, varchar(3),>)"
 
@@ -689,34 +634,34 @@ Static Function Sair(lRet)
 							cInsert += "           ,[FIPPD]"
 				         cInsert += "           ,[FIPEMPRESA])"								
 							cInsert += "    VALUES"
-							cInsert += "          ('"+QTEMPFIP->CHAPA+"'"//, varchar(6),>"
-							cInsert += "           ,'"+QTEMPFIP->FIPCUSTO+"'"//, varchar(14),>"
-							cInsert += "           ,'"+QTEMPFIP->FIPDATA2+"'"//, datetime,>     "
-							cInsert += "           ,'"+QTEMPFIP->FIPCRONOGRAMA+"'"//, varchar(21),>"
-							cInsert += "           ,'"+QTEMPFIP->FIPATIVIDADES+"'"//, varchar(10),>"
-							cInsert += "           ,'"+QTEMPFIP->FIPDOCUMENTOS+"'"//, varchar(19),>"
-							cInsert += "           ,replace( CAST('"+aItens[nI][8][ngt][1]+"' AS VarChar(5)) ,':','.')"//, numeric(8,2),>"
-							cInsert += "           ,replace( CAST('"+aItens[nI][8][ngt][2]+"' AS VarChar(5)) ,':','.')"//, numeric(8,2),>"
-							cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPHORAS)+""//, numeric(8,2),>"
-							cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPHRNORMAL)+""//, numeric(8,2),>"
-							cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPMINNORMAL)+""//, numeric(18,0),>"
-							cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPHREXTRA)+""//, numeric(8,2),>"
-							cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPHRCOMP)+""//, numeric(8,2),>"
-							cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPHRBANCO)+""//, numeric(8,2),>"
-							cInsert += "           ,'"+QTEMPFIP->FIPANOMES+"'"//, varchar(6),>"
-							cInsert += "           ,'"+QTEMPFIP->FIPESCOPO+"'"//, varchar(1),>"
-							cInsert += "           ,'"+QTEMPFIP->FIPFATURAVEL+"'"//, varchar(1),>"
-							cInsert += "           ,'"+QTEMPFIP->FIPEXTRAS+"'"//, varchar(1),>"
-							cInsert += "           ,'"+QTEMPFIP->FIPSITUACAO+"'"//, varchar(2),>"
-							cInsert += "           ,'"+QTEMPFIP->FIPGERADO+"'"//, varchar(1),>"
-							cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPREVISAO)+""//, int,>"
-							cInsert += "           ,'"+QTEMPFIP->FIPANOMESDATA+"'"//, varchar(6),>"
-							cInsert += "           ,'"+QTEMPFIP->SETORFIPIMPORTADAS+"'"//, char(10),>"
-							cInsert += "           ,'"+QTEMPFIP->FIPEMPRESA+"'"//, varchar(2),>"
-							cInsert += "           ,'"+QTEMPFIP->FIPFILIAL+"'"//, varchar(2),>"
-							cInsert += "           ,'"+QTEMPFIP->FIPORIGEM+"'"//, varchar(10),>"
-							cInsert += "           ,'"+aItens[nI][8][ngt][4]+"'"//, varchar(3),>)"
-							cInsert += "           ,'"+SM0->M0_CODIGO+"')"//, varchar(3),>)"							
+							cInsert += "          ('"+QTEMPFIP->CHAPA+"'"																		//, varchar(6),>"
+							cInsert += "           ,'"+QTEMPFIP->FIPCUSTO+"'"																//, varchar(14),>"
+							cInsert += "           ,'"+QTEMPFIP->FIPDATA2+"'"																//, datetime,>     "
+							cInsert += "           ,'"+QTEMPFIP->FIPCRONOGRAMA+"'"															//, varchar(21),>"
+							cInsert += "           ,'"+QTEMPFIP->FIPATIVIDADES+"'"															//, varchar(10),>"
+							cInsert += "           ,'"+QTEMPFIP->FIPDOCUMENTOS+"'"															//, varchar(19),>"
+							cInsert += "           ,replace( CAST('"+aItens[nI][8][ngt][1]+"' AS VarChar(5)) ,':','.')"				//, numeric(8,2),>"
+							cInsert += "           ,replace( CAST('"+aItens[nI][8][ngt][2]+"' AS VarChar(5)) ,':','.')"				//, numeric(8,2),>"
+							cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPHORAS)+""														//, numeric(8,2),>"
+							cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPHRNORMAL)+""													//, numeric(8,2),>"
+							cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPMINNORMAL)+""												//, numeric(18,0),>"
+							cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPHREXTRA)+""													//, numeric(8,2),>"
+							cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPHRCOMP)+""													//, numeric(8,2),>"
+							cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPHRBANCO)+""													//, numeric(8,2),>"
+							cInsert += "           ,'"+QTEMPFIP->FIPANOMES+"'"																//, varchar(6),>"
+							cInsert += "           ,'"+QTEMPFIP->FIPESCOPO+"'"																//, varchar(1),>"
+							cInsert += "           ,'"+QTEMPFIP->FIPFATURAVEL+"'"															//, varchar(1),>"
+							cInsert += "           ,'"+QTEMPFIP->FIPEXTRAS+"'"																//, varchar(1),>"
+							cInsert += "           ,'"+QTEMPFIP->FIPSITUACAO+"'"																//, varchar(2),>"
+							cInsert += "           ,'"+QTEMPFIP->FIPGERADO+"'"																//, varchar(1),>"
+							cInsert += "           ,"+CVALTOCHAR(QTEMPFIP->FIPREVISAO)+""													//, int,>"
+							cInsert += "           ,'"+QTEMPFIP->FIPANOMESDATA+"'"															//, varchar(6),>"
+							cInsert += "           ,'"+QTEMPFIP->SETORFIPIMPORTADAS+"'"														//, char(10),>"
+							cInsert += "           ,'"+QTEMPFIP->FIPEMPRESA+"'"																//, varchar(2),>"
+							cInsert += "           ,'"+QTEMPFIP->FIPFILIAL+"'"																//, varchar(2),>"
+							cInsert += "           ,'"+QTEMPFIP->FIPORIGEM+"'"																//, varchar(10),>"
+							cInsert += "           ,'"+aItens[nI][8][ngt][4]+"'"																//, varchar(3),>)"
+							cInsert += "           ,'"+SM0->M0_CODIGO+"')"																	//, varchar(3),>)"							
 							TcSQLExec(cInsert)
 						next
 						
@@ -733,15 +678,8 @@ Static Function Sair(lRet)
 		oDl002:End()
 		MSGINFO("Operação concluida.")
 	else
-		if (cAlias == "SRC")
-			MSGSTOP("Voce cancelou o rateio de horas, as informações não foram gravadas."+chr(13)+chr(10)+"Edite as verbas novamente para refazer o processo!")
-		else 
-			if (cAlias == "SRR")
-				MSGSTOP("A operação não foi processada, para ter acesso novamente a tela do rateio você deverá excluir a Rescisão e recalculá-la novamente!")
-			else
-				MSGSTOP("A operação não foi processada e para fazer novamente o rateio você deverá refazer a operação que chegou até esta tela!")
-			end if
-		end if
+		
+		MSGSTOP("Voce CANCELOU o rateio de horas. Rateio NÃO realizado!")
 		oDl002:End()
 	endif
 Return

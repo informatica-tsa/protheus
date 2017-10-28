@@ -6,5 +6,5 @@
  */
 User Function GP040RES
 	// Verifica se existe rateio de horas a ser realizado
-	U_RatFip01("SRR")
+	U_RatFip01("RGB","RES") 
 Return
