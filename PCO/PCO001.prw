@@ -23,8 +23,9 @@ User Function PCO001 (cCC)
 
 	cXco := ''
 
-	// se a filial é a matriz
-//	if (SM0->M0_CODFIL == '01')
+	/******************************************************************************
+	SE É FILIAL
+	 *****************************************************************************/
 	if (SM0->M0_CODFIL >= '01' .and. SM0->M0_CODFIL <= '19')
 		cClassi := POSICIONE("CTT", 1, xFilial("CTT")+cCC, "CTT_CLASSI")
 				
@@ -37,8 +38,22 @@ User Function PCO001 (cCC)
 				cXco := POSICIONE("SB1", 1, xFilial("SB1")+c1Produto, "B1_CTACONS")
 		ENDCASE       
 	else      
-		// filial
-		cXco := POSICIONE("SB1", 1, xFilial("SB1")+c1Produto, "B1_CTACEI")
+		/******************************************************************************
+		SE É CEI
+		//Exemplo: 
+		//	cei => Conta	
+		//	20  => 4163 01 0006
+		//	21  => 4163 02 0006
+		//	22  => 4163 03 0006
+		//	23  => 4163 04 0006
+		 *****************************************************************************/
+		
+		cTemp := POSICIONE("SB1", 1, xFilial("SB1")+c1Produto, "B1_CTACEI")
+		cIni = SubStr( cTemp, 1, 4 )
+		cFim = SubStr( cTemp, 7, 4 )
+		cMeio = PADL(ALLTRIM(STR(VAL(cFilAnt) - 19)),2,"0")
+ 		cXco := cIni+cMeio+cFim
+ 		
 	endif             
 	                          
 	ACOLS[N,nPXCO] := cXco
