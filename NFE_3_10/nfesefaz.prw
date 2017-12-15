@@ -2298,7 +2298,11 @@ If cTipo == "1"
 					            EndIf 
 			            	EndIf
 			            EndIf
-			            		            		
+						
+						If SC6->(FieldPos("C6_MSCOMPL"))<>0
+							cInfAdic := Alltrim(SC6->C6_MSCOMPL)
+						EndIf
+						 		            		
 						aAdd(aInfoItem,{(cAliasSD2)->D2_PEDIDO,(cAliasSD2)->D2_ITEMPV,(cAliasSD2)->D2_TES,(cAliasSD2)->D2_ITEM})
 						aadd(aProd,	{Len(aProd)+1,;
 							cCodProd,;
