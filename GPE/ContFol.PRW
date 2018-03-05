@@ -767,13 +767,13 @@ Static Function GerRatFol()
 	While !Eof()
 	
 		//Exclui os registros desta matricula para este Mes na tabela de Rateio
-		cQueryDel:=" DELETE "+RetSqlName("SZ7")+" WHERE Z7_MAT='"+QMAT->RZ_MAT+"' AND (Z7_DTLANC='' OR Left(Z7_DTLANC,6)='"+cAnoMes+"')"
+		cQueryDel:=" DELETE "+RetSqlName("SZ7")+" WHERE Z7_MAT='"+QMAT->RZ_MAT+"' AND (Z7_DTLANC='' OR Left(Z7_DTLANC,6)='"+cAnoMes+"') AND Z7_FILMAT = '"+QMAT->RZ_FILIAL+"' "
 		TcSQLExec(cQueryDel)
 		
 		IncProc("Efetuando Rateio.... Mat "+QMAT->RZ_MAT ,"Aguarde...")
 		cMatTemp += QMAT->RZ_MAT +chr(13)+chr(10)
 		
-		Fwrite(Fcreate('\Log_Rateio\Rateio_'+QMAT->RZ_MAT+'.txt'),getQueRat(QMAT->RZ_FILIAL,QMAT->RZ_MAT,SM0->M0_CODIGO))
+		Fwrite(Fcreate('\Log_Rateio\Rateio_'+QMAT->RZ_FILIAL+'_'+QMAT->RZ_MAT+'.txt'),getQueRat(QMAT->RZ_FILIAL,QMAT->RZ_MAT,SM0->M0_CODIGO))
 		//Executa a Query com o Rateio já realizado
 		TCQUERY getQueRat(QMAT->RZ_FILIAL,QMAT->RZ_MAT,SM0->M0_CODIGO) Alias QRATMAT NEW 
 				
