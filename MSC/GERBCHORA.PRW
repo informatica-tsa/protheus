@@ -162,7 +162,8 @@ User Function GerBcHora()
 			
 		Next	
 	
-		U_MsgFull(cErros)
+		MsgInfo(cErros, "Erros encontrados. Verifique as informacoes abaixo.")
+		//U_MsgFull(cErros)
 		
 	endif
 
