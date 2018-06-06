@@ -933,7 +933,7 @@ Return( aExp )
 //цддддддддддеддддддддддадддддддадддддддддддддддддддддддаддддддадддддддддд╢
 //ЁDescri┤фo ЁSelecionaro os Arquivos do Word.                            Ё
 //юддддддддддадддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
-User Function fOpen_Word()
+User Function fOpWord()
 
 Local cSvAlias		:= Alias()
 Local lAchou		:= .F.
