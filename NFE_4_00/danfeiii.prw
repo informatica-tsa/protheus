@@ -1,7 +1,7 @@
 #INCLUDE "PROTHEUS.CH" 
 #INCLUDE "TBICONN.CH"
 #INCLUDE "COLORS.CH"
-#INCLUDE "RPTDEF.CH"  
+#INCLUDE "RPTDEF.CH"
 #INCLUDE "FWPrintSetup.ch"
 
 #DEFINE IMP_SPOOL 2
@@ -180,6 +180,7 @@ Local lMVGfe	:= GetNewPar( "MV_INTGFE", .F. ) // Se tem integração com o GFE
 Local lContinua := .T.
 local lChave	:= .F.
 local cChavSF3 := ""
+Local lVerPerg := .T.
 
 Default lIsLoja	:= .F.
 
@@ -192,7 +193,20 @@ If lIsLoja
 	MV_PAR05 := 1	//Frente e Verso - 1:Sim
 	MV_PAR06 := 2	//DANFE simplificado - 2:Nao
 Else
-	lContinua := Pergunte("NFSIGW",.T.)  .AND. ( (!Empty(MV_PAR06) .AND. MV_PAR06 == 2) .OR. Empty(MV_PAR06) )
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ 
+	//³                        Agroindustria                          ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If FindFunction("OGXUtlOrig") //Encontra a função
+		If OGXUtlOrig() // Retorna se tem integração com Agro/originação modulo 67
+			If FindFunction("AGRXPERG")
+				lVerPerg := AGRXPERG()
+			EndIf
+		EndIf
+	Endif
+	
+	If lVerPerg
+		lContinua := Pergunte("NFSIGW",.T.)  .AND. ( (!Empty(MV_PAR06) .AND. MV_PAR06 == 2) .OR. Empty(MV_PAR06) )
+	EndIf
 EndIf
 
 If lContinua
