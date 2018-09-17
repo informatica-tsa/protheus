@@ -16,7 +16,28 @@
  ****************************************************************************************/
 User Function GP090ALT
 	
-	// VERIFICA SE A MATRICULA EM EDIÇÃO POSSUIR VERBAR PARA RATEIO 
-	U_RatFip01("RGB","FOL") 
-
+	TelaIni()
+	 
 Return
+
+
+Static Function TelaIni()
+
+	Local cTypeRgb := Space(3)
+	Local aItems:= {'FOL','RES'}
+	Local lok := .F.
+	Local   oFontCab  := TFont():New("Arial",10,,,.T.,,,,.F.,.F.) 
+	
+	cCombo1:= aItems[1]
+	DEFINE MSDIALOG oDlg TITLE "Definições Gerais" FROM 0,0 TO 100,250 OF oMainWnd Pixel
+	
+	TComboBox():New(010,005,{|U|if(PCount()>0,cCombo1:=U,cCombo1)},aItems,80,09,oDlg,,,,,,.T.,oFontCab,,,,,,,,"cCombo1")
+	
+	@ 01,05 Say "Informe se é recisão ou Folha" PIXEL OF oDlg
+	//@ 10,05 Get cTypeRgb Valid !Empty(cTypeRgb) PIXEL OF oDlg
+	
+	DEFINE SBUTTON FROM 30, 10   TYPE 1 ENABLE OF oDlg ACTION (oDlg:End(),U_RatFip01("RGB",cCombo1),lOk:=.T.)
+	DEFINE SBUTTON FROM 30, 40   TYPE 2 ENABLE OF oDlg ACTION (lOk:=.F.,oDlg:End())
+	ACTIVATE MSDIALOG oDlg CENTERED 
+
+Return(lOk)

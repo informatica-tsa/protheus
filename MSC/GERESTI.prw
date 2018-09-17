@@ -64,7 +64,6 @@ Static Function Confirma()
 	* Cancela os lançamentos do periodo, somente tipo = ZZ
 	*
 	******
-	
 	Processa( {|| IMPSZB() },"Importando Registros da Tabela SZB para a SZ0","Alterando Registro ..." )
 Return()
 
@@ -79,6 +78,7 @@ Static Function ImpSZB()
 	Local cPerg:="ESTSZB"
 	Local cRevIni:=""
 	Local cRevFim:=""
+	Local cListFil := GetFiliais() //Pega as filiais da empresa corrente.
 	Private cSeq   := "00"
 	Private cIndex := CriaTrab(NIL,.F.)
 	
@@ -97,7 +97,7 @@ Static Function ImpSZB()
 	//cQuery  += " WHERE Z0_LINHA ='ZZ' AND Z0_FILIAL IN ('01','02') AND" //09/12/11
 	//cQuery  += "       Z0_REVISAO<>'' AND " //09/12/11
 	//cQuery  += "       Z0_REVISAO BETWEEN '"+MV_PAR01+"' AND '"+MV_PAR02+"' AND Z0_VEICULO != 'S' " //09/12/11
-	cQuery  += " WHERE Z0_LINHA in ('ZZ','PC', 'EM') AND Z0_FILIAL IN ('01','02', '20', '21', '22','23', '24', '25','26', '27', '28', '29', '30') AND"
+	cQuery  += " WHERE Z0_LINHA in ('ZZ','PC', 'EM') AND Z0_FILIAL IN (" + cListFil + ") AND"
 	cQuery  += "       Z0_REVISAO<>'' AND "
 	cQuery  += "       Z0_REVISAO BETWEEN '"+MV_PAR01+"' AND '"+MV_PAR02+"' AND Z0_VEICULO != 'S' "
 	
@@ -690,3 +690,20 @@ Static Function FGrvSZE()
 	EndDo
 
 Return
+
+Static Function GetFiliais()
+
+	local aFilAux := FWAllFilial()
+	local nAtu
+	local cList
+	
+
+	For nAtu := 1 To Len(aFilAux)
+		if nAtu == 1
+			cList := "'" + aFilAux[nAtu] + "'"
+		else
+			cList := cList + ",'" + aFilAux[nAtu] + "'"
+		endif
+	Next
+	
+return cList

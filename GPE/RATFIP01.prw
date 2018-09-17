@@ -23,20 +23,20 @@
  ****************************************************************************************/
 User Function RATFIP01(_cAlias, _cOrigem)
 	Private cOriRot := _cOrigem   //Origem do roteiro     
-	Private cAlias := _cAlias
-	Private cTitForm     := "Rateio de Horas " 
+	Private cAlias := _cAlias 
 	Private oDl002
 	Private oDlMont
 	Private oFont1   := TFont():New("Arial Black",,024,,.T.,,,,,.F.,.F.)
 	Private cVebHExt := GetVerbRat() // PEGA AS VERBAS DA TABELA SRV COM RV_TIPORAT = 2 OU 3
 	Private cFolMes  := SuperGetMv ( "MV_FOLMES" , .T. , Space(100))
 	Private dUltimoDiaMes := LastDay(ctod('01/'+Substr(cFolMes, 5, 2) + '/' + Substr(cFolMes, 1, 4)))
+	Private cTitForm     := "Rateio de Horas | Mês : " + cFolMes
 	Private aSubHora := {}
 	Private lLancErro := .F.                 
 	Private cMatric := SRA->RA_MAT      
 	Private aAreaAlias := GetArea(cAlias)
 
-	Private aVerbas := BuscarVerbas(cAlias) // VERIFICA SE A MATRICULA POSSUIR VERBAR PARA RATEIO 
+	Private aVerbas := BuscarVerbas(cAlias,cOriRot) // VERIFICA SE A MATRICULA POSSUIR VERBAR PARA RATEIO 
 	Private aItens  := BuscarHoras(cFolMes)
 	
 	if len(aVerbas) == 0
@@ -109,7 +109,7 @@ Static Function Mostra()
 	ACTIVATE MSDIALOG oDl002 CENTERED 
 Return
 
-Static Function BuscarVerbas(cAlias)
+Static Function BuscarVerbas(cAlias,cRotrei)
 	aVerbas := {}           
 	
 	dbSelectArea(cAlias) 
@@ -122,10 +122,14 @@ Static Function BuscarVerbas(cAlias)
 	c_PD	  := alltrim(cAlias) + "_PD"	    
 	c_Horas  := alltrim(cAlias) +  "_HORAS" 
 	
-	WHILE !((cAlias)->(EOF())) .AND. (cAlias)->(&c_Filial) == xFilial(cAlias) .AND. (cAlias)->(&c_Mat) == cMatric	.AND. Alltrim((cAlias)->RGB_ROTEIR) $ "RES,FOL"
-		if alltrim((cAlias)->(&c_PD)) $ alltrim(cVebHExt)
-			AADD(aVerbas,{(cAlias)->(&c_PD),0,(cAlias)->(&c_Horas)})
+	WHILE !((cAlias)->(EOF())) .AND. (cAlias)->(&c_Filial) == xFilial(cAlias) .AND. (cAlias)->(&c_Mat) == cMatric
+	
+		if  Alltrim((cAlias)->RGB_ROTEIR) == Alltrim(cRotrei)
+			if alltrim((cAlias)->(&c_PD)) $ alltrim(cVebHExt)
+				AADD(aVerbas,{(cAlias)->(&c_PD),0,(cAlias)->(&c_Horas)})
+			endif
 		endif
+		
 		(cAlias)->(dbSkip())
 	Enddo
 		
