@@ -4188,7 +4188,7 @@ Return (cRetorno)
 */
 Static Function Ajusta()
 
-Local aPergs 	:= {}
+/*Local aPergs 	:= {}
 Local aHelpPor	:= {}
 Local aHelpEng	:= {}
 Local aHelpSpa	:= {}
@@ -4235,7 +4235,7 @@ Aadd(aPergs,{"Compoe Saldo por?","¿Compone Saldo por?","Set Balance by?","mv_chh
 Aadd(aPergs,{"Considera Saldos Zerados?","Considera Saldos Zerados?","Considera Saldos Zerados?","mv_ch18","N",1,0,2,"C","","mv_par18", "Sim"         ,"Si"           ,"Yes","","","Nao","No","No","" ,"","","" ,"","","","","","","","","","","","    "," ","   ","S",""})    
 Aadd(aPergs,{"Lista Estorno?","Lista Reversion?","List Reversal?","mv_ch19","N",1,0,2,"C","","mv_par19", "Sim"         ,"Si"           ,"Yes","","","Nao","No","No","" ,"","","" ,"","","","","","","","","","","","    "," ","   ","S",""})    
 
-AjustaSx1("FIN140",aPergs)
+AjustaSx1("FIN140",aPergs)*/
 
 //Ajuste do SX3
 dbSelectArea("SX3")

@@ -1879,7 +1879,7 @@ Else
          Replace ZY_VALOR   With nVlrFlux //nVlrFlux*IIf(Substr(cTipo,3,1)=='-',-1,1)
          Replace ZY_HIST    With cHist
          Replace ZY_NATUREZ With cNatureza
-         Replace ZY_CODCLAS With cCodClas
+         //Replace ZY_CODCLAS With cCodClas
          MsUnLock()
       EndIf   
    EndIf   
