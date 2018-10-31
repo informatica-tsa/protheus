@@ -14,7 +14,6 @@
 ¦LEANDRO FARIA¦11/09/17¦ ALTERADO PONTO DE ENTRADA MT097END PARA        ¦
 ¦             ¦        ¦ MT094END. MIGRAVACAO V12                       ¦
 +-----------------------------------------------------------------------+
-
 */
 User Function MT094END()
 *************************************************************************
@@ -174,7 +173,7 @@ ElseIf nOpcX == 6
    // Envia e-mail para o gerente da conta
    cAliasTMP := GetNextAlias()  
    BeginSql Alias cAliasTMP //Inicio do Embedded SQL
-      SELECT CR_USER ,CR_OBS,R_E_C_N_O_ REGSRC FROM %table:SCR% SCR
+      SELECT CR_USER , R_E_C_N_O_ AS REGSRC, CR_OBS FROM %table:SCR% SCR
       WHERE SCR.%NotDel%
             AND SCR.CR_FILIAL  = %xFilial:SCR%
             AND SCR.CR_NUM = %Exp:cDocto%
