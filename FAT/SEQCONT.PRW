@@ -28,8 +28,10 @@ SetPrvt("CINICONTR,NCONTRATO,CCONTRATO,")
 // do grupo correspondente, na tabela 95
 If SM0->M0_CODIGO == "03" //LYNX
    cIniContr := Tabela("94","LYNX")
+ElseIf SM0->M0_CODIGO == "02"
+	cIniContr := Tabela("94","TSA")
 Else
-   cIniContr := Tabela("94","TSA")
+   cIniContr := Tabela("94","TSAMZ")
 EndIf
 
 //Transformar o conte£do de alfa para num‚rico e somar 1
@@ -42,8 +44,10 @@ cContrato:=StrZero(nContrato,4)
 //Montar o c¢digo do Contrato, do tipo Empresa+Sequencial
 If SM0->M0_CODIGO == "03" //LYNX
    cIniContr:= "L" + cContrato
-Else
+ElseIf SM0->M0_CODIGO == "02"
    cIniContr:= "T" + cContrato
+Else
+	cIniContr:= "M" + cContrato
 EndIF
 
 // Substituido pelo assistente de conversao do AP5 IDE em 25/06/01 ==> __Return(cIniContr)
