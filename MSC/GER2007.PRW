@@ -32,6 +32,25 @@ Processa( {|| GERA() },"Geracao Fluxo Economico","Gerando Registro..." )
 
 Return(nil)
 
+User Function GetStrFil()
+	aAreaM0 := SM0->(GetArea())
+	aFilAux := FWAllFilial()
+	sStrFil := ""
+	For nAtu := 1 To Len(aFilAux)
+		if aFilAux[nAtu] $ '99|97'
+			loop
+		endif
+		
+		if nAtu = 1
+			sStrFil := "'"+aFilAux[nAtu]+"'"
+			loop
+		endif
+		sStrFil := sStrFil + ",'" + aFilAux[nAtu]+"'"
+	Next
+	RestArea(aAreaM0)
+Return sStrFil
+
+
 Static Function Gera()
 ***********************************************************************************************************************
 * Rotina que gera oFluxo Economico Baseado nos lançamentos contábeis
@@ -39,6 +58,7 @@ Static Function Gera()
 *
 ******
 
+Local sStrFil := U_GetStrFil()
 Private aArq    := { Alias(), IndexOrd(), Recno() }
 Private nValor  := 0
 Private nCont   := 0
@@ -92,7 +112,7 @@ cQuery+= " LEFT OUTER JOIN "+RetSqlName("CT1")+" CT1C ON (CT2_CREDIT=CT1C.CT1_CO
 cQuery+= " LEFT OUTER JOIN "+RetSqlName("CT1")+" CT1D ON (CT2_DEBITO=CT1D.CT1_CONTA AND CT1D.CT1_FILIAL='"+Xfilial("CT1")+"' AND CT1D.D_E_L_E_T_<>'*')"
 cQuery+= " LEFT OUTER JOIN "+RetSqlName("SZA")+" SZAC ON (SZAC.ZA_GRUPGER=CT1C.CT1_GRUPO AND SZAC.ZA_FLUXO<>'N' AND SZAC.D_E_L_E_T_<>'*')"
 cQuery+= " LEFT OUTER JOIN "+RetSqlName("SZA")+" SZAD ON (SZAD.ZA_GRUPGER=CT1D.CT1_GRUPO AND SZAD.ZA_FLUXO<>'N' AND SZAD.D_E_L_E_T_<>'*')"
-cQuery+= " WHERE  CT2_FILIAL IN ('01','02','03','04','05', '20', '21', '22','23','24','25','26','27','28','29','30') AND CT2.CT2_DATA>='20070101'  AND CT2.CT2_DC IN ('1','2','3') AND CT2.CT2_TPSALD IN ('1') AND CT2.D_E_L_E_T_<>'*'"
+cQuery+= " WHERE  CT2_FILIAL IN ("+sStrFil+") AND CT2.CT2_DATA>='20070101'  AND CT2.CT2_DC IN ('1','2','3') AND CT2.CT2_TPSALD IN ('1') AND CT2.D_E_L_E_T_<>'*'"
 cQuery+= "   AND (((ISNULL(SZAC.ZA_GRUPGER,'') <> '') "
 cQuery+= "       OR (ISNULL(SZAC.ZA_GRUPGER,'') = '' AND LEFT(CT1C.CT1_CONTA,1) IN ('4','5')) )"
 cQuery+= "    OR ((ISNULL(SZAD.ZA_GRUPGER,'') <> '') "

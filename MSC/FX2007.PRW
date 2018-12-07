@@ -32,6 +32,7 @@ Return
 
 Static Function Confirma()
 	Local Ano := YEAR(DATE())+1
+	Local sAnoAt := cValToChar(YEAR(DATE()))
 	Local nHist := 10
 	Local nCnt := 0
 	
@@ -40,7 +41,7 @@ Static Function Confirma()
 	Else
 		If !File("CalcFluxo-"+cEmpAnt+".txt")              
 		
-			MsgBox("O Fluxo Gerencial 2017 vai ser processado  ...")
+			MsgBox("O Fluxo Gerencial "+sAnoAt+" vai ser processado  ...")
 	
 			/*Cria o Arquivo com as informações de Quem esta Executando*/
 			
@@ -69,7 +70,7 @@ Static Function Confirma()
 			Endif
 			FWrite(FCreate("Fluxo-"+cEmpAnt+".txt"),"Usuário: "+cUserName+Chr(13)+Chr(10)+" Data da Ultima geração do Fluxo:"+Dtoc(Date())+" - "+Time())
 		  	FErase("CalcFluxo-"+cEmpAnt+".txt")
-			MsgBox("O Fluxo Gerencial 2017 processado com sucesso.")
+			MsgBox("O Fluxo Gerencial "+sAnoAt+" processado com sucesso.")
 		Else
 			MsgBox("O Fluxo Gerencial já esta sendo processado por "+Chr(13)+Chr(10)+MemoRead("CalcFluxo"+cEmpAnt+".txt"))
 		Endif	
