@@ -461,10 +461,22 @@ Static Function Cabec(oPrint,nLinha,cAliasTemp,aDadosFor,nPgAtu,nTotPg,aDadCab)
 ***
 
 Local nXi := 0
+Local sEmp := "T"
+
+DO CASE
+	CASE cEmpAnt == "04"
+		sEmp := "M"
+	CASE cEmpAnt == "03"
+		sEmp := "L"
+	OTHERWISE
+		sEmp := "T"
+ENDCASE
+
 oPrint:EndPage()
 oPrint:StartPage() 		// Inicia uma nova pagina
 nPgAtu++
 aDadosFor := Iif(aDadosFor!=Nil,aDadosFor,{'NOME FORNECEDOR','ENDERECO','REPRESENTANTE','CONTATO','FONE','EMAIL',''})
+
 If nPgAtu == 1
 	oPrint:Box(0050,0050,750,2300) //Box cabecalho
     
@@ -517,13 +529,13 @@ If nPgAtu == 1
 	oPrint:Say(0450,1810,OemToAnsi("DATA: ")+aDadCab[2],oFontRos,100)// C7_EMISSAO
 	
 	oPrint:Line(0500,1800,0500,2300)
-	oPrint:Say(0500,1810,OemToAnsi("PROJETO: ")+aDadCab[3],oFontRos,100)//C7_ITEMCTA CTD->CTD_DESC01
+	oPrint:Say(0500,1810,OemToAnsi("FILIAL/PROJETO: ")+cFilAnt+"/"+sEmp+aDadCab[3],oFontCab,100)//C7_ITEMCTA CTD->CTD_DESC01
 	
 	oPrint:Line(0550,1800,0550,2300)
-	oPrint:Say(0550,1810,OemToAnsi("No SC: ")+aDadCab[4],oFontRos,100)//C7_ITEMCTA
+	oPrint:Say(0550,1810,OemToAnsi("No SC: ")+aDadCab[4],oFontCab,100)//C7_ITEMCTA
 	
 	oPrint:Line(0600,1800,0600,2300)
-	oPrint:Say(0600,1810,OemToAnsi("No PROPOSTA: ")+aDadCab[5],oFontRos,100)//
+	oPrint:Say(0600,1810,OemToAnsi("No PROPOSTA: ")+aDadCab[5],oFontCab,100)//
 	
 	oPrint:Line(0650,1800,0650,2300)
 	oPrint:Say(0650,1810,OemToAnsi("DATA PROPOSTA: ")+aDadCab[6],oFontCab,100)
@@ -541,7 +553,7 @@ Else
 	oPrint:Say(0185,0070,OemToAnsi("OS/OC: ")+aDadCab[1],oFontRos,100)
 	oPrint:Say(0185,0650,OemToAnsi("No SC: ")+aDadCab[4],oFontRos,100)
 	oPrint:Say(0185,1200,OemToAnsi("DATA: ")+aDadCab[2],oFontRos,100)
-	oPrint:Say(0185,1850,OemToAnsi("PROJETO: ")+aDadCab[3],oFontRos,100)
+	oPrint:Say(0185,1850,OemToAnsi("FILIAL/PROJETO: ")+cFilAnt+"/"+sEmp+aDadCab[3],oFontCab,100)
 		
 		
 	nLinha := 310
