@@ -1,5 +1,6 @@
 #Include "RwMake.ch"
 #Include "Colors.ch"
+#INCLUDE "topconn.ch"
 /*
 +-----------------------------------------------------------------------+
 ¦Programa  ¦ComGrf1    ¦ Autor ¦ Gilson Lucas          ¦Data ¦12.01.2016¦
@@ -462,6 +463,7 @@ Static Function Cabec(oPrint,nLinha,cAliasTemp,aDadosFor,nPgAtu,nTotPg,aDadCab)
 
 Local nXi := 0
 Local sEmp := "T"
+Local sNameComp := GetNameCpr(SUBSTR(aDadCab[1],3,6))
 
 DO CASE
 	CASE cEmpAnt == "04"
@@ -495,7 +497,7 @@ If nPgAtu == 1
 	oPrint:Say(0345,0070,OemToAnsi("CPNJ: ")+Iif(Len(Alltrim(SM0->M0_CGC))==14,Transform(SM0->M0_CGC,"@R 99.999.999/9999-99"),Transform(SM0->M0_CGC,"@R 999.999.999-99")),oFontRos,100)
 	oPrint:Say(0345,0780,OemToAnsi("Inscrição Municipal: ")+SM0->M0_INSC,oFontRos,100)
 	
-	oPrint:Say(0395,0070,OemToAnsi("Email: ")+GetNewpar("NM_MAILEMP","suprimentos@tsamg.com.br"),oFontRos,100)
+	oPrint:Say(0395,0070,"Comprador: "+sNameComp+"  "+OemToAnsi("Email: ")+GetNewpar("NM_MAILEMP","suprimentos@tsamg.com.br"),oFontRos,100)
 	oPrint:Say(0395,08000,OemToAnsi("Email Nota Fiscal: ")+GetNewpar("NM_MAILNF","tsamg@tsamg.com.br"),oFontRos,100)
 	oPrint:Box(0445,0050,0447,1800)// Linha serador fornecedor
 	
@@ -1004,3 +1006,25 @@ PswSeek(cIdUsrOld,.T.)
 
 RestArea(aAreaOld)
 Return(aRetAss)
+
+Static Function GetNameCpr(cNumPed)
+	sComp := ""
+	
+	cQuery:="SELECT DISTINCT SC7.C7_FILIAL,SC7.C7_NUM,C1_CODCOMP, Y1_EMAIL, SC7.R_E_C_N_O_ FROM "+RetSqlName("SC1")+" AS SC1 "
+	cQuery+=" INNER JOIN "+RetSqlName("SY1")+" AS SY1 ON SC1.C1_CODCOMP = SY1.Y1_COD"
+	cQuery+=" INNER JOIN "+RetSqlName("SC7")+" AS SC7 ON SC7.C7_NUMSC = SC1.C1_NUM AND SC1.C1_FILIAL = SC7.C7_FILIAL" 
+	cQuery+=" WHERE SY1.D_E_L_E_T_ = '' AND SC1.D_E_L_E_T_ = '' AND SC7.D_E_L_E_T_ = '' AND SC7.C7_NUM = '"+cNumPed+"'" 
+	
+	TCQUERY cQuery ALIAS "CPR" New
+	dbSelectArea("CPR")
+	
+	if !Eof()	
+		aArray := StrToKarr( CPR->Y1_EMAIL , '@')
+		aArray := StrToKarr( aArray[1] , '.')
+		sComp := Capital(aArray[1])+" "+Capital(aArray[2])
+	EndIf
+	
+	dbSelectArea("CPR")
+	dbCloseArea()
+	
+Return(sComp)
