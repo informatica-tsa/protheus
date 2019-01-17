@@ -307,18 +307,18 @@ Static Function RecCompl()
 	cData:=Left(cData,4)+'-'+SubStr(cData,5,2)+'-'+Right(cData,2)
 	//Gera Fip para as pessoas Com Recisão Complementar
 	
-	cQuery:=" SELECT DISTINCT RA_NOME,RA_CC,CTT_DESC01,RZ_MAT,CASE WHEN Z2_SUBC IS NULL THEN RA_FIPSUBC ELSE Z2_SUBC END SUBCONTA "
+	cQuery:=" SELECT DISTINCT SRA.RA_NOME,SRA.RA_CC,CTT_DESC01,RZ_MAT,CASE WHEN Z2_SUBC IS NULL THEN SRA.RA_FIPSUBC ELSE Z2_SUBC END SUBCONTA "
 	cQuery+=" FROM "+RetSqlName("SRZ")
-	cQuery+=" INNER JOIN "+RetSqlName("SRA")+" ON (RA_MAT=RZ_MAT AND RA_FILIAL=RZ_FILIAL AND RA_DEMISSA<'"+Dtos(dDataAte)+"' AND RA_DEMISSA<>'' AND SRA020.D_E_L_E_T_ = '')"
+	cQuery+=" INNER JOIN "+RetSqlName("SRA")+" AS SRA ON (SRA.RA_MAT=RZ_MAT AND SRA.RA_FILIAL=RZ_FILIAL AND SRA.RA_DEMISSA<'"+Dtos(dDataAte)+"' AND SRA.RA_DEMISSA<>'' AND SRA.D_E_L_E_T_ = '')"
 	cQuery+=" LEFT OUTER JOIN "+RetSqlName("SZ2")+" SZ2 ON (Z2_SETOR=RZ_CC AND Z2_LETRA='R' AND SZ2.D_E_L_E_T_<>'*') "
-	cQuery+=" INNER JOIN "+RetSqlName("CTT")+" CTT ON  (CTT.CTT_CUSTO=RA_CC AND CTT.CTT_FILIAL='') "
+	cQuery+=" INNER JOIN "+RetSqlName("CTT")+" CTT ON  (CTT.CTT_CUSTO=SRA.RA_CC AND CTT.CTT_FILIAL='') "
 	cQuery+=" LEFT OUTER JOIN FIPEPC ON (FIPEMPRESA = '"+SM0->M0_CODIGO+"' AND CHAPA=RZ_MAT AND FIPANOMES='"+cAnoMes+"' AND (SUBSTRING(FIPCUSTO,10,1)<>'9' OR RIGHT(FIPCUSTO,1) NOT IN ('F'))) "
 	cQuery+=" WHERE "
-	cQuery+="     RA_CC BETWEEN '"+cCCDe+"' AND '"+cCCAte+"'"
-	cQuery+=" AND RA_FILIAL BETWEEN '"+cFilde+"' AND '"+cFilAte+"'"
-	cQuery+=" AND RA_ADMISSA <='"+dtos(dDataAte)+"'"
+	cQuery+="     SRA.RA_CC BETWEEN '"+cCCDe+"' AND '"+cCCAte+"'"
+	cQuery+=" AND SRA.RA_FILIAL BETWEEN '"+cFilde+"' AND '"+cFilAte+"'"
+	cQuery+=" AND SRA.RA_ADMISSA <='"+dtos(dDataAte)+"'"
 	cQuery+=" AND CHAPA IS NULL "
-	cQuery+=" ORDER BY RA_CC,RA_NOME "
+	cQuery+=" ORDER BY SRA.RA_CC,SRA.RA_NOME "
 	
 	TcQuery cQuery Alias QREC New
 	
