@@ -311,7 +311,7 @@ Endif
 If INCLUI    //Apenas na Inclusao
    DbSelectArea("SX5")
    DbSetOrder(1)
-   cEmp:=IIf(SM0->M0_CODIGO=="03","LYNX","TSA")
+   cEmp:=IIf(SM0->M0_CODIGO=="03","LYNX",IIf(SM0->M0_CODIGO=="02","TSA","TSAMZ"))
    If DbSeek(xFilial("SX5")+"94"+cEmp)
       If RecLock("SX5",.F.)
          Replace X5_DESCRI  With SubStr(SZ1->Z1_COD,2,4)
