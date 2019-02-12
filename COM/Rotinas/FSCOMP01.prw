@@ -33,6 +33,9 @@ If SC1->(dbSeek(xFilial("SC1")+cNumSol))
 		        SC8->C8_XORCAME :=  SC1->C1_XORCAME
 		        SC8->C8_XPCO    :=  SC1->C1_XPCO 
 		        SC8->C8_XPCO1   :=  SC1->C1_XPCO1
+		        SC8->C8_CONTA   :=  SC1->C1_CONTA
+		        SC8->C8_ITEMCTA :=  SC1->C1_ITEMCTA
+		        SC8->C8_CC  	   :=  SC1->C1_CC
 		    SC8->(MsUnlock())
 		EndIf
 		SC1->(dbSkip())
