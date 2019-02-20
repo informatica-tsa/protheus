@@ -1,5 +1,7 @@
 #Include 'Protheus.ch'
 #Include 'FWMVCDef.ch'
+#include 'fileio.ch
+#include "rwmake.ch" 
 
 //-------------------------------------------------------------------------------
 /*/{Protheus.doc} FSCOMP01
@@ -14,15 +16,15 @@ Grava informacoes complementares na cotacao
 //-------------------------------------------------------------------------------
 User Function FSCOMP01()
 
-Local aAreas   := {SC8->(GetArea(),GetArea())}
+Local aAreas   := {SC8->(GetArea()),GetArea(),SC1->(GetArea())}
 Local cNumCot  := SC8->C8_NUM
 Local cNumSol  := SC8->C8_NUMSC
+Local cMsg := ""
 SC1->(dbSetOrder(1))
-SC8->(dbSetOrder(4)) //INDICE 4 = C8_FILIAL+C8_NUM+C8_IDENT+C8_PRODUTO
-
+SC8->(dbSetOrder(11)) //CRIAR INDICE CUSTOMIZADO 11 = C8_FILIAL+C8_NUM+C8_ITEMSC+C8_PRODUTO
 If SC1->(dbSeek(xFilial("SC1")+cNumSol))  
 	Do While SC1->( !Eof())
-		if(SC1->C1_NUM != cNumSol )
+		if(SC1->C1_NUM != cNumSol .Or. SC1->C1_FILIAL != xFilial("SC8") )
 			EXIT
 		EndIf
 		If SC8->(dbSeek(xFilial("SC8")+cNumCot+SC1->C1_ITEM+SC1->C1_PRODUTO))
@@ -37,6 +39,11 @@ If SC1->(dbSeek(xFilial("SC1")+cNumSol))
 		        SC8->C8_ITEMCTA :=  SC1->C1_ITEMCTA
 		        SC8->C8_CC  	   :=  SC1->C1_CC
 		    SC8->(MsUnlock())
+		    GravaLog("log-cust-cotacao-"+cEmpAnt+".log","A SOLICITACAO: "+cNumSol+" E A COTACAO: "+cNumCot+" ITEM: "+SC1->C1_ITEM+" PRODUTO: "+SC1->C1_PRODUTO+" Gravado com sucesso!")
+		Else
+			cMsg := "EXISTE DIVERGENCIA ENTRE A SOLICITACAO: "+cNumSol+" E A COTACAO: "+cNumCot+". GENTILEZA PROCURAR A CI ANTES DE SEGUIR COM O PROCESSO. ITEM: "+SC1->C1_ITEM+" PRODUTO: "+SC1->C1_PRODUTO
+			MSGALERT(cMsg)
+			GravaLog("log-cust-cotacao-"+cEmpAnt+".log",cMsg)
 		EndIf
 		SC1->(dbSkip())
 	End Do 
@@ -44,3 +51,22 @@ EndIf
 AEval(aAreas, {|x| RestArea(x)})
 
 Return Nil
+
+Static Function GravaLog(cArq,cMsg )
+ 	
+	If !File(cArq)
+		nHandle := FCreate(cArq)
+	else
+		nHandle := fopen(cArq , FO_READWRITE + FO_SHARED )
+	Endif
+
+	If nHandle == -1
+		MsgStop('Erro de abertura : FERROR '+str(ferror(),4))
+	Else
+		FSeek(nHandle, 0, FS_END)         // Posiciona no fim do arquivo
+		FWrite(nHandle, Dtoc(Date())+" - "+Time()+" : "+cUserName+" : "+cMsg+Chr(13)+Chr(10)) // Insere texto no arquivo
+		fclose(nHandle)                   // Fecha arquivo
+	Endif
+	
+ 
+return
