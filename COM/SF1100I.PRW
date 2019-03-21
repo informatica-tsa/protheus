@@ -26,6 +26,7 @@ Local aAliasSD1:={SD1->(IndexOrd()),SD1->(Recno())}
 Local aAliasSA2:={SA2->(IndexOrd()),SA2->(Recno())}
 Local aAliasSA6:={SA6->(IndexOrd()),SA6->(Recno())}
 Local aAliasSF1:={SF1->(IndexOrd()),SF1->(Recno())}
+Local aAliasSFT:={SFT->(IndexOrd()),SFT->(Recno())}
 Local nVretIss := 0
 Local nVretPis := 0
 Local nVretCof := 0
@@ -127,10 +128,28 @@ EndIf
 dbSelectArea("SF1")
 If RecLock("SF1",.F.)
 	Replace SF1->F1_DTENT   With SF1->F1_DTDIGIT
-	If SF1->F1_EMISSAO > GetMv("MV_ULMES")
+	If SF1->F1_EMISSAO > GetMv("MV_ULMES") //data de fechamento do estoque
 		Replace SF1->F1_DTDIGIT With SF1->F1_EMISSAO
+
+		dbSelectArea("SFT")
+		dbSetOrder(6)
+		dbSeek(xFilial("SFT")+"E"+SF1->F1_DOC+SF1->F1_SERIE)
+		While (!Eof()) .And. SF1->F1_FORNECE = SFT->FT_CLIEFOR  .And. SF1->F1_LOJA = SFT->FT_LOJA  .And. SF1->F1_FILIAL = SFT->FT_FILIAL .And. SF1->F1_DOC = SFT->FT_NFISCAL  .And. SF1->F1_SERIE = SFT->FT_SERIE .And. SFT->FT_TIPOMOV = 'E'  
+			If RecLock ("SFT", .F.)
+				Replace FT_ENTRADA With SF1->F1_EMISSAO
+			EndIf
+			MsUnlock()
+			
+			dbSkip()
+		EndDo
+		
+		dbSelectArea("SF3")
+		If RecLock ("SF3", .F.)
+			Replace F3_ENTRADA With SF1->F1_EMISSAO
+		EndIf
+		
 	EndIf
-	//   Replace SF1->F1_DTDIGIT With SF1->F1_EMISSAO
+	
 	Replace SF1->F1_VRETISS With nVretIss
 	Replace SF1->F1_VRETPIS With nVretPis
 	Replace SF1->F1_VRETCOF With nVretCof
@@ -141,6 +160,7 @@ If RecLock("SF1",.F.)
 	EndIf
 	MsUnlock()
 EndIf
+
 
 lContAut:=.t. //Chama tela de contabilizacao ao sair da mata103
 If Empty(dDataDe) .Or. SF1->F1_DTDIGIT < dDataDe
@@ -183,6 +203,10 @@ DbGoTo(aAliasSF1[2])
 DbSelectArea("SD1")
 DbSetOrder(aAliasSD1[1])
 DbGoTo(aAliasSD1[2])
+
+DbSelectArea("SFT")
+DbSetOrder(aAliasSFT[1])
+DbGoTo(aAliasSFT[2])
 
 DbSelectArea(aAliasAnt[1])
 DbSetOrder(aAliasAnt[2])
