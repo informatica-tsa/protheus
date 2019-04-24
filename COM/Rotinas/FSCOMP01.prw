@@ -18,16 +18,14 @@ User Function FSCOMP01()
 
 Local aAreas   := {SC8->(GetArea()),GetArea(),SC1->(GetArea())}
 Local cNumCot  := SC8->C8_NUM
-Local cNumSol  := SC8->C8_NUMSC
+Local cNumFil  := SC8->C8_FILIAL
 Local cMsg := ""
 SC1->(dbSetOrder(1))
-SC8->(dbSetOrder(11)) //CRIAR INDICE CUSTOMIZADO 11 = C8_FILIAL+C8_NUM+C8_ITEMSC+C8_PRODUTO
-If SC1->(dbSeek(xFilial("SC1")+cNumSol))  
-	Do While SC1->( !Eof())
-		if(SC1->C1_NUM != cNumSol .Or. SC1->C1_FILIAL != xFilial("SC8") )
-			EXIT
-		EndIf
-		If SC8->(dbSeek(xFilial("SC8")+cNumCot+SC1->C1_ITEM+SC1->C1_PRODUTO))
+SC8->(dbSetOrder(4))
+SC8->(dbSeek(xFilial("SC8")+cNumCot))
+
+	Do While SC8->( !Eof() .AND. SC8->C8_FILIAL = cNumFil .AND. SC8->C8_NUM = cNumCot  )
+		If SC1->(dbSeek(xFilial("SC1")+SC8->C8_NUMSC+SC8->C8_ITEMSC))
 		    SC8->(RecLock("SC8",.F.))
 		        SC8->C8_XCO     :=  SC1->C1_XCO
 		        SC8->C8_XCLASSE :=  SC1->C1_XCLASSE     
@@ -39,15 +37,16 @@ If SC1->(dbSeek(xFilial("SC1")+cNumSol))
 		        SC8->C8_ITEMCTA :=  SC1->C1_ITEMCTA
 		        SC8->C8_CC  	   :=  SC1->C1_CC
 		    SC8->(MsUnlock())
-		    GravaLog("log-cust-cotacao-"+cEmpAnt+".log","A SOLICITACAO: "+cNumSol+" E A COTACAO: "+cNumCot+" ITEM: "+SC1->C1_ITEM+" PRODUTO: "+SC1->C1_PRODUTO+" Gravado com sucesso!")
+		    GravaLog("log-cust-cotacao-"+cEmpAnt+".log","A SOLICITACAO: "+SC8->C8_NUMSC+" E A COTACAO: "+cNumCot+" ITEM: "+SC1->C1_ITEM+" PRODUTO: "+SC1->C1_PRODUTO+" Gravado com sucesso!")
 		Else
-			cMsg := "EXISTE DIVERGENCIA ENTRE A SOLICITACAO: "+cNumSol+" E A COTACAO: "+cNumCot+". GENTILEZA PROCURAR A CI ANTES DE SEGUIR COM O PROCESSO. ITEM: "+SC1->C1_ITEM+" PRODUTO: "+SC1->C1_PRODUTO
+			cMsg := "EXISTE DIVERGENCIA ENTRE A SOLICITACAO: "+SC8->C8_NUMSC+" E A COTACAO: "+cNumCot+". GENTILEZA PROCURAR A CI ANTES DE SEGUIR COM O PROCESSO. ITEM: "+SC8->C8_ITEMSC+" PRODUTO: "+SC8->C8_PRODUTO
 			MSGALERT(cMsg)
 			GravaLog("log-cust-cotacao-"+cEmpAnt+".log",cMsg)
 		EndIf
-		SC1->(dbSkip())
-	End Do 
-EndIf
+		SC8->(dbSkip())
+	End Do
+	 
+
 AEval(aAreas, {|x| RestArea(x)})
 
 Return Nil
