@@ -26,6 +26,7 @@ Local aAliasSD1:={SD1->(IndexOrd()),SD1->(Recno())}
 Local aAliasSA2:={SA2->(IndexOrd()),SA2->(Recno())}
 Local aAliasSA6:={SA6->(IndexOrd()),SA6->(Recno())}
 Local aAliasSF1:={SF1->(IndexOrd()),SF1->(Recno())}
+Local aAliasSF3:={SF3->(IndexOrd()),SF3->(Recno())}
 Local aAliasSFT:={SFT->(IndexOrd()),SFT->(Recno())}
 Local nVretIss := 0
 Local nVretPis := 0
@@ -125,29 +126,41 @@ If SF1->F1_TIPO <> "D"
 EndIf
 
 //Atualiza cabeçalho da NF com os valores a serem retidos de ISS, PIS, COFINS e CSLL
+//SF1 - CABECALHO DAS NF’S DE ENTRADA
 dbSelectArea("SF1")
 If RecLock("SF1",.F.)
-	Replace SF1->F1_DTENT   With SF1->F1_DTDIGIT
-	If SF1->F1_EMISSAO > GetMv("MV_ULMES") //data de fechamento do estoque
-		Replace SF1->F1_DTDIGIT With SF1->F1_EMISSAO
 
+	Replace SF1->F1_DTENT   With SF1->F1_DTDIGIT
+	
+	If SF1->F1_EMISSAO > GetMv("MV_ULMES") //data de fechamento do estoque
+		
+		Replace SF1->F1_DTDIGIT With SF1->F1_EMISSAO
+		
+		// SFT - ITENS DOS LIVROS FISCAIS
 		dbSelectArea("SFT")
-		dbSetOrder(6)
-		dbSeek(xFilial("SFT")+"E"+SF1->F1_DOC+SF1->F1_SERIE)
+		dbSetOrder(1)
+		dbSeek(xFilial("SFT")+"E"+SF1->F1_SERIE+SF1->F1_DOC+SF1->F1_FORNECE+SF1->F1_LOJA)
 		While (!Eof()) .And. SF1->F1_FORNECE = SFT->FT_CLIEFOR  .And. SF1->F1_LOJA = SFT->FT_LOJA  .And. SF1->F1_FILIAL = SFT->FT_FILIAL .And. SF1->F1_DOC = SFT->FT_NFISCAL  .And. SF1->F1_SERIE = SFT->FT_SERIE .And. SFT->FT_TIPOMOV = 'E'  
 			If RecLock ("SFT", .F.)
-				Replace FT_ENTRADA With SF1->F1_EMISSAO
+				Replace SFT->FT_ENTRADA With SF1->F1_EMISSAO
 			EndIf
 			MsUnlock()
 			
 			dbSkip()
 		EndDo
-		
+
+		// SF3 - LIVROS FISCAIS
 		dbSelectArea("SF3")
-		If RecLock ("SF3", .F.)
-			Replace F3_ENTRADA With SF1->F1_EMISSAO
-		EndIf
-		
+		dbSetOrder(4)
+		dbSeek(xFilial("SF3")+SF1->F1_FORNECE+SF1->F1_LOJA+SF1->F1_DOC+SF1->F1_SERIE)
+		While (!Eof()) .And. SF1->F1_FORNECE = SF3->F3_CLIEFOR  .And. SF1->F1_LOJA = SF3->F3_LOJA  .And. SF1->F1_FILIAL = SF3->F3_FILIAL .And. SF1->F1_DOC = SF3->F3_NFISCAL  .And. SF1->F1_SERIE = SF3->F3_SERIE
+			If RecLock ("SF3", .F.)
+				Replace SF3->F3_ENTRADA With SF1->F1_EMISSAO
+			EndIf
+			MsUnlock()
+			
+			dbSkip()
+		EndDo
 	EndIf
 	
 	Replace SF1->F1_VRETISS With nVretIss
@@ -155,6 +168,7 @@ If RecLock("SF1",.F.)
 	Replace SF1->F1_VRETCOF With nVretCof
 	Replace SF1->F1_VRETCSL With nVretCsl
 	Replace SF1->F1_VRETSES With nVretSes
+	
 	If !EMPTY(SF1->F1_DUPL)
 		Replace SF1->F1_HISTORI  With Upper(cHistF1)
 	EndIf
@@ -199,6 +213,10 @@ DbGoTo(aAliasSE2[2])
 DbSelectArea("SF1")
 DbSetOrder(aAliasSF1[1])
 DbGoTo(aAliasSF1[2])
+
+DbSelectArea("SF3")
+DbSetOrder(aAliasSF3[1])
+DbGoTo(aAliasSF3[2])
 
 DbSelectArea("SD1")
 DbSetOrder(aAliasSD1[1])
