@@ -17,10 +17,7 @@
 #include "rwmake.ch"        // incluido pelo assistente de conversao do AP5 IDE em 25/06/01
 #Include "TopConn.ch"
 User Function GERESTI()
-	*************************************************************************************************
-	*
-	*
-	*******     
+  
 	Local cPerg:="ESTSZB" 
 	Local aPerg:={}
 	
@@ -60,20 +57,17 @@ Return
 
 
 Static Function Confirma()
-	************************************************************************************************
-	* Cancela os lançamentos do periodo, somente tipo = ZZ
-	*
-	******
+
 	Processa( {|| IMPSZB() },"Importando Registros da Tabela SZB para a SZ0","Alterando Registro ..." )
+	
 Return()
 
 
 
 Static Function ImpSZB()
-	****************************************************************************************
-	* Rotina para importar dados do arquivo SZB para ao SZ0
-	*
-	****
+
+	// Rotina para importar dados do arquivo SZB para ao SZ0
+
 	Local cQuery :=""
 	Local cPerg:="ESTSZB"
 	Local cRevIni:=""
@@ -93,12 +87,8 @@ Static Function ImpSZB()
 	IncProc("Excluindo Registros do Fluxo ")
 	
 	cQuery  := " DELETE FROM "+RetSqlName("SZ0")
-	//cQuery  += " WHERE Z0_LINHA ='ZZ' AND Z0_FILIAL = '"+xFilial("SZ0")+"' AND"
-	//cQuery  += " WHERE Z0_LINHA ='ZZ' AND Z0_FILIAL IN ('01','02') AND" //09/12/11
-	//cQuery  += "       Z0_REVISAO<>'' AND " //09/12/11
-	//cQuery  += "       Z0_REVISAO BETWEEN '"+MV_PAR01+"' AND '"+MV_PAR02+"' AND Z0_VEICULO != 'S' " //09/12/11
 	cQuery  += " WHERE Z0_LINHA in ('ZZ','PC', 'EM') AND Z0_FILIAL IN (" + cListFil + ") AND"
-	cQuery  += "       Z0_REVISAO<>'' AND "
+	cQuery  += "       Z0_REVISAO <> '' AND "
 	cQuery  += "       Z0_REVISAO BETWEEN '"+MV_PAR01+"' AND '"+MV_PAR02+"' AND Z0_VEICULO != 'S' "
 	
 	TCSQLExec(cQuery)
@@ -113,7 +103,7 @@ Static Function ImpSZB()
 		
 	   IncProc("Importando Revisão.: "+SZB->ZB_REVISAO)
 	              
-	   	//-- Alteração para tratar o CT1_GRUPO até 30/09/2013 e CT1_GRUPO2 a partir de 01/10/2013
+	   	//Alteração para tratar o CT1_GRUPO até 30/09/2013 e CT1_GRUPO2 a partir de 01/10/2013
 	   	if (SZB->ZB_ANO <= '2013' )
 		   	dbSelectArea("CT1")         
 		   	dbSetOrder(4)  // CT1_FILIAL + CT1_GRUPO		
@@ -216,10 +206,9 @@ Return
 	
 
 Static Function FGravaSz0(cMesRefe)
-	****************************************************************************************
-	* Gravacao no SZ0
-	*
-	****
+	
+	// Gravacao no SZ0
+
 	
 	cSeq   :=  StrZero(Val(cSeq)+1,2)
 	 
@@ -252,18 +241,6 @@ Static Function FGravaSz0(cMesRefe)
 			cConta := CT1->CT1_CONTA
 		endif                                                                                                                                
 		
-	/*	// Ajuste para acertar a conta a ser exibida quando o grupo for '000077' e '000078'   - Simone - 10/2013
-		IF (Alltrim(CT1->CT1_GRUPO2) == '000077')
-			cConta := '4116010006'
-		else
-			cConta := CT1->CT1_CONTA
-		endif     
-		IF (Alltrim(CT1->CT1_GRUPO2) == '000078')
-			cConta := '4116010008'
-		else
-			cConta := CT1->CT1_CONTA
-		endif	
-	*/
 	endif
 	
 	DbSelectArea("SZ0")
@@ -290,99 +267,9 @@ Static Function FGravaSz0(cMesRefe)
 	MsUnlock()
 	
 	DbSelectArea("SZ0") 
-	// Registro já esta gravado e agora será contas de encargos,Provisões, Licenças e Auxilios
-//	If cEmpAnt<>'02' .And. Left(SZ0->Z0_CONTA,4)>='3121' .And. Left(SZ0->Z0_CONTA,4)<='3124'
-	If cEmpAnt = '01' .And. Left(SZ0->Z0_CONTA,4)>='3121' .And. Left(SZ0->Z0_CONTA,4)<='3124'
-		RegToMemory("SZ0",.F.)
-		aRatDesp:={}
-		Aadd(aRatDesp,{'000095',0.3630})
-		Aadd(aRatDesp,{'000096',0.2891})
-		Aadd(aRatDesp,{'000097',0.1355})
-		For nXi:=1 To Len(aRatDesp)
-			If RecLock("SZ0",.T.)
-				Replace  Z0_FILIAL  With M->Z0_FILIAL,;
-							Z0_LINHA   With M->Z0_LINHA,;
-							Z0_DATA    With M->Z0_DATA,;
-							Z0_HIST    With M->Z0_HIST,;
-							Z0_DTVENC  With M->Z0_DTVENC,;
-							Z0_LOTE    With M->Z0_LOTE,;
-							Z0_DOC     With M->Z0_DOC,;
-							Z0_VALOR   With (M->Z0_VALOR*aRatDesp[nXi,2]),;
-							Z0_DTCAIXA With M->Z0_DTCAIXA,;
-							Z0_DTREF   With M->Z0_DTREF,;
-							Z0_CONTA   With M->Z0_CONTA,;
-							Z0_CC      With M->Z0_CC,;
-							Z0_DESC2   With M->Z0_DESC2,;
-				            Z0_CUSTO   With M->Z0_CUSTO,;
-							Z0_RECEITA With M->Z0_RECEITA,;
-							Z0_GRUPGER With aRatDesp[nXi,1],;
-							Z0_DTLANC  With ddatabase
-				MsUnlock()
-	   		//Faz a gravação dos campos de cadastro
-			Endif
-		Next nXi
-	Endif          
 	
 Return()
       
-/******************************************************************************
- * Realiza a leitura dos valores orçados da Tabela AK2 e salva na SZ0 para or-
- * çamentos realizados a partir de Dez/2013
- *****************************************************************************/
-/*Static Function FGrvPCO()
-	cxEnter := chr(10) + chr(13)
-                                                   
-	cQry := ' select * from ' + RetSqlName('AK2') + ' AK2A ' + cxEnter
-	cQry += ' where AK2A.AK2_VERSAO = (Select Max(AK2_VERSAO) ' + cxEnter 
-	cQry += ' 							from ' + RetSqlName('AK2') + " AK2B " + cxEnter 
-	cQry += ' 							where AK2A.AK2_ORCAME = AK2B.AK2_ORCAME AND AK2A.AK2_FILIAL = AK2B.AK2_FILIAL AND AK2B.D_E_L_E_T_ <> '*' ) ' + cxEnter 
-	cQry += '								and AK2A.AK2_PERIOD >='20131201' AND AK2A.D_E_L_E_T_ <> '*' "
-	//cQry := 'Select * from ' + RetSqlName('AK2') + ' where  AK2_VERSAO = (Select Max(AK2_VERSAO) from ' + RetSqlName('AK2') + ") and AK2_PERIOD >='20131201' "
-	
-	bQuery  := {|| If(Select("QAK2") > 0, QAK2->(dbCloseArea()), Nil), dbUseArea(.T.,"TOPCONN",TCGENQRY(,,cQry),"QAK2",.F.,.T.), dbSelectArea("QAK2"), QAK2->(dbGoTop()) }
-	Eval(bQuery)                                                                                                                                                          
-	
-	Count To nQtdReg
-	
-	QAK2->(dbGoTop())
-	ProcRegua(nQtdReg)
-	IncProc("Processando Estimado PCO (Tabela AK2)")
-	    
-	while(!QAK2->(Eof()))
-		
-     	IncProc("Processando Estimado PCO (Tabela AK2)")
-		cSeq   := StrZero(Val(cSeq)+1,2)
-		cSetor := Posicione("SZ2",3,Xfilial("cCusto")+Alltrim(QAK2->AK2_CC),"Z2_SETOR")
-		nValor := (-1) * QAK2->AK2_VALOR
-		
-		DbSelectArea("SZ0")
-		Reclock("SZ0",.T.)
-		Replace Z0_FILIAL 	With QAK2->AK2_FILIAL	,;
-		        Z0_LINHA 	With "ZZ"        	,;
-		        Z0_HIST 	With "ESTIMADO AK2"	,;
-		        Z0_LOTE 	With "9800"      	,;
-		        Z0_DOC 	 	With "9800"+cSeq 	,;
-		        Z0_VALOR 	With nValor 		,;
-		        Z0_CONTA 	With QAK2->AK2_CO	,;  
-		        Z0_CC 		With QAK2->AK2_CC 	,;
-		        Z0_DESC2	With QAK2->AK2_DESCRI ,;
-		        Z0_DTREF 	With SubStr(QAK2->AK2_PERIOD, 5,2) +"/"+ SubStr(QAK2->AK2_PERIOD, 3,2) ,;
-		        Z0_DATA 	With "" 		,;
-		        Z0_DTCAIXA 	With ""   		,;
-		        Z0_DTVENC  	With ""   		,;  
-		        Z0_GRUPGER 	With QAK2->AK2_OPER ,; 
-		        Z0_CUSTO   	With Iif(nValor < 0,nValor,0) ,;
-		        Z0_RECEITA 	With Iif(nValor > 0,nValor,0) ,;
-		        Z0_Revisao 	With MV_PAR02	,;
-		        Z0_DTLANC  	With ddatabase,;
-		        Z0_SETORIG 	With cSetor
-		MsUnlock()
-		
-		QAK2->(DbSkip())
-	enddo
-Return
-*/
-
 /******************************************************************************
  * Realiza a leitura dos valores orçados da Tabela AKD e salva na SZ0 para or-
  * çamentos realizados a partir de Dez/2013           
@@ -392,7 +279,6 @@ Return
  *****************************************************************************/
 Static Function FGrvPCO()
 	cxEnter := chr(10) + chr(13)         
-	aReproc := {}
                                                    
 	cQry := " SELECT * 
 	cQry += " FROM " + RetSqlName('AKD') + " AKD "
@@ -483,110 +369,7 @@ Static Function FGrvPCO()
 		MsUnlock()
 		
 		QAKD->(DbSkip())
-	enddo                                                                                                                                                    
-	          
-	/* Reprocessa os pedidos para que abata do orçamento no mês da emissão para o fluxo, uma vez que o mesmo foi adicionado no fluxo como 'Empenhado' no mês de entrega, 
-	 * comprometendo orçamento de entrega.
-	 * // Cancelado com a orientação do Rodrigo(CN) em abater os empenhados dos Orçados no mes corrente para resolver este mesmo propósito
-	for i:= 1 to Len (aReproc)             
-     	IncProc("Processando Empenhados PCO (Tipo = 'PC')")
-     	ProcessMessage()
-
-		cChave := Substr(aReproc[i][7], 4)
-		cFil := SubStr(cChave, 01, 2) 
-		cNum := SubStr(cChave, 03, 6)
-		cFor := SubStr(cChave, 09, 6)
-		cLoj := SubStr(cChave, 15, 2)                                                                 
-		nVal := aReproc[i][8]                          
-		nValor := (-1 * nVal)
-	
-		cQry := " select * from " + RetSqlName("SC8")  
-		cQry += " WHERE C8_FILIAL = '" + cFil + "' AND C8_NUM = '" + cNum + "'" + cxEnter
-		cQry += " 	AND C8_FORNECE = '" + cFor + "'" + cxEnter
-		cQry += " 	AND C8_LOJA = '" + cLoj + "'" + cxEnter
-		
-		bQuery  := {|| If(Select("QSC8") > 0, QSC8->(dbCloseArea()), Nil), dbUseArea(.T.,"TOPCONN",TCGENQRY(,,cQry),"QSC8",.F.,.T.), dbSelectArea("QSC8"), QSC8->(dbGoTop()) }
-		Eval(bQuery)
-		
-		if !QSC8->(Eof())
-			cMesRef := SubStr(QSC8->C8_EMISSAO, 5, 2) + "/" + SubStr(QSC8->C8_EMISSAO, 3, 2) 
-			
-			//Agora Procura por um orçamento na SZ0 no mes de emissão, do mesmo CO e CC e Grupo Gerencial para realizar o abatimento
-			cQry := " Select * from " + RetSqlName("SZ0") 
-			cQry += " WHERE Z0_FILIAL = '" + cFil + "' AND Z0_LINHA = 'ZZ'" + cxEnter
-			cQry += " 	AND Z0_DTREF = '" + cMesRef + "'" + cxEnter
-			cQry += " 	AND Z0_CONTA = '" + QSC8->C8_XCO + "'" + cxEnter
-			cQry += " 	AND Z0_CC 	 = '" + QSC8->C8_CC + "'" + cxEnter
-			cQry += "	AND Z0_GRUPGER = '" + QSC8->C8_XOPER + "'" + cxEnter
-			cQry += "	AND Z0_CODPLA = '" + QSC8->C8_XORCAME + "'" + cxEnter   
-			cQry += "	AND Z0_REVISAO = '" + MV_PAR02 + "'"
-			cQry += "	AND D_E_L_E_T_ = ''"
-                	    
-			bQuery  := {|| If(Select("QSZ0") > 0, QSZ0->(dbCloseArea()), Nil), dbUseArea(.T.,"TOPCONN",TCGENQRY(,,cQry),"QSZ0",.F.,.T.), dbSelectArea("QSZ0"), QSZ0->(dbGoTop()) }
-			Eval(bQuery)
-            //nRs := TcSqlExec(cQry)                   
-            
-            if !QSZ0->(Eof())            
-	            cSeq   := StrZero(Val(cSeq)+1,2)
-	            
-	            // Lançamento Empenho
-	       		DbSelectArea("SZ0")
-				Reclock("SZ0",.T.)
-				Replace Z0_FILIAL 	With cFil 		,;
-				        Z0_LINHA 	With "PC"     	,; // lançamento do empenho
-				        Z0_HIST 	With "EMPENHADO AKD " + alltrim(aReproc[i][6])	,;
-				        Z0_LOTE 	With "9800"      	,;
-				        Z0_DOC 	 	With "9800"+cSeq 	,;
-				        Z0_VALOR 	With nValor 		,; // lançamento valor negativo
-				        Z0_CONTA 	With aReproc[i][2]	,;  
-				        Z0_CC 		With aReproc[i][3] 	,;
-				        Z0_DESC2	With alltrim(aReproc[i][6]),;
-				        Z0_DTREF 	With SubStr(aReproc[i][10], 5,2) +"/"+ SubStr(aReproc[i][10], 3,2) ,;
-				        Z0_DATA 	With "" 		,;
-				        Z0_DTCAIXA 	With ""   		,;
-				        Z0_DTVENC  	With ""   		,;  
-				        Z0_GRUPGER 	With aReproc[i][4] ,; 
-				        Z0_CUSTO   	With Iif(nValor < 0, nValor,0) ,;
-				        Z0_RECEITA 	With Iif(nValor > 0, nValor,0) ,;
-				        Z0_Revisao 	With MV_PAR02	,;
-				        Z0_DTLANC  	With ddatabase	,;
-				        Z0_SETORIG 	With aReproc[i][11]	,;
-				        Z0_CODPLA	With aReproc[i][9]
-				MsUnlock()  
-				
-				// Lançamento Baixa Empenho
-	       		DbSelectArea("SZ0")
-				Reclock("SZ0",.T.)
-				Replace Z0_FILIAL 	With cFil 		,;
-				        Z0_LINHA 	With "ZZ"     	,;
-				        Z0_HIST 	With "GERESTI - BAIXA ORCAMENTO EMPENHO " + alltrim(aReproc[i][6])	,;
-				        Z0_LOTE 	With "9800"      	,;
-				        Z0_DOC 	 	With "9800"+cSeq 	,;
-				        Z0_VALOR 	With nVal 			,; // Inserindo valor positivo para 'abater' do orçamento
-				        Z0_CONTA 	With aReproc[i][2]	,;  
-				        Z0_CC 		With aReproc[i][3] 	,;
-				        Z0_DESC2	With alltrim(aReproc[i][6]),;
-				        Z0_DTREF 	With cMesRef ,;
-				        Z0_DATA 	With "" 		,;
-				        Z0_DTCAIXA 	With ""   		,;
-				        Z0_DTVENC  	With ""   		,;  
-				        Z0_GRUPGER 	With aReproc[i][4] ,; 
-				        Z0_CUSTO   	With Iif(nVal < 0, nVal ,0) ,;
-				        Z0_RECEITA 	With Iif(nVal > 0, nVal ,0) ,;
-				        Z0_Revisao 	With MV_PAR02	,;
-				        Z0_DTLANC  	With ddatabase	,;
-				        Z0_SETORIG 	With aReproc[i][11]	,;
-				        Z0_CODPLA	With aReproc[i][9]
-				MsUnlock()  
-			endif
-				 
-			QSZ0->(DbCloseArea())
-			QAKD->(DbSkip())
-		endif
-		
-		QSC8->(DbCloseArea())
-	next
-		 */
+	enddo                                                                                                                                                    	          
 
 Return
 
@@ -615,74 +398,25 @@ Static Function FGrvSZE()
 		cCount := Soma1(cCount)
 		cDatRef := SubStr(SZE->ZE_REF,1,2)+"/"+SubStr(SZE->ZE_REF,-2)
 			
-/*		_cAlias := "TMP_PESQ"
-				
-		if select(_cAlias) <> 0
-			(_cAlias)->(dbCloseArea())
-		endif 
-		
-		_cQuery := " SELECT * FROM "+RetSqlName("SZ0")
-		_cQuery += " WHERE Z0_FILIAL = '"+SZE->ZE_FILIAL+"' " 
-		_cQuery += " AND Z0_LINHA = 'ZZ' " 
-		_cQuery += " AND Z0_CC = '"+SZE->ZE_CC +"' " 
-		_cQuery += " AND Z0_DTREF = '"+cDatRef+"' "  
-		_cQuery += " AND Z0_HIST = '"+cHist+"' " 
-		_cQuery += " AND "+RetSqlName("SZ0")+".D_E_L_E_T_  = '' "
-			
-		dbUseArea(.T.,"TOPCONN",TCGenQry(,,ChangeQuery(_cQuery)),_cAlias, .T., .F.)
-		
-		IF (_cAlias)->(eof())
-			lCria := .T.
-		ELSE
-			lCria := .F.
-		ENDIF
-		
-		if select(_cAlias) <> 0
-			(_cAlias)->(dbCloseArea())
-		endif */
 	
 		RecLock('SZ0',lCria)//FLUXO ECONOMICO               
 			Replace Z0_FILIAL  with SZE->ZE_FILIAL // Filial (C,  2,  0)* Campo não usado
 			Replace Z0_LINHA   with "ZZ" // Linha Doc. (C,  2,  0)
 			Replace Z0_HIST    with cHist // Historico (C, 40,  0)
-			//Replace Z0_LOTE    with CAMPO04 // Lote (C,  6,  0)
 			Replace Z0_DOC     with cDoc // Documento (C,  9,  0)
 			Replace Z0_VALOR   with SZE->ZE_VALOR // Valor (N, 14,  2)
 			Replace Z0_CONTA   with cCONTA // Conta (C, 20,  0)
 			Replace Z0_CC      with SZE->ZE_CC // Centro Custo (C, 20,  0)
 			Replace Z0_DTREF   with cDatRef // Dt. Refer. (C,  5,  0)
-			//Replace Z0_DATA    with CAMPO10 // Data (C,  5,  0)
-			//Replace Z0_DTCAIXA with CAMPO11 // Dt. Caixa (C,  5,  0)
-			//Replace Z0_DTVENC  with CAMPO12 // Vencto (C,  5,  0)
-			//Replace Z0_CUSTO   with CAMPO13 // Custo (N, 14,  2)
-			//Replace Z0_RECEITA with CAMPO14 // Receita (N, 14,  2)
 			Replace Z0_REVISAO with MV_PAR02 // REVISAO (C,  6,  0)
-			//Replace Z0_DTRF1   with CAMPO16 // DATA REF (C,  4,  0)
 			Replace Z0_SITUACA with "ESTIMADO" // Situacao (C, 45,  0)
-			//Replace Z0_CLASSIF with CAMPO18 // CLASSIF (C, 45,  0)
-			//Replace Z0_GRUPO   with CAMPO19 // GRUPO_GERAL (C, 45,  0)
-			//Replace Z0_DRE     with CAMPO20 // DRE (C, 15,  0)
 			Replace Z0_DTLANC  with Date() // Dt Lancament (D,  8,  0)
 			Replace Z0_GRUPGER with cGRUPGER // Grupo Gerenc (C,  6,  0)
 			Replace Z0_VRPREV  with SZE->ZE_VALOR // Vlr Prev (N, 12,  2)
 			Replace Z0_DESC01  with POSICIONE("CTT",1,xFilial("CTT")+SZE->ZE_CC,"CTT_DESC01") // Desc. CCusto (C, 40,  0)
 			Replace Z0_FATOR   with POSICIONE("SZA",1,xFilial("SZA")+cGRUPGER,"ZA_FATOR") // Fator (N, 12,  2)
 			Replace Z0_DESGER  with POSICIONE("SZA",1,xFilial("SZA")+cGRUPGER,"ZA_DESCRI") // Desc Grupo (C, 40,  0)
-			//Replace Z0_FATORE  with CAMPO27 // Fator Receit (N, 12,  2)
-			//Replace Z0_CLIENTE with CAMPO28 // Cliente (C, 40,  0)
-			//Replace Z0_SITUAC  with CAMPO29 // Sit. Contrat (C,  1,  0)
-			//Replace Z0_PROP    with CAMPO30 // Prop (C, 20,  0)
-			//Replace Z0_OS      with CAMPO31 // os (C,  2,  0)
-			//Replace Z0_SETOR   with CAMPO32 // Setor (C,  5,  0)
-			//Replace Z0_DESCSET with CAMPO33 // Setor (C, 40,  0)
 			Replace Z0_CODCONT with POSICIONE("CTT",1,xFilial("CTT")+SZE->ZE_CC,"CTT_CODCON") // CodCont (C,  5,  0)
-			//Replace Z0_SUBCTA  with CAMPO35 // SubCta (C,  6,  0)
-			//Replace Z0_SETORIG with CAMPO36 // Setor Origem (C,  5,  0)
-			//Replace Z0_VEICULO with CAMPO37 // Veiculos (C,  1,  0)
-			//Replace Z0_USERLGI with CAMPO38 // Log de Inclu (C, 17,  0)* Campo não usado
-			//Replace Z0_USERLGA with CAMPO39 // Log de Alter (C, 17,  0)* Campo não usado
-			//Replace Z0_DESC2   with CAMPO40 // Desc.Despesa (C, 40,  0)
-			//Replace Z0_CODPLA  with CAMPO41 // Planilha (C, 15,  0)
 		MsUnLock('SZ0') 
 		
 		SZE->(dbSkip())

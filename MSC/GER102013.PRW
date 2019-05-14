@@ -228,41 +228,7 @@ While !Eof()
 						Replace Z0_RECEITA With ABS(nValor)      //N, 14, 2
 					EndIf
 					MsUnlock()
-					
-					// Registro já esta gravado e agora será contas de encargos,Provisões, Licenças e Auxilios
-					
-					
-					If cEmpAnt = '01'  .And. ((cConta>='5111010001' .And. cConta<='5111010008') .OR. (cConta>='4111010001' .And. cConta<='4111010008'))
-						RegToMemory("SZ0",.F.)
-						aRatDesp:={}
-						Aadd(aRatDesp,{'000095',0.3630})
-						Aadd(aRatDesp,{'000096',0.2891})
-						Aadd(aRatDesp,{'000097',0.1355})
-						
-						For nXi:=1 To Len(aRatDesp)
-							If RecLock("SZ0",.T.)
-								Replace  Z0_FILIAL  With M->Z0_FILIAL,;
-								Z0_LINHA   With M->Z0_LINHA,;
-								Z0_DATA    With M->Z0_DATA,;
-								Z0_HIST    With M->Z0_HIST,;
-								Z0_DTVENC  With M->Z0_DTVENC,;
-								Z0_LOTE    With M->Z0_LOTE,;
-								Z0_DOC     With M->Z0_DOC,;
-								Z0_VALOR   With (M->Z0_VALOR*aRatDesp[nXi,2]),;
-								Z0_DTCAIXA With M->Z0_DTCAIXA,;
-								Z0_DTREF   With M->Z0_DTREF,;
-								Z0_CONTA   With M->Z0_CONTA,;
-								Z0_CC      With M->Z0_CC,;
-								Z0_SETORIG With M->Z0_SETORIG,;
-								Z0_CUSTO   With M->Z0_CUSTO,;
-								Z0_RECEITA With M->Z0_RECEITA,;
-								Z0_GRUPGER With aRatDesp[nXi,1] ,;
-								Z0_DTLANC  with CT2->CT2_DATA
-								MsUnlock()
-								//Faz a gravação dos campos de cadastro
-							Endif
-						Next nXi
-					Endif
+
 				EndIf
 			EndIf
 			

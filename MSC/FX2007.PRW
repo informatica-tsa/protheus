@@ -36,8 +36,8 @@ Static Function Confirma()
 	Local nHist := 10
 	Local nCnt := 0
 	
-	If cEmpAnt # '02' .and. cEmpAnt # '03'
-		MsgBox("O Fluxo Gerencial so pode ser processado na Empresa 02 ou 03.")
+	If cEmpAnt # '02' .and. cEmpAnt # '03' .and. cEmpAnt # '04'
+		MsgBox("O Fluxo Gerencial so pode ser processado na Empresa 02 ou 03 ou 04")
 	Else
 		If !File("CalcFluxo-"+cEmpAnt+".txt")              
 		
@@ -50,20 +50,19 @@ Static Function Confirma()
 			FWrite(nFile,"Inicio do Calculo:"+Dtoc(Date())+" - "+Time()+Chr(13)+Chr(10))
 			FClose(nFile) 
 			             
-		    ExecBlock("GER2007",.F.,.F.) //Rotina de Geracao
-	        ExecBlock("GER102013",.F.,.F.) //Para gerar com novos grupos a partir de 01/10/2013 - Ricardo NM
-			ExecBlock("IMPSC6",.F.,.F.) //Rotina de Geracao de Pedidos
+			ExecBlock("GER2007",.F.,.F.)   //Rotina que gera oFluxo Economico Baseado nos lançamentos contábeis
+			ExecBlock("GER102013",.F.,.F.) //Rotina que gera oFluxo Economico Baseado nos lançamentos contábeis | Para gerar com novos grupos(CT1_GRUPO2) a partir de 01/10/2013 - Ricardo NM
+			ExecBlock("IMPSC6",.F.,.F.)    //Rotina de Geracao de Pedidos de Venda
 			
 			For nCnt := 0 To nHist Step 1
-				U_EXEQUERY(cValToChar(Ano))
+				U_EXEQUERY(cValToChar(Ano))//Rotina de atualização de dados
 				Ano--
 			Next
 			   
 	 		if ExistBlock("GerBcHora")
-	 			//if MsgYesNo("Deseja calcular o banco de horas?")
-					U_GerBcHora()
-				//endif
+					U_GerBcHora() 		   //Rotina para levar banco de horas
 			endif
+			
 			Close(oDlg1)
 			If File("Fluxo-"+cEmpAnt+".txt")'
 		  		FErase("Fluxo-"+cEmpAnt+".txt")
