@@ -32,6 +32,9 @@ User Function CodGpe(cTipo)
 	ElseIf cTipo == '3'
 		cQuery:="SELECT TOP 1 RA_MAT FROM "+RetSqlName("SRA")+" WHERE D_E_L_E_T_ = '' AND RA_MAT LIKE '01%' ORDER BY RA_MAT DESC" //ESTAGIARIO
 		cPrimeira := "015001"
+	ElseIf cTipo == '4'
+		cQuery:="SELECT TOP 1 RA_MAT FROM "+RetSqlName("SRA")+" WHERE D_E_L_E_T_ = '' AND RA_MAT LIKE '03%' ORDER BY RA_MAT DESC" //AUTONOMO
+		cPrimeira := "030001"
 	Else	
 		cQuery:="SELECT TOP 1 RA_MAT FROM "+RetSqlName("SRA")+" WHERE D_E_L_E_T_ = '' AND RA_MAT LIKE '99%' ORDER BY RA_MAT ASC" //DIRETORIA
 		cPrimeira := "999999"
