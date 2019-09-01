@@ -49,7 +49,9 @@ Static Function Confirma()
 			FWrite(nFile,"Usuário:"+cUserName+Chr(13)+Chr(10))
 			FWrite(nFile,"Inicio do Calculo:"+Dtoc(Date())+" - "+Time()+Chr(13)+Chr(10))
 			FClose(nFile) 
-			             
+			If File("log-fluxo-"+cEmpAnt+".log")//Arquivo de log do fluxo.
+		  		FErase("log-fluxo-"+cEmpAnt+".log")
+			Endif             
 			ExecBlock("GER2007",.F.,.F.)   //Rotina que gera oFluxo Economico Baseado nos lançamentos contábeis
 			ExecBlock("GER102013",.F.,.F.) //Rotina que gera oFluxo Economico Baseado nos lançamentos contábeis | Para gerar com novos grupos(CT1_GRUPO2) a partir de 01/10/2013 - Ricardo NM
 			ExecBlock("IMPSC6",.F.,.F.)    //Rotina de Geracao de Pedidos de Venda
@@ -64,7 +66,7 @@ Static Function Confirma()
 			endif
 			
 			Close(oDlg1)
-			If File("Fluxo-"+cEmpAnt+".txt")'
+			If File("Fluxo-"+cEmpAnt+".txt")
 		  		FErase("Fluxo-"+cEmpAnt+".txt")
 			Endif
 			FWrite(FCreate("Fluxo-"+cEmpAnt+".txt"),"Usuário: "+cUserName+Chr(13)+Chr(10)+" Data da Ultima geração do Fluxo:"+Dtoc(Date())+" - "+Time())

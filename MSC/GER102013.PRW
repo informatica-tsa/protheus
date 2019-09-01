@@ -1,6 +1,6 @@
 #include "rwmake.ch"
 #include "TopConn.ch"
-
+#include 'fileio.ch
 /*-----------------------------------------------------------------------|
 | Programa  | GERADOR  | Autor ³Eduardo Carraro        | Data | 01/09/00 |
 |------------------------------------------------------------------------|
@@ -132,10 +132,11 @@ While !Eof()
 	// temporariamente substituimos o código 1421 (PATRIMONIO) por um codigo alternativo (0000) ( nas duas comparações !!!!!)*/
 	
 	If  CT2->CT2_FILIAL = '01' .AND. CT2->CT2_DATA >= STOD('20131001') .AND. (Left(CT2->CT2_DEBITO,4) == '0000' .or. Left(CT2->CT2_CREDIT,4) == '0000' )
+		GravaLog("log-fluxo-"+cEmpAnt+".log","Registro: "+cValToChar(QCT2->CT2RECNO)+" Descartado registro com data superior a 01/01/2008 e conta 0000")
 		dbSelectArea("CT2")
 		dbSkip()
 	ElseIf CT2->CT2_FILIAL = '01' .AND. (Left(CT2->CT2_DEBITO,4) == '4119' .or. Left(CT2->CT2_CREDIT,4) == '4119' )
-		ConOut('Descartando Registro. Data '+ dtoc(CT2->CT2_DATA) + ' CD '+ CT2->CT2_DEBITO + ' CC '+CT2->CT2_CREDIT)
+		GravaLog("log-fluxo-"+cEmpAnt+".log","Registro: "+cValToChar(QCT2->CT2RECNO)+" Descartado registro com contas(CT2_CREDIT,CT2_DEBITO) iniciadas por 4119...")
 		dbSelectArea("CT2")
 		dbSkip()
 	Else
@@ -171,7 +172,7 @@ While !Eof()
 			//Verifica se a conta tem GrupoGerencial, pois estas não devem ir para o Fluxo
 			If (CT1->(dbSeek(xFILIAL("CT1")+cConta)) .And. Empty(CT1->CT1_GRUPO2)) .Or. ;
 				(SZA->(dbSeek(Xfilial("SZA")+CT1->CT1_GRUPO2)) .And. SZA->ZA_FLUXO=='N')
-				
+				GravaLog("log-fluxo-"+cEmpAnt+".log","Registro: "+cValToChar(QCT2->CT2RECNO)+" Descartado registro CT1_GRUPO2 vazio ou ZA_FLUXO = N")
 				nForIni++
 				loop
 			Endif
@@ -203,7 +204,7 @@ While !Eof()
 					cCCusto:=Alltrim(cCCusto)
 					cSetor :=IIF(nTipoLan==1,CT2->CT2_CCD,If(Empty(CT2->CT2_CCC),CT2->CT2_CCD,CT2->CT2_CCC))
 				Endif
-				
+				GravaLog("log-fluxo-"+cEmpAnt+".log","Registro: "+cValToChar(QCT2->CT2RECNO)+" Gravando registro SZ0...")
 				If RecLock("SZ0",.T.)
 					Replace  	Z0_FILIAL  With CT2->CT2_FILIAL ,; //
 					Z0_LINHA   With CT2->CT2_LINHA  ,; //C, 2
@@ -256,7 +257,7 @@ While !Eof()
 				DbSetOrder(1)
 				DbSeek(Xfilial('SE1')+cSerie+cNota,.f.)
 				nSeqDoc++
-				
+				GravaLog("log-fluxo-"+cEmpAnt+".log","Registro: "+cValToChar(QCT2->CT2RECNO)+" Gravando registro de multa na SZ0...")
 				nValMulta:=(SF2->F2_VALBRUT*(1.02^(Val(Left(CT2->CT2_ORIGEM,3))/30)-1)*-1)
 				If RecLock("SZ0",.T.)
 					Replace Z0_FILIAL  With CT2->CT2_FILIAL ,;
@@ -294,3 +295,22 @@ DbSetOrder(aArq[2])
 DbGoTo(aArq[3])
 
 Return(.T.)
+
+static Function GravaLog(cArq,cMsg )
+ 	
+	If !File(cArq)
+		nHandle := FCreate(cArq)
+	else
+		nHandle := fopen(cArq , FO_READWRITE + FO_SHARED )
+	Endif
+
+	If nHandle == -1
+		MsgStop('Erro de abertura : FERROR '+str(ferror(),4))
+	Else
+		FSeek(nHandle, 0, FS_END)         // Posiciona no fim do arquivo
+		FWrite(nHandle, Dtoc(Date())+" - "+Time()+" : "+cUserName+" : "+cMsg+Chr(13)+Chr(10)) // Insere texto no arquivo
+		fclose(nHandle)                   // Fecha arquivo
+	Endif
+	
+ 
+return
