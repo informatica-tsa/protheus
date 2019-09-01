@@ -504,15 +504,15 @@ Private lRet       := .F.
 @ 000,000 To 230,250 Dialog oDlg Title "Copia Revisao"
 @ 005,005 To 100,110  Title "Copia revisao"
 @ 015,007 Say "SubConta:"
-@ 015,050 GET cCCusto  PICTURE "@!" F3 "CTT" VALID U_ValOrca() .And. if(cEmpAnt='02' .OR. cEmpAnt='03',.t.,U_ValRevi()) SIZE 40,50
+@ 015,050 GET cCCusto  PICTURE "@!" F3 "CTT" VALID U_ValOrca() .And. if(cEmpAnt $ '02|03|04',.t.,U_ValRevi()) SIZE 40,50
 @ 030,007 Say "Copiar Revisao:"
-@ 030,050 GET cReviCop PICTURE "@!" SIZE 20,30 Valid   if(cEmpAnt='02' .OR. cEmpAnt='03',.t.,VldRev())
+@ 030,050 GET cReviCop PICTURE "@!" SIZE 20,30 Valid   if(cEmpAnt $ '02|03|04',.t.,VldRev())
 @ 045,007 Say "Ano:"
-@ 045,050 GET cAnoRev  PICTURE "@!" When (cEmpAnt='02' .OR. cEmpAnt='03') Valid   VldRev() .And. U_ValOrca() .And. if(cEmpAnt='02' .OR. cEmpAnt='03',.t.,U_ValRevi()) SIZE 20,30
+@ 045,050 GET cAnoRev  PICTURE "@!" When (cEmpAnt $ '02|03|04') Valid   VldRev() .And. U_ValOrca() .And. if(cEmpAnt $ '02|03|04',.t.,U_ValRevi()) SIZE 20,30
 @ 060,007 Say "Para Revisao:"
 @ 060,050 GET cRevisao PICTURE "@!" When .f.  SIZE 20,30   
 @ 075,007 Say "Ano:"
-@ 075,050 GET cAno     PICTURE "@!" When (cEmpAnt='02' .OR. cEmpAnt='03',) Valid U_ValRevi() SIZE 20,30   
+@ 075,050 GET cAno     PICTURE "@!" When (cEmpAnt $ '02|03|04',) Valid U_ValRevi() SIZE 20,30   
 @ 100,020 BmpButton Type 01 Action (OkProc(),lRet:=.T.)
 @ 100,060 BmpButton Type 02 Action  (Close(oDlg),lRet:=.F.)
 Activate Dialog oDlg Center                
