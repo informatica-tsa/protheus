@@ -1,4 +1,5 @@
 #include "rwmake.ch"        // incluido pelo assistente de conversao do AP5 IDE em 25/06/01
+#include "TopConn.ch"
 
 	/*
 	‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
@@ -51,7 +52,12 @@ Static Function Confirma()
 			FClose(nFile) 
 			If File("log-fluxo-"+cEmpAnt+".log")//Arquivo de log do fluxo.
 		  		FErase("log-fluxo-"+cEmpAnt+".log")
-			Endif             
+			Endif
+			
+			//LIMPA TABELA ANTES DE REALIZAR O PROCESSAMENTO
+			cQuery  := " DELETE FROM "+RetSqlName("SZ0")
+			TCSQLExec(cQuery)      
+			       
 			ExecBlock("GER2007",.F.,.F.)   //Rotina que gera oFluxo Economico Baseado nos lanÁamentos cont·beis
 			ExecBlock("GER102013",.F.,.F.) //Rotina que gera oFluxo Economico Baseado nos lanÁamentos cont·beis | Para gerar com novos grupos(CT1_GRUPO2) a partir de 01/10/2013 - Ricardo NM
 			ExecBlock("IMPSC6",.F.,.F.)    //Rotina de Geracao de Pedidos de Venda
