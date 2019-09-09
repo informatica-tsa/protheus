@@ -112,14 +112,14 @@ If Pergunte(cPerg,.T.)
       Aadd(aCabTit,OemToAnsi("Loja"))
       Aadd(aCabTit,OemToAnsi("Nome"))
                                           
-      oDlgTit := MSDialog():New(000,000,450,800,OemToAnsi('Reprogramacao de titulos'),,,,,,,,,.T.,,,)
+      oDlgTit := MSDialog():New(000,000,540,800,OemToAnsi('Reprogramacao de titulos'),,,,,,,,,.T.,,,)
       oDlgTit:lESCClose := .F.
 
-      TGroup():New(015,005,040,390,"",oDlgTit,,,.T.,.T.)
-      TSay():New(021,010,{|| OemToAnsi("Data Programada:") },oDlgTit,,oFont,,,,.T.,,,280,050)   
-      TGet():New(020,090,{|u| if(PCount()>0,dDtaProg :=u,dDtaProg) }, oDlgTit, 080,10,,{|| NaoVazio() .And. (dDtaProg > dDatabase)  },,,oFont,,,.T.,,, {|| .T. },,,,,.F.,,"dDtaProg") 
+      TGroup():New(035,005,060,390,"",oDlgTit,,,.T.,.T.)
+      TSay():New(041,010,{|| OemToAnsi("Data Programada:") },oDlgTit,,oFont,,,,.T.,,,280,050)   
+      TGet():New(040,090,{|u| if(PCount()>0,dDtaProg :=u,dDtaProg) }, oDlgTit, 080,10,,{|| NaoVazio() .And. (dDtaProg > dDatabase)  },,,oFont,,,.T.,,, {|| .T. },,,,,.F.,,"dDtaProg") 
       
-      oSelTit := TWBrowse():New(035,005,390,175,,aCabTit,,oDlgTit,,,,,,,,,,,,.F.,,.T.,,.F.,,,)
+      oSelTit := TWBrowse():New(065,005,390,195,,aCabTit,,oDlgTit,,,,,,,,,,,,.F.,,.T.,,.F.,,,)
       oSelTit:SetArray(aDadTit)
       oSelTit:bLDblClick   := { || aDadTit[oSelTit:nAt,1] := !aDadTit[oSelTit:nAt,1],oSelTit:DrawSelect()  }
 
