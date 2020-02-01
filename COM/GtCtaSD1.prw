@@ -26,7 +26,6 @@ Local aArqCTT := {"CTT", CTT->(IndexOrd()), CTT->(Recno())}
 Local nPosProd	 := 0
 Local nPosTES 	 := 0
 Local nPosItCta := 0
-Local nPosFilial := 0
 
 Do Case
 	Case cAlias $ "SD1"
@@ -39,16 +38,16 @@ Do Case
 		nPosItCta	:= aScan(aHeader,{|x| Alltrim(x[2]) == "C7_ITEMCTA"})
 EndCase
 
-If Posicione("SF4",1,xFilial("SF4")+aCols[n,nPosTES],"F4_ESTOQUE") $ "S" //se atualiza estoque
-	cRet := Posicione("SB1",1,xFilial("SB1")+aCols[n,nPosProd],"B1_CONTA") //retorna B1_CONTA
+If Posicione("SF4",1,xFilial("SF4")+aCols[1,nPosTES],"F4_ESTOQUE") $ "S" //se atualiza estoque
+	cRet := Posicione("SB1",1,xFilial("SB1")+aCols[1,nPosProd],"B1_CONTA") //retorna B1_CONTA
 Else
 	If XFILIAL(cAlias) >= "20" .AND. XFILIAL(cAlias) <= "90"
-		cRet := SUBSTR(Posicione("SB1",1,xFilial("SB1")+aCols[n,nPosProd],"B1_CTACEI"),1,4)+STRZERO(VAL(XFILIAL(cAlias))-19,2)+SUBSTR(Posicione("SB1",1,xFilial("SB1")+aCols[n,nPosProd],"B1_CTACEI"),7,4) //retorna conta do CEI
+		cRet := SUBSTR(Posicione("SB1",1,xFilial("SB1")+aCols[1,nPosProd],"B1_CTACEI"),1,4)+STRZERO(VAL(XFILIAL(cAlias))-19,2)+SUBSTR(Posicione("SB1",1,xFilial("SB1")+aCols[1,nPosProd],"B1_CTACEI"),7,4) //retorna conta do CEI
 	Else
-		If Posicione("CTD",1,xFilial("CTD")+aCols[n,nPosItCta],"CTD_CLASSI") $ "D" //Se nao atualiza estoque e o item contabil e de despesa
-			cRet := Posicione("SB1",1,xFilial("SB1")+aCols[n,nPosProd],"B1_CTADESP")//retorna B1_CTADESP
+		If Posicione("CTD",1,xFilial("CTD")+aCols[1,nPosItCta],"CTD_CLASSI") $ "D" //Se nao atualiza estoque e o item contabil e de despesa
+			cRet := Posicione("SB1",1,xFilial("SB1")+aCols[1,nPosProd],"B1_CTADESP")//retorna B1_CTADESP
 		Else //Se nao atualiza estoque e o Item contabil e custo direto/indireto
-			cRet := Posicione("SB1",1,xFilial("SB1")+aCols[n,nPosProd],"B1_CTACONS") //retorna B1_CTACONS
+			cRet := Posicione("SB1",1,xFilial("SB1")+aCols[1,nPosProd],"B1_CTACONS") //retorna B1_CTACONS
 		EndIf
 	EndIf
 	//	If cAlias = "SD1"

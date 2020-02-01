@@ -41,6 +41,8 @@ Return(nil)        // incluido pelo assistente de conversao do AP5 IDE em 25/06/
 // Substituido pelo assistente de conversao do AP5 IDE em 25/06/01 ==> Function Acerta
 Static Function Acerta()
 
+Local xNewReg := 0 
+
 aArq    := { Alias(), IndexOrd(), Recno() }
 nImp    :=0
 naImp   :=0
@@ -58,7 +60,7 @@ ProcRegua(Reccount())
 While !Eof()
 //   iF SZB->ZB_DESCRI='08059'
 	   IncProc("Recalculando Registro: "+SZB->ZB_CCUSTO+'-'+SZB->ZB_DESCRI)
-	   For xNewReg:=1 to 12
+	   For xNewReg := 1 to 12
 			cMes:='SZB->ZB_MES'+StrZero(xNewReg,2)
 			cHRMES:= 'SZB->ZB_HRMES'+StrZero(xNewReg,2)
 			cMesAno:=StrZero(xNewReg,2)+'/'+SZB->ZB_ANO

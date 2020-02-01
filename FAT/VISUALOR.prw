@@ -15,9 +15,11 @@
 
 User Function VISUALOR()
 
+Local nxI := 0
+
 SetPrvt("AARQINP,LREINDEX,NOPCX,CCCUSTO,CANO,CREVISAO")
 SetPrvt("LEDIT,NSEQ,CCONTRAT,CTIPODES,NUSADO,AHEADER")
-SetPrvt("NPOSDESC,ACOLS,NXI,CTITULO,AC,AR")
+SetPrvt("NPOSDESC,ACOLS,CTITULO,AC,AR")
 SetPrvt("ACGD,CLINHAOK,CTUDOOK,LRETMOD2,NPOSITE,NXJ")
 SetPrvt("NPOSOR,")
 
@@ -212,6 +214,9 @@ Static Function Processa()
 *
 ****
 
+Local nxJ := 0
+Local nxI := 0
+
 nSeq := 1
 nPosIte := aScan(aHeader,{|aAux| Upper(alltrim(aAux[2])) == "ZB_ITEMORC"})
 
@@ -311,7 +316,9 @@ Static Function FGravMes(cAcao)
 * Grava registros no arquivo de meses do Orcamento (SZI)
 *
 ********
+
 Local cSZBMes := ""
+Local nXA := 0 
 
 //Apaga registros antigos
 dbSelectArea("SZI")

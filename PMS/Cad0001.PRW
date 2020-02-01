@@ -841,6 +841,8 @@ Static Function FDelte
 Local cQuery      := ""
 Local cSta        := Iif(nOp2 == 2,"P","T")
 Local aColsAnt    := AClone(aCols)
+Local nXi := 0
+
 Private nPosItem  := GDFieldPos("ZO_ITEM")
 Private nPosProd  := GDFieldPos("ZO_PRODUTO")
 Private nPosQuant := GDFieldPos("ZO_QUANT")

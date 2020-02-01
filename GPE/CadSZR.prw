@@ -28,9 +28,12 @@ User Function MODSZR(cAlias,nRecno,nOpcx)
 * Monta a tela de Manutenção
 *
 *****
+
 Local cTitulo:="Cadastro de Plano de Saude"
 Local aC:={}
 Local aR:={}
+Local nxI := 0
+
 Private aHeader:={}
 Private aCols:={}
 
@@ -101,7 +104,10 @@ Static Function GravaSZR(nOpcx)
 * Grava os Dados
 *
 ****
-Local nGrvSZR:=0
+
+Local nGrvSZR := 0
+Local nHead := 0
+
 Private cCampo:=""
 dbSelectArea("SZR")
 dbSetOrder(1)
@@ -111,7 +117,7 @@ If nOpcx<>5
 			dbSelectArea("SZR")
 			dbSetOrder(1)			
 			If Reclock("SZR",!dbSeek(Xfilial("SZR")+M->ZR_PLANO+GdFieldGet("ZR_ITEM",nGrvSZR)))
-				For nHead:=1 To Len(aHeader)
+				For nHead := 1 To Len(aHeader)
 					cCampo:="SZR->"+aHeader[nHead,2]
 					&cCampo:=GdFieldget(aHeader[nHead,2],nGrvSZR)
 				Next nHead
@@ -329,11 +335,13 @@ Static Function MCalcSZR()
 *
 *
 ******
+
 Local aVerb:={}
 Local nNroMin:=0
 Local nVlrTot:=0
 Local nVlrFun:=0
 Local nVlrEmp:=0
+Local nCount := 0
 	
 dbSelectArea("SRX")
 dbSeek(Xfilial("SRX")+'11')
@@ -525,9 +533,10 @@ While !Eof() .And. SRA->RA_MAT==SRB->RB_MAT
    dbSelectArea("SRB")
    dbSkip()	
 EndDo
+
 Pergunte("GPM020",.F.)
 
-For nCount:=1 to Len(aVerb)
+For nCount := 1 to Len(aVerb)
 	
 	//Grava as Verbas na Tabela SRC
 	If aVerb[nCount,2]>0

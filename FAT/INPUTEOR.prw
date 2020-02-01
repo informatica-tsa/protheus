@@ -32,6 +32,8 @@ User Function INPUTEOR()
 Local aPosObj   := {} 
 Local aObjects  := {}                        
 Local aSize     := MsAdvSize(.F.,.F.) 
+Local nxI := 0 
+
 Private lEmLote := Iif(Paramixb == 'L',.T.,.F.)
 
 If Paramixb == 'L'
@@ -284,6 +286,9 @@ Static Function Processa()
 *
 ****
 
+Local nxJ := 0
+Local nXi := 0
+
 nSeq := 1
 nPosIte := aScan(aHeader,{|aAux| Upper(alltrim(aAux[2])) == "ZB_ITEMORC"})
 nValrend:=0
@@ -400,6 +405,8 @@ Local nQtdeHora := 0
 Local nTotaHora := 0
 Local cValrMes  := ""
 
+Local nXA := 0
+
 /*Apaga registros antigos*/
 dbSelectArea("SZI")
 dbSetOrder(1)
@@ -474,6 +481,8 @@ Static Function FAprova()
 *
 *
 ****
+
+Local nXi := 0
 
 If !MsgBox("Confirma Aprovacao deste Orcamento?","Pergunta","YESNO")
 	Return
@@ -600,10 +609,15 @@ User Function VlrImpEv()
 *
 *
 ***** 
-Local cCmpMes:=""
-Local lRet:=.T.
-Local nVlrImp:=0  
-Private nTotEv:=0
+
+Local nXA := 0 
+Local cCmpMes := ""
+Local lRet := .T.
+Local nVlrImp := 0  
+Local nXi := 0
+Local nXy := 0
+
+Private nTotEv := 0
                 
 nLinImp:=aScan(aCols,{|x| Alltrim(x[2]) == "000015" .And. !x[Len(aHeader)+1]})
 //If cEmpAnt='02' 
@@ -625,10 +639,10 @@ If cEmpAnt <> '01'
 	Endif	
 	
 	If lRet .And. nLinImp>0 .And. (GdFieldget("ZB_TIPO")=='V' .OR. GdFieldget("ZB_GRUPGER")=='000015')
-		For nXy:=1 To 12
+		For nXy := 1 To 12
 			cCmpMes:="ZB_MES"+StrZero(nXy,2)
 			nVlrImp:=0
-			For nXi:=1 To Len(Acols)
+			For nXi := 1 To Len(Acols)
 				If nXi<>nLinImp .And. !GdDeleted(nXi) .And. GdFieldget("ZB_TIPO",nXi)=='V'
 					dbSelectArea("SZ3")
 					dbSetOrder(3)
@@ -755,10 +769,13 @@ Static function CopySZB()
 *
 *
 ********
+
 Local aAreaAt:=GetArea()
 Local cQuery:=""
 Local aStru:={}
 Local cUltRev:=""
+Local nXi := 0
+
 //Verifica qual é a Ultima Revisão
 cQuery:=" SELECT Max(ZB_REVISAO) ULTREVISAO FROM "+RetsqlName("SZB")+" WHERE ZB_CCUSTO='"+cCCusto+"' AND ZB_ANO='"+cAnoPara+"' AND D_E_L_E_T_<>'*' "
 cQuery+=" AND ZB_FILIAL='"+Xfilial("SZB")+"'"
@@ -775,7 +792,7 @@ dbSelectArea("SZB")
 aStru:=dbStruct()
 dbSelectArea("QSZB")
 
-For nXi:=1 To Len(aStru)
+For nXi := 1 To Len(aStru)
 	If Alltrim(aStru[2])$'N/D'
 		TCSetField("QSZB", aStru[1], aStru[2], aStru[3],aStru[4])
 	Endif

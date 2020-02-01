@@ -21,6 +21,8 @@ Return(nil)        // incluido pelo assistente de conversao do AP5 IDE em 25/06/
 // Substituido pelo assistente de conversao do AP5 IDE em 25/06/01 ==> Function AcertSB1
 Static Function AcertSB1()
 
+Local nX := 0
+
 cTexAux1 := ""
 cTexAux2 := ""
 cTexAux3 := ""

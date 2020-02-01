@@ -29,12 +29,14 @@ Static function GeraVT()
 *
 *
 ******
+
 Local cMatDe:=""
 Local cMatAte:=""
 Local cFile:=""
 Local cEol:=Chr(13)+Chr(10)
 Local cRegiao:=""
 Local cGrupo :=""
+Local nXi := 0
 
 Pergunte("GERVTR",.F.)
 
@@ -87,7 +89,7 @@ While !Eof() .And. RA_MAT<=cMatAte
 		dbSkip()
 		Loop
 	Endif
-	For nXi:=nItens To 4
+	For nXi := nItens To 4
 		cText01+=" 00"
 	Next nXi
 	Set Cent On

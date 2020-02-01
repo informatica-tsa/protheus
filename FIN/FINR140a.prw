@@ -216,7 +216,8 @@ Local nDecs			:= GetMv("MV_CENT"+(IIF(nMoeda > 1 , STR(nMoeda,1),"")))
 Local nMoedaBco		:= 1
 Local cAplCotas   	:= GetMv("MV_APLCAL4")
 Local nAscan
-Local nXj
+Local nXj := 0
+Local nXi := 0
 
 nNumDias := MV_PAR01
 nTipoRel := MV_PAR02

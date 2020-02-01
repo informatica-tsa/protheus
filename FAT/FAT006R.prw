@@ -111,6 +111,8 @@ Return
 
 Static Function xRetifica()
 
+Local t := 0
+
 		If	lPri
 
 			aHeader := {}
@@ -130,7 +132,7 @@ Static Function xRetifica()
 			//³Monta registros com os campos marcados.³
 			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 			aCols := {}
-			For t:= 1 to len(aAux)
+			For t := 1 to len(aAux)
 				Var := "_lChk"+Alltrim(Str(t))
 				If	&Var
 					_des := Iif(t = 33,_cOut,aAux[t,2])
@@ -327,6 +329,9 @@ Return
 */
 		
 Static Function xConfirma()
+
+Local t := 0
+
 lRet 	:= .T.
 
 		If	( Empty(_cDoc) ) .or. ( Empty(_cSerie) ) .or. ( Empty(_cCod) ) .or. ( Empty(_cLoj) )
@@ -340,7 +345,7 @@ lRet 	:= .T.
 		EndIf
 		
 		_Vazio := .F.
-		For t:=1 to Len(acols)
+		For t := 1 to Len(acols)
 			If	( ! Empty(acols[t,1]) ) .and. ( Empty(acols[t,3]) )
 				_Vazio := .T.
 			EndIf
@@ -381,6 +386,9 @@ Return
 */
 
 Static Function xImprRel()
+
+Local _nNumVia := 0
+
 Private	oFont14		:= TFont():New("Arial",,14,,.f.,,,,,.f.),;
 		oFont14n	:= TFont():New("Arial",,14,,.t.,,,,,.f.),;
 		oFont12 	:= TFont():New("Arial",,12,,.f.,,,,,.f.),;
@@ -438,7 +446,7 @@ Private	cbTxt     	:= "",;
 		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 		//³Localiza Empresa³
 		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-		_cAlias := Iif(_nOp2=1,"SA1","SA2")
+		_cAlias := Iif(_nOp2=1,"SA1","SA2")
 		DbSelectArea(_cAlias)
 		(_cAlias)->(DbSetOrder(1))
 		(_cAlias)->(DbGoTop())
@@ -469,7 +477,7 @@ Private	cbTxt     	:= "",;
 			Return(.F.)
 		EndIf
 
-		For _nNumVia:=1 to 1
+		For _nNumVia := 1 to 1
 			xImpCarta()
 		Next _nNumVia
 
@@ -506,6 +514,9 @@ Return
 */
 
 Static Function xImpCarta()
+
+Local i := 0
+Local t := 0
 
 Local oProPr := ReturnPrtObj()
 Local	_nLin 	:= 30,;
@@ -587,8 +598,8 @@ Local	_nLin 	:= 30,;
 		oPrn:Say(_nLin,_nIni+920 ,"Cód"+Space(7)+"Especificação",oFont12n,100)
 		oPrn:Say(_nLin,_nIni+1720,"Cód"+Space(7)+"Especificação",oFont12n,100)
 		_nLin := _nLin + _nInt+ 10
-		For t:= 1 to Len(aAux)/3
-			For i:= 0 to 2
+		For t := 1 to Len(aAux)/3
+			For i := 0 to 2
 				_cod := aAux[t+(i*12),1]
 				_des := aAux[t+(i*12),2]
 				_var := "_lChk"+AllTrim(str(t+(i*12)))

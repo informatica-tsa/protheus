@@ -117,6 +117,9 @@ Static Function RptDetail()
 *
 *******/
 
+Local nI2 := 0
+Local I := 1
+
 SetRegua(Val(cNotaFina)-Val(cNotaInic))
 
 dbSelectArea("SF2")
@@ -233,7 +236,6 @@ While (! Eof()) .And. (SF2->F2_Filial == xFilial("SF2")) .And. (SF2->F2_Doc <= c
     xLUCRO     := {}                           // Margem de Lucro p/ ICMS Solidario
     xCLFISCAL  := {}
     xPESO_LIQ  := 0
-    I          := 1
     nPercISS   := 0
 
     For I := 1 to Len(xCOD_PRO)
@@ -733,12 +735,12 @@ Static Function IMPDET()
 *
 *****/
 
+Local I := 1
+Local J := 1
+
 nTamDet := 60 - nLinAux /*Tamanho da Area de Detalhe*/
 
-I := 1
-J := 1
-
-For I:=1 to nTamDet
+For I := 1 to nTamDet
 	If I <= Len(xCOD_PRO)
    	@ nLinAux,15 PSAY Alltrim(xDESCRICAO[I])
       @ nLinAux,58 PSAY TransForm(xVAL_MERC[I],"@E 999,999.99")
@@ -755,6 +757,9 @@ Static Function TestaSX1()
 *
 *
 ***********/
+
+Local nxY := 0
+Local nxZ := 0 
 
 aPerguntas := {}
 

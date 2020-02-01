@@ -76,7 +76,8 @@ Static Function FOk()
 *
 ****
 
-Local cOsDigit := "" 
+Local cOsDigit := ""
+Local nxi := 0 
 
 cRet := SubStr(cMainProj,1,5) + M->AF8_X_OS
 
@@ -86,7 +87,7 @@ dbSelectArea("AF8")
 dbSetOrder(1)
 dbSeek(xFilial("AF8")+cMainProj)
 
-For nxi:=1 to FCount()
+For nxi := 1 to FCount()
 	cCmp:="M->"+AF8->(FieldName(nXi))
 	&cCmp:=AF8->(FieldGet(nXi))	
 Next nxi

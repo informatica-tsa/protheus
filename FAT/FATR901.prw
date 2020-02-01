@@ -220,6 +220,8 @@ Static Function GravTrab()
 * Grava os dados no arquivo de trabalho
 ***
 
+Local ni := 0 
+
 // Estas variavis foram embutidas no arrey abaixo.
 // aValrFi e a ordem dos valors (nBancos,nCaixas,nSaldoTit,nAplica,nEmprest).
 // aAmbSE1 e a ordem dos valors (cIndSE1,cChaSE1,cFilSE1,nIndSE1)
@@ -1368,6 +1370,8 @@ Static Function FaT901Imp()
 * Imprime as Informacoes do Arquivo de Trabalho TRBF
 ***
 
+Local nColun := 0
+
 m_pag      := 1
 nContLinha := 80
 cRodatxt   := ""
@@ -1650,6 +1654,10 @@ Static Function ImprCabe()
 * Impressao do Relatorio (Cabecalho)
 ***
 
+Local nC := 0
+Local nCC2 := 0
+Local nCC := 0 
+
 nContLinha  := Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho) + 2
 
 aPosMes[02] := Iif(nImprQuiMe == 1,                                               ;
@@ -1690,7 +1698,9 @@ nPC       := 1
 lPrVez    := .T.
 
 For nCC := 1 To aPosColun[01]
+
     For nCC2 := 1 To aPosColun[03]
+    
        If lPrVez
           @ nContLinha, 000 PSAY "|"
           @ nContLinha, aPosCab2[nPC] PSAY "|"
@@ -1742,6 +1752,8 @@ Static Function Imprdeta()
 *****************************************************************************
 *  Imprime as Linhas de Detalhe
 ***
+
+Local nD := 0
 
 If (nContLinha > 59 )
    nLinha := 80
@@ -1834,6 +1846,8 @@ Static Function SubTotal()
 *  Imprime as Linhas de SubTotais
 ***
 
+Local nD := 0
+
 If (nContLinha > 59 )
    nLinha := 80
    AtuaInfo()
@@ -1924,6 +1938,8 @@ Static Function TotGer()
 *****************************************************************************
 *  Imprime as Linhas de SubTotais
 ***
+
+Local nD := 0
 
 If (nContLinha > 59 )
    nLinha := 80

@@ -30,9 +30,11 @@ If xFilial("SD3") >= "20" .AND. xFilial("SD3") <= "90"
 Else
    If cClasItm $ "D"
       cRet := POSICIONE("SB1",1,Xfilial("SB1")+SD3->D3_COD,"B1_CTADESP")
-  Else
+   ElseIf !EMPTY(SD3->D3_OP) .AND. LEFT(SD3->D3_CF,2) == 'RE'
+      cRet := "1181030004" // REGRA ADICIONADA A PEDIDO DO GLEISON EM 11/09/2019 JUNTAMENTE COM HEMERSON. 
+   Else
       cRet := POSICIONE("SB1",1,Xfilial("SB1")+SD3->D3_COD,"B1_CTACONS")
-  EndIf
+   EndIf
 EndIf
    
 Return(cRet)

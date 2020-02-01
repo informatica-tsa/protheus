@@ -889,6 +889,8 @@ Static Function ImprItem()
 *
 ***
 
+Local nCurLDes := 0
+ 
 lContItem := .T.
 
 If (nContItem > nTotaItem)
@@ -990,6 +992,9 @@ Static Function ImprRoda()
 *
 ***
 
+Local nIX := 0
+Local nXi := 0
+ 
 If (nTipoNtFi == 2)
 	dbSelectArea("SC5")
 	dbSetOrder(1)

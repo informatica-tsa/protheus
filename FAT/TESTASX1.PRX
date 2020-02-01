@@ -2,6 +2,9 @@
 
 User Function TESTASX1()        // incluido pelo assistente de conversao do AP5 IDE em 02/07/01
 
+Local nxY := 0
+Local nxZ := 0
+
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Declaracao de variaveis utilizadas no programa atraves da funcao    ³
 //³ SetPrvt, que criara somente as variaveis definidas pelo usuario,    ³
@@ -44,7 +47,9 @@ For nxZ := 1 To Len(aPerg)
     Replace  X1_F3      With  aPerg[nxZ,8]
     Replace  X1_Var01   With  "Mv_Par"+StrZero(nxZ,2)
     If (aPerg[nxZ,6] == "C")
+    
        For nxY := 9 To 13
+       
            If (aPerg[nxZ,nxY] == "")
               Exit
            Else
@@ -61,8 +66,11 @@ For nxZ := 1 To Len(aPerg)
                       Replace X1_Def05 With aPerg[nxZ,nxY]
               EndCase
            EndIf
+           
         Next
+        
     EndIf
+    
 Next
 
 Return

@@ -130,6 +130,9 @@ Static Function RptDetail()
 *
 ***
 
+Local nI2 := 0
+Local I := 0 
+
 SetRegua(Val(cNotaFina)-Val(cNotaInic))
 
 dbSelectArea("SF2")
@@ -764,6 +767,9 @@ Return .T.
 
 Static Function TestaSX1()
 
+Local nxY := 0
+Local nxZ := 0
+
 aPerguntas := {}
 
 AADD(aPerguntas,{cPerg,"Da Nota Fiscal     ?","C",06,0,"G","","","","","","",""})
@@ -822,10 +828,11 @@ Return
 // Substituido pelo assistente de conversao do AP5 IDE em 25/06/01 ==> Function IMPDET
 Static Function IMPDET()
 
+Local I := 1
+Local J := 1
+
 nTamDet :=60-nLinAux            // Tamanho da Area de Detalhe
 
-I:=1
-J:=1
 For I:=1 to nTamDet
     If I <= Len(xCOD_PRO)
        @ nLinAux,10 PSAY Alltrim(xDESCRICAO[I])

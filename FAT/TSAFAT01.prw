@@ -70,6 +70,9 @@ Local aCampos    := {}
 Local aStruct    := {}
 Local cQuery     := ""
 Local nFreeze    := 0
+
+Local ni := 0
+
 Private lInverte := .T.
 Private cMarca   := GetMark()
 Private aHeader  := {}

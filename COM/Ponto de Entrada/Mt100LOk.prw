@@ -86,8 +86,11 @@ Static Function VldAltSC()
 * Valida se há Itens alterados
 *
 *****
+
 Local lRet := .T.
 Local aAreaSC := GetArea()
+Local nXi2 := 0
+Local nXi := 0
 cLibAlt := GdFieldGet("C1_LIBALT",1)
 
 If cLibAlt <> 'S'
@@ -98,7 +101,7 @@ If cLibAlt <> 'S'
 		lRet := .f.
 	Endif
 	If DataValida(SC1->C1_EMISSAO) < Date() 
-		For nXi:=1 To Len(Acols)
+		For nXi := 1 To Len(Acols)
 			// Valida se há novos Itens
 			If !SC1->(dbSeek(Xfilial("SC1")+GdFieldget("C1_PRODUTO",nXI)+cA110Num+GdFieldget("C1_ITEM",nXI)))
 				lRet := .F.	
@@ -115,7 +118,7 @@ If cLibAlt <> 'S'
 			Endif
 			//Valida se há campos alterados
 		    If lRet
-		    	For nXi2:=1 To Len(aHeader)
+		    	For nXi2 := 1 To Len(aHeader)
 		    		xCmp := "SC1->"+aHeader[nXi2,2]
 		    		If lRet .And. GdFieldGet(aHeader[nXi2,2],nXi)<>&xCmp
 		    			lRet := .F.
@@ -167,6 +170,9 @@ Static Function AtuLin()
 *
 *
 ******
+
+Local nXI := 0
+
 For nXi:=1 to Len(ACols)
 	GdFieldPut("C1_LIBALT",'S',nXi)
 Next nXi

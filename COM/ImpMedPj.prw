@@ -259,10 +259,14 @@ Static Function GerPcom(lValid)
 *
 *
 ******
+
 Local cQuery:=""
 Local nVlrTot:=0     
 Local aHoraCCUsto:={}
+Local nXi := 0
+
 Private nQtdTot:=0
+
 cQuery:=" SELECT  FIPCUSTO, "
 cQuery+="         Convert(Char(5), "
 cQuery+="            Cast(replace( CAST(FIPEPC.FIPHORAF AS varchar(5)) ,'.',':') as smalldatetime) "
@@ -280,6 +284,7 @@ cQuery+=" ORDER BY FIPCUSTO "
 TcQuery cQuery Alias QPCOM New
 dbSelectArea("QPCOM")
 dbGoTop()
+
 While !Eof() 
 	nMinItem:=(Val(Left(HORASDIA,2))*60)+Val(Right(HORASDIA,2))
 	nQtdTot+=nMinItem
@@ -291,10 +296,12 @@ While !Eof()
 	aHoraCCUsto[nPos,2]+=nMinItem
 	dbSkip()
 EndDo
+
 dbSelectArea("QPCOM")
 dbCloseArea()
 aItemPed:={} 
 aCabPed:={}
+
 If nQtdTot>0
 	cLojaF=Posicione("SA2",1,Xfilial("SA2")+SRA->RA_FOR,"A2_LOJA")
 	//Cabeçalho do Pedido de Compras
@@ -309,7 +316,7 @@ If nQtdTot>0
 	nValorTot:=0
 	nVlrItem:=Round(SRC->RC_VALOR/(nQtdTot/60),2)  
 	lMsErroAuto:=.F.
-	For nXi:=1 To Len(aHoraCCUsto)
+	For nXi := 1 To Len(aHoraCCUsto)
 		cProdSC7:=BuscaProd(Substring(aHoraCCUsto[nXi,1],10,5))
 		if !SB1->(dbSeek(Xfilial("SB1")+cProdSC7))
 			FGravaCrit(SRC->RC_MAT,cEol+"Produto("+Alltrim(cProdSC7)+") Inválido para a SubConta:"+Alltrim(Substring(aHoraCCUsto[nXi,1],10,5)),,'N')

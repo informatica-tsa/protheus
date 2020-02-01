@@ -28,6 +28,8 @@ User Function MODSZT(cAlias,nRecno,nOpcx)
 Local cTitulo:="Regra de Plano P/ C.Custo"
 Local aC:={}
 Local aR:={}
+Local nxI := 0
+ 
 Private aHeader:={}
 Private aCols:={}
 
@@ -95,7 +97,10 @@ Static Function GravaSZT(nOpcx)
 * Grava os Dados
 *
 ****
+
 Local nGrvSZT:=0
+Local nHead := 0
+
 Private cCampo:=""
 dbSelectArea("SZT")
 dbSetOrder(1)
@@ -110,7 +115,7 @@ If nOpcx<>5
 			Reclock("SZT",.T.)	
 			//If Reclock("SZT",!dbSeek(Xfilial("SZT")+M->ZT_CCUSTO+M->ZT_PLANO+GdFieldGet("ZT_TIPOD",nGrvSZT)))
 				//Grava os campos chaves
-				For nHead:=1 To Len(aHeader)
+				For nHead := 1 To Len(aHeader)
 					cCampo:="SZT->"+aHeader[nHead,2]
 					&cCampo:=GdFieldget(aHeader[nHead,2],nGrvSZT)
 				Next nHead

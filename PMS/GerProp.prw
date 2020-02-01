@@ -210,6 +210,8 @@ Static Function GerPlan()
 *
 *
 ***** 
+
+Local nX := 0
 ///  Function PmsPlnExcel(aCampos, cUsrRev, nNivelMax, nPrjOrc, cPlanilha, lCsv)
 Private cDirDocs  := MsDocPath() 
 Private cPath		  := AllTrim(GetTempPath())
@@ -304,8 +306,13 @@ Static function GravaTot()
 *
 ****
 
+Local nLoop := 0
+Local nX := 0 
+
 For nLoop:=1 To 2
+
 	cBuffer:=""
+	
 	For nx := 1 To Len(aNomCamp)
 		cConteudo:=""
 		If aNomCamp[nx,3]$'EDFGHIL'

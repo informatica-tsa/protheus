@@ -39,6 +39,9 @@ Static Function Gera()
 *
 ******
 
+Local nXi := 0
+Local nTipoLan := 0
+ 
 Private aArq    := { Alias(), IndexOrd(), Recno() }
 Private nValor  := 0
 Private nCont   := 0
@@ -102,6 +105,7 @@ TcQuery cQuery Alias QCT2 New
 xnumlan:=0
 DbSelectArea("QCT2") //Lancamentos Contabeis
 DbGoTop()
+
 While !Eof() 
 	
 	dbSelectArea("CT2") 
@@ -134,7 +138,7 @@ While !Eof()
 	Endif
 
 	//Feito para tratamento de lançamento de Partida Dobrada
-	For nTipoLan=nForIni To nForFim
+	For nTipoLan := nForIni To nForFim
 		
 		DbSelectArea("SZ0")
 		nValor := 0
@@ -202,7 +206,7 @@ While !Eof()
 					Aadd(aRatDesp,{'000095',0.3630})
 					Aadd(aRatDesp,{'000096',0.2891})
 					Aadd(aRatDesp,{'000097',0.1355})
-					For nXi:=1 To Len(aRatDesp)
+					For nXi := 1 To Len(aRatDesp)
 						If RecLock("SZ0",.T.)
 							Replace  Z0_FILIAL  With M->Z0_FILIAL,;
 										Z0_LINHA   With M->Z0_LINHA,;

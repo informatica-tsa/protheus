@@ -16,6 +16,8 @@
 
 User Function InpHrTot()
 
+Local nxI := 0 
+
 SetPrvt("AARQINP,LREINDEX,NOPCX,CCCUSTO,CANO,CREVISAO")
 SetPrvt("LEDIT,NSEQ,CCONTRAT,CTIPODES,NUSADO,AHEADER")
 SetPrvt("NPOSDESC,ACOLS,NXI,CTITULO,AC,AR")
@@ -53,6 +55,7 @@ dbSetOrder(1)
 dbSeek("SZL")
 nUsado:=0
 aHeader:={}
+
 While !Eof() .And. (x3_arquivo == "SZL")
 
    IF X3USO(x3_usado)                         .And. ;
@@ -69,10 +72,12 @@ End
 nPosMes := aScan(aHeader,{|aAux| Upper(Alltrim(aAux[2])) == "ZL_MESANO"})
 
 If PARAMIXB == "I"
+
    aCols:=Array(1,nUsado+1)
    dbSelectArea("SX3")
    dbSeek("SZL")
    nUsado:=0
+
    While !Eof() .And. (X3_ARQUIVO == "SZL")
       IF X3USO(X3_USADO)                         .And. ;
          cNivel >= x3_nivel                      .And. ;
@@ -287,7 +292,9 @@ Static Function FGravMes(cAcao)
 * Grava registros no arquivo de meses do Orcamento (SZI)
 *
 ********
+
 Local cSZBMes := ""
+Local nXA := 0
 
 //Apaga registros antigos
 dbSelectArea("SZI")

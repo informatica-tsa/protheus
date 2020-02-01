@@ -2,6 +2,8 @@
 
 User Function INPCOXFO()        // incluido pelo assistente de conversao do AP5 IDE em 25/06/01
 
+Local nxI := 0
+
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Declaracao de variaveis utilizadas no programa atraves da funcao    ³
 //³ SetPrvt, que criara somente as variaveis definidas pelo usuario,    ³
@@ -94,7 +96,7 @@ Else
    dbSelectArea("SZC")
    dbSetOrder(1)
    dbSeek(xFilial("SZC")+cContrato+cTipoCont)
-*???   dbSeek(xFilial("SZC")+cContrato+cTipoCont+cCentCust)
+//   dbSeek(xFilial("SZC")+cContrato+cTipoCont+cCentCust)
 
    aCols := {}
    While (! eof())                            .And. ;
@@ -102,7 +104,7 @@ Else
          (SZC->ZC_CONTRAT == cContrato)       .And. ;
          (SZC->ZC_TIPOCON == cTipoCont)
 
-*???         (SZC->ZC_CCUSTO  == cCentCust)
+//         (SZC->ZC_CCUSTO  == cCentCust)
 
       Aadd(aCols,Array(Len(aHeader)+1))
       For nxI := 1 to Len(aHeader)
@@ -193,6 +195,9 @@ Static Function Processa()
 *
 ****
 
+Local nxJ := 0
+Local nxI := 0
+
 nPosFor := aScan(aHeader,{|aAux1| Upper(Alltrim(aAux1[2])) == "ZC_FORNECE"})
 nPosLoj := aScan(aHeader,{|aAux2| Upper(Alltrim(aAux2[2])) == "ZC_LOJA"})
 
@@ -202,7 +207,7 @@ dbSetOrder(1)
 For nxI := 1 To Len(aCols)
     If ! Empty(aCols[nxI,nPosFor])
        cChave := cContrato+cTipoCont+aCols[nxI,nPosFor]+aCols[nxI,nPosLoj]
-*???       cChave := cContrato+cTipoCont+cCentCust+aCols[nxI,nPosFor]+aCols[nxI,nPosLoj]
+//       cChave := cContrato+cTipoCont+cCentCust+aCols[nxI,nPosFor]+aCols[nxI,nPosLoj]
        dbSeek(xFilial("SZC")+cChave)
        RecLoCk("SZC",Eof())
        If ! aCols[nxI,Len(aHeader)+1]
@@ -213,7 +218,7 @@ For nxI := 1 To Len(aCols)
           Replace ZC_FILIAL  With xFilial()
           Replace ZC_CONTRAT With cContrato
           Replace ZC_TIPOCON With cTipoCont
-*???          Replace ZC_CCUSTO  With cCentCust
+//          Replace ZC_CCUSTO  With cCentCust
        Else
           If ! Eof()
              RecLock("SZC",.F.)

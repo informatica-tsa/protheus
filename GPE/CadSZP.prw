@@ -25,9 +25,12 @@ User Function MODSZP(cAlias,nRecno,nOpcx)
 * Monta a tela de Manutenção
 *
 *****
+
 Local cTitulo:="Cadastro de Vale Refeição"
 Local aC:={}
 Local aR:={}
+Local nxI := 0
+
 Private aHeader:={}
 Private aCols:={}
 
@@ -95,8 +98,12 @@ Static Function GravaSZP(nOpcx)
 * Grava os Dados
 *
 ****
+
 Local nGrvSZp:=0
+Local nHead := 0
+ 
 Private cCampo:=""
+
 dbSelectArea("SZP")
 dbSetOrder(1)
 If nOpcx<>5
@@ -110,7 +117,7 @@ If nOpcx<>5
 							ZP_TIPO    With M->ZP_TIPO  ,;
 							ZP_DESCRIC With M->ZP_DESCRIC,;
 							ZP_VUNIT   With M->ZP_VUNIT 
-				For nHead:=1 To Len(aHeader)
+				For nHead := 1 To Len(aHeader)
 					cCampo:="SZP->"+aHeader[nHead,2]
 					&cCampo:=GdFieldget(aHeader[nHead,2],nGrvSZp)
 				Next nHead

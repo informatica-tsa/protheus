@@ -45,6 +45,7 @@ Static function GeraVR()
 *
 *
 ******
+
 Local cFile:=""
 Local cEol:=Chr(13)+Chr(10)
 Local cRegiao:=""
@@ -66,6 +67,8 @@ Local aTpVlrTot:={}
 Local aTpVlr:={}
 Local nVlrTotal:=0
 Local nTotItens:=0
+Local nLin := 0
+Local nXi := 0
 
 //Grava osRegistros de Homonimos
 
@@ -180,7 +183,7 @@ While !Eof() .And. SM0->M0_CODIGO==cEmpAnt .And. SM0->M0_CODFIL<=cFilAte
 				cTexto+=cCodMat
 				cTexto+=' '+Padr(Left(SRA->RA_NOME,29),29)
 				cTexto+=cMensFol
-				For nLin:=1 To Len(aTpVlr)
+				For nLin := 1 To Len(aTpVlr)
 					cTexto+=aTpVlr[nLin,1]
 					cTexto+="000001"
 					cTexto+=StrZero((aTpVlr[nLin,2]*100),11)
@@ -203,7 +206,7 @@ While !Eof() .And. SM0->M0_CODIGO==cEmpAnt .And. SM0->M0_CODFIL<=cFilAte
 					cTexto+=Replicate('0',11)
 				Next nLin
 				//Campos para demitidos
-				For nXi:=1 To 4
+				For nXi := 1 To 4
 					cTexto+='00 '
 				Next nXi
 				//Grava o registro

@@ -38,6 +38,8 @@ Static Function Gera()
 ******
 
 Local sStrFil := U_GetStrFil()
+Local nTipoLan := 0
+
 Private aArq    := { Alias(), IndexOrd(), Recno() }
 Private nValor  := 0
 Private nCont   := 0
@@ -155,7 +157,7 @@ While !Eof()
 		Endif
 		
 		//Feito para tratamento de lançamento de Partida Dobrada
-		For nTipoLan=nForIni To nForFim
+		For nTipoLan := nForIni To nForFim
 			
 			DbSelectArea("SZ0")
 			nValor := 0

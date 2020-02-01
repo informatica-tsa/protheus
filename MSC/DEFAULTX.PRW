@@ -192,7 +192,10 @@ EndIf
 Return Nil
 
 Static Function ReConstr(cArquivo,aStruRec,_aEstrNul)
+
 Local lRename := .T.
+Local ni := 0
+
 If TCCanOpen("TRBXTRB")
     cQuery := 'SELECT COUNT(*) TOTREG FROM TRBXTRB'
     dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery), 'CONT', .F., .T.)
@@ -294,8 +297,10 @@ EndIf
 
 nCont := CONT->MINRECNO
 _oObjRegua2:SetRegua2(nTotReg)
+
 Do While nCont <= CONT->MAXRECNO
-    For ni:= 1 to Len(_aEstrNul)
+
+    For ni := 1 to Len(_aEstrNul)
         _oObjRegua2:IncRegua2("Verificando/Ajustando nulos do campo "+_aEstrNul[ni,1])
         If _aEstrNul[ni,2] != "M"
             cQuery := "UPDATE TRBXTRB SET "+_aEstrNul[ni,1]+" = "
@@ -370,9 +375,12 @@ Return
 Static Function TemNulos(aStru)
 Local _lRetNul  := .F.,_aRetFunc,_aCposNul := {}
 Local _aStruNul	:= aClone(aStru)
+Local ni := 0
+
 AADD(_aStruNul,{"D_E_L_E_T_","C",1,0})	// agrega o campo D_E_L_E_T_ verificacao de existencia de NULOS
 _oObjRegua2:SetRegua2(Len(_aStruNul))
-For ni:= 1 to Len(_aStruNul)
+
+For ni := 1 to Len(_aStruNul)
    	_oObjRegua2:IncRegua2("Analisando NULOS no Campo "+_aStruNul[ni,1])
     If _aStruNul[ni,2] != "M"
     	cQuery := "Select count(*) NULOS from "+SX2->X2_ARQUIVO

@@ -27,12 +27,15 @@ Static Function XGRVSRA()
 *
 *
 ******  
+
 Local aArqs:={}
+Local nCnt := 0
+Local xCont := 0
 
 AADD(aArqs,MV_PAR01)
 
 
-For xCont:=1 To Len(aArqs)
+For xCont := 1 To Len(aArqs)
 	
 	IncProc("Importando Arquivo:"+RetSqlName(aArqs[xCont]))                 
 	
@@ -45,7 +48,7 @@ For xCont:=1 To Len(aArqs)
 	    
 		//Cria as Variáveis
 		aCmp:={}
-		For nCnt:=1 To (cAlias)->(FCount())
+		For nCnt := 1 To (cAlias)->(FCount())
 			xPos:=QSRA->(FieldPos((cAlias)->(FieldName(nCnt))))
 			If xPos > 0
 				Aadd(aCmp,{(cAlias)->(FieldName(nCnt)),CriaVar((cAlias)->(FieldName(nCnt)),.T.)})

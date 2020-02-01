@@ -8,6 +8,7 @@
 User Function EPCCTB01()
 
 Local aArrEmpr := {"01","02"}
+Local nxI := 0
  
 For nxI := 1 To Len(aArrEmpr)
 

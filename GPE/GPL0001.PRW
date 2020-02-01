@@ -106,12 +106,14 @@ Local aValrTot:={}
 Local cEol      :=Chr(13)+Chr(10)
 Local cCont:="3"
 Local cLinIni:=cCont
+Local nX := 0
+
 Fwrite(nFile,MemoRead("Plan001.txt")+cEol)
 
 //Carrega os Arrays
 Aadd(aValrItem,Array(23))
 Aadd(aValrItem,Array(23))
-For nX:=1 to 23
+For nX := 1 to 23
 	aValrItem[1,nX]:=0
 	aValrItem[2,nX]:='='
 Next nX
@@ -324,13 +326,16 @@ Static Function GerDados()
 * Gera a Query com as Informações
 *
 *****
+
 Local cSitQuery := ""
 Local cCatQuery := ""
 Local cQuery:=""
+Local nS := 0
+Local nX := 0
 
 //-- Modifica variaveis para a Query
 cSitQuery := ""
-For nS:=1 to Len(cSituacao)
+For nS := 1 to Len(cSituacao)
 	cSitQuery += "'"+Subs(cSituacao,nS,1)+"'"
 	If ( nS+1) <= Len(cSituacao)
 		cSitQuery += "," 

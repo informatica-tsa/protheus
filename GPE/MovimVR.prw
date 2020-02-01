@@ -25,9 +25,12 @@ User Function CADMOV(cAlias,nRecno,nOpcx)
 * Monta a tela de Manutenção dos Movimentos
 *
 *****
+
 Local cTitulo:="Manut. dos Movimentos de Vale Refeição"
 Local aC:={}
 Local aR:={}
+Local nxI := 0
+
 Private aHeader:={}
 Private aCols:={}
 Private M->ZQ_CUSEMP:=0
@@ -68,8 +71,11 @@ EndDo
 dbSelectArea("SZQ")
 dbSetOrder(1)
 dbSeek(xFilial("SZQ")+SRA->RA_MAT)
+
 While !Eof() .and. SZQ->ZQ_FILIAL== xFilial("SZQ") .and. SZQ->ZQ_MAT == SRA->RA_MAT
+
 	AADD(aCols,Array(Len(aHeader)+1))
+
 	For nxI := 1 To Len(aHeader)
 		If aHeader[nxI,2]<>'ZQ_DESCVR'
 			aCols[Len(aCols),nxI]:=FieldGet(FieldPos(aHeader[nxI,2]))
@@ -77,10 +83,13 @@ While !Eof() .and. SZQ->ZQ_FILIAL== xFilial("SZQ") .and. SZQ->ZQ_MAT == SRA->RA_
 			aCols[Len(aCols),nxI]:=Posicione("SZP",1,Xfilial("SZP")+SZQ->ZQ_CODVALE,"ZP_DESCRIC")
 		Endif	
 	Next nxI
+
 	aCols[Len(aCols),Len(aHeader)+1]:=.F.
 	dbSelectArea("SZQ")
 	dbSkip()
+
 EndDo
+
 If Len(aCols)<=0
 	aCols := {Array(Len(aHeader) + 1)}
 	For nxI := 1 to Len(aHeader)
@@ -103,10 +112,15 @@ Static Function GrvMov(nOpcx)
 * Grava os Dados
 *
 ****
+
 Local nGrvSZQ:=0
+Local nHead := 0
+
 Private cCampo:=""
+
 dbSelectArea("SZQ")
 dbSetOrder(1)
+
 For nGrvSZQ:=1 To Len(Acols)
 	If !GdDeleted(nGrvSZQ)
 		dbSelectArea("SZQ")
@@ -115,7 +129,7 @@ For nGrvSZQ:=1 To Len(Acols)
 			//Grava os campos chaves
 			Replace ZQ_FILIAL With Xfilial("SZQ"),;
 					ZQ_MAT    With SRA->RA_MAT
-			For nHead:=1 To Len(aHeader)
+			For nHead := 1 To Len(aHeader)
 				If SZQ->(FieldPos(aHeader[nHead,2]))>0
 					cCampo:="SZQ->"+aHeader[nHead,2]
 					&cCampo:=GdFieldget(aHeader[nHead,2],nGrvSZQ)
@@ -364,8 +378,11 @@ Static Function GerLanc()
 *
 *
 *****
+
 Local aVerb:={}                    
 Local cAnoMes:=Alltrim(StrTran(MV_PAR01,'/',''))
+Local nCount := 0
+
 cAnoMes:=Alltrim(StrTran(cAnoMes,'\',''))
 dDataRef:=Stod(cAnoMes+'01')
 
@@ -410,7 +427,7 @@ While !Eof() .And. RA_MAT <= MV_PAR03
 		dbSelectArea("SZQ")	
 		dbSkip()
 	EndDo
-	For nCount:=1 to Len(aVerb)
+	For nCount := 1 to Len(aVerb)
 		//Grava as Verbas na Tabela SRC
 		If aVerb[nCount,2] > 0
 			

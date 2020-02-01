@@ -38,7 +38,7 @@ SetPrvt("NAUXLIN,CCGCPICT,CCEPPICT,")
 ±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
 ±±³ PROGRAMADOR  ³ DATA   ³ BOPS ³  MOTIVO DA ALTERACAO                   ³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Edson  M.     ³18/06/98³16597A³Acerto dos parametros de impressao.     ³±±
+3±±³Edson  M.     ³18/06/98³16597A³Acerto dos parametros de impressao.     ³±±
 ±±³Marcos Simidu ³07/06/98³XXXXXX³Acerto de bound error aSavRec.          ³±±
 ±±³Edson  M.     ³13/08/98³16980A³Correcao no calculo do IPI.             ³±±
 ±±³Bruno         ³09/12/98³melhor³Modificacao para a impressao da AE (ARG)³±±
@@ -150,6 +150,10 @@ Return(.T.)
 /*/
 // Substituido pelo assistente de conversao do AP5 IDE em 25/06/01 ==> Function C110PC
 Static Function C110PC()
+
+Local ncw := 0
+Local i := 0
+
 nReem    := 0
 nOrder   := 0
 cCondBus := ""
@@ -299,7 +303,7 @@ While ! Eof() .And. C7_FILIAL == xFilial("SC7") .And. C7_NUM >= cPedIni .And. C7
         FinalPed(nDescProd)             // Imprime os dados complementares do PC
     Next
     If Len(aSavRec)>0
-       For i:=1 to Len(aSavRec)
+       For i := 1 to Len(aSavRec)
            dbGoto(aSavRec[i])
            RecLock("SC7",.F.)  //Atualizacao do flag de Impressao
            Replace C7_QTDREEM With (C7_QTDREEM+1)
@@ -348,6 +352,10 @@ Return .T.
 /*/
 // Substituido pelo assistente de conversao do AP5 IDE em 25/06/01 ==> Function C110AE
 Static Function C110AE()
+
+Local ncw := 0
+Local i := 0
+
 nReem   := 0
 nSavRec := 0
 aSavRec := {}
@@ -371,6 +379,7 @@ SetRegua(Reccount())
 @ 0,0 PSay AvalImp(Limite+2)
 
 While ! Eof() .And. C7_FILIAL == xFilial("SC7") .And. C7_NUM >= cPedIni .And. C7_NUM <= cPedFim
+
     //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     //³ Cria as variaveis para armazenar os valores do pedido        ³
     //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -469,7 +478,7 @@ While ! Eof() .And. C7_FILIAL == xFilial("SC7") .And. C7_NUM >= cPedIni .And. C7
     Next
     If Len(aSavRec)>0
        dbGoto(aSavRec[Len(aSavRec)])
-       For i:=1 to Len(aSavRec)
+       For i := 1 to Len(aSavRec)
            dbGoto(aSavRec[i])
            RecLock("SC7",.F.)  //Atualizacao do flag de Impressao
            Replace C7_EMITIDO With "S"
@@ -519,6 +528,8 @@ Return .T.
 /*/
 // Substituido pelo assistente de conversao do AP5 IDE em 25/06/01 ==> Function ImpProd
 Static Function ImpProd()
+
+Local nBegin := 0
 
 cDesc   := ""
 nLinRef := 1
@@ -669,6 +680,9 @@ Return .T.
 /*/
 // Substituido pelo assistente de conversao do AP5 IDE em 25/06/01 ==> Function FinalPed
 Static Function FinalPed()
+
+Local nX := 0 
+
 nk := 1
 lImpLeg := .T.
 nTotDesc:= nDescProd
@@ -1030,6 +1044,9 @@ Return .T.
 /*/
 // Substituido pelo assistente de conversao do AP5 IDE em 25/06/01 ==> Function FinalAE
 Static Function FinalAE()
+
+Local nX := 0
+
 nk := 1
 nTotDesc:= nDescProd
 cMensagem:= Formula(C7_MSG)

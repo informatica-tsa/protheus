@@ -3,6 +3,10 @@
 
 User Function A100F4PC()        // incluido pelo assistente de conversao do AP5 IDE em 25/06/01
 
+Local nx := 1
+Local nAuxCNT := 1
+Local nxI := 1
+
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Declaracao de variaveis utilizadas no programa atraves da funcao    ³
 //³ SetPrvt, que criara somente as variaveis definidas pelo usuario,    ³
@@ -14,7 +18,7 @@ SetPrvt("AALIAS,AALIASF4,CVAR1,CVARCHAMA,AHEADEROLD,NNOLD")
 SetPrvt("ACOLSOLD,CVAR,BKEYF4,LALCADA,NX,CPROD")
 SetPrvt("NPOSPRD,CLOCAL,CTES,NPOSPDD,NPOSITM,NPOSQTD")
 SetPrvt("LCONTINUE,CSEEK,CCOND,AHEADER,ACOLS2,AARRSLDO")
-SetPrvt("ACOLS,NFREEQT,NAUXCNT,NXI,N,NQUAL")
+SetPrvt("NFREEQT,NQUAL")
 SetPrvt("NPERCIPI,NQUANT,NVALUNIT,NPERCICM,NVALTOTAL,")
 
 /*
@@ -59,7 +63,7 @@ If GetMV("MV_ALCADA") == "S"
    EndIf
 EndIf
 
-For nx:=1 to Len(aHeader)
+For nx := 1 to Len(aHeader)
 	Do Case
        Case Trim(aHeader[nX][2]) == "D1_COD"
 			cProd:=aCols[n][nx]
@@ -287,6 +291,8 @@ Return
 
 // Substituido pelo assistente de conversao do AP5 IDE em 25/06/01 ==> Function GravF4
 Static Function GravF4()
+
+Local nX := 1
 
 nQual:=n
 DbSelectArea("SC7")

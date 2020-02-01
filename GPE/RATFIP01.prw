@@ -263,6 +263,8 @@ Return
 Static Function fRaHora()
                  
 	Local bOkV := .F.
+	Local nT := 0 
+	Local nI := 0 
 
 	aSubHora := {}
 	
@@ -355,6 +357,9 @@ Return
  
 // Monta novas horas para inserção na tela de Rateio
 Static function fMontNovasHoras()
+
+	Local nI := 0
+
 	// validando aItens vazio
 	if (aItens[1] != nil .and. Empty(aItens[1][3]))
 		aItens[1] := nil                        
@@ -393,6 +398,8 @@ Return
 
 Static Function fMontSubHoras()
 
+	Local nI := 0
+
 	aTemp21  := {}
 	aTemp21  := aSubHora
 	aSubHora := {}
@@ -420,6 +427,8 @@ Return
 
 Static Function fEDSubHoras()
 
+	Local nI := 0
+	
 	if  oSubHora:ColPos == 1 .or. oSubHora:ColPos == 2
 		lEditCell( aSubHora, oSubHora, "@E 99:99", oSubHora:ColPos )
 	endif
@@ -440,6 +449,9 @@ Return
 
 Static Function Valores()
                
+	Local nI := 0
+	Local nT := 0
+	
 	lLancErro := .F.
 
 	for nI := 1 to len(aVerbas)
@@ -488,6 +500,9 @@ Return
 
 Static Function Sair(lRet)
 
+	Local nI := 0
+	Local ngt := 0
+	
 	if lRet                                   
 	
 		for nI := 1 to len(aItens)

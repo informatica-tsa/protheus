@@ -443,6 +443,8 @@ Static Function FGravaNFS()
 * 
 *
 *******/
+
+Local nContAuxi := 0
 	
 lFirst := .T.
 		
@@ -754,7 +756,8 @@ Local cNomeClfo, cCGCCliFo, cTeleClFo, cEndeClFo, cBairClFo
 Local cCEPCliFo, cMuniClFo, cEstaClFo, cInscClFo
 Local cImprFiOP := "" 
 Local cExtenso  := ""
-
+Local nXi := 0
+LOcal nFatur := 0 
 //fConfig("G", 18)
 
 
@@ -851,7 +854,7 @@ If !Eof()
 	
 	If nPag == nPagUlt
 
-		For nFatur=1 To Len(aFaturas) 
+		For nFatur := 1 To Len(aFaturas) 
 			@ 015+nFatur, 020 PSAY Left(aFaturas[nFatur][1],75)
 			If nFatur <> 0	
 				@ 015+nFatur, 103 PSAY Alltrim(aFaturas[nFatur-0][2])

@@ -66,8 +66,11 @@ Return()
 
 Static Function ImpSZB()
 
+
+
 	// Rotina para importar dados do arquivo SZB para ao SZ0
 
+	Local i := 0
 	Local cQuery :=""
 	Local cPerg:="ESTSZB"
 	Local cRevIni:=""

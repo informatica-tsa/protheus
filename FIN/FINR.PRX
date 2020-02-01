@@ -171,6 +171,7 @@ Local nMoedaBco		:=	1
 Local nMoeda        	:= mv_par02
 Local cAplCotas   	:= GetMv("MV_APLCAL4")
 Local nAscan
+Local j := 0
 //旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴커
 //� Variaveis utilizadas para Impressao do Cabecalho e Rodape	  �
 //읕컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴켸

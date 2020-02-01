@@ -8,6 +8,8 @@ User function Mt241tok()
 *****
 
 Local lRet:=.T.
+Local nLin := 0
+
 For nLin:=1 to Len(aCols)
 	If !GdDeleted(nLin) .And. lRet
 		If cTM$GetMv('MV_TMAMPL',,'801') .And. (Empty(GdFieldGet("D3_CODBEM",nLin)) .Or. Empty(GdFieldGet("D3_ITEMBEM",nLin)) )

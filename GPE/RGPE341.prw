@@ -133,6 +133,7 @@ Local cPerAte	    := mv_par02
 Local cDesDe	    := mv_par03
 Local cDesAte	    := mv_par04
 Local cOrder        := "RA_CC,RA_FILIAL,RA_MAT"
+Local nX := 0
 
 //apmsgalert(cPerDe) 
 //apmsgalert(valtype(cPerDe))

@@ -126,6 +126,9 @@ Static Function FModelo2()
 *
 *****
 
+Local nxI := 0
+
+
 dbSelectArea("SZK")
 
 PRIVATE dDataInic := CTOD("")
@@ -293,9 +296,14 @@ Static Function FGravArq()
 * Input de dados nos arquivos
 *
 *****
+
+Local nxJ := 0
+Local nxI := 0
+
 nPos1 := aScan(aHeader,{|aAux| Upper(Alltrim(aAux[2])) == "ZK_DATA"})
 
 For nxI := 1 To Len(aCols)
+
 	dbSelectArea("SZK")
 	dbSetOrder(1)
 	dbSeek(xFilial("SZK")+cCodSet+cMesAtu+DTOS(aCols[nxI,nPos1]))

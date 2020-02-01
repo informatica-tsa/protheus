@@ -15,8 +15,7 @@ Local nVer747:=0
 Local aVerb  :={} 
 Local nExed  :=0  
 Local nVerb  :=0
-
-
+Local i := 0
 	
 If SRA->RA_SEGUROV = '01' .AND. SRA->RA_CATFUNC='M'
 
@@ -45,7 +44,7 @@ If SRA->RA_SEGUROV = '01' .AND. SRA->RA_CATFUNC='M'
   //Gerar Verba 843 Seguro Metlyfe
 		AADD(aVerb,{'843',((SRA->RA_SALARIO*20)*0.063725)/1000})  
    
-   For i:=1 to 5
+   For i := 1 to 5
 	  		dbSelectArea("SRC")    		
 	  		RecLock('SRC',!dbSeek(SRA->RA_FILIAL+SRA->RA_MAT+aVerb[i,1]+SRA->RA_CC))
 	  		Replace RC_FILIAL With SRA->RA_FILIAL 

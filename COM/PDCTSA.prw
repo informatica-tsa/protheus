@@ -30,6 +30,7 @@ Local nXy
 Local cQuery:= ""
 Local cCrysDa:= ""
 Local cPerg := "PDCTSA"
+Local nXi := 0
 
 Private cDesc1:= cDesc2:= cDesc3:= cDesc4:= cDesc5:= ""
 
@@ -180,7 +181,7 @@ EndIf
 
 //Inclui linhas em branco para posicionar o rodape no final da 1 pagina
 If nQtdItem < 14
-	For nXi:= 1 To (14-nQtdItem)
+	For nXi := 1 To (14-nQtdItem)
 		cItem:= SOMA1(cItem)
       DbSelectArea("SZH") //Itens do Pedido
       DbSetOrder(1) //Filial + Pedido + Item

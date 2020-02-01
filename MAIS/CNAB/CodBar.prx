@@ -35,6 +35,9 @@
 //\--------------------------------------------------------------------------/
 
 USER FUNCTION CodBar()
+
+Local i := 0
+
 SETPRVT("cStr,lRet,cTipo,nConta,nMult,nVal,nDV,cCampo,i,nMod,nDVCalc")
 
 M->E2_CODBAR := iIf(LEN(AllTrim(M->E2_CODBAR))<44,AllTrim(M->E2_CODBAR)+REPL("0",47-LEN(AllTrim(M->E2_CODBAR))),AllTrim(M->E2_CODBAR))

@@ -71,9 +71,11 @@ Static Function GetMsgNota(cTpNf,lAddMsg)
 *********************************************************************************************
 *
 *****
+
 Local cRet     := ''
 Local cAuxi    := ''
 Local nLinAuxi := 0
+Local nXi := 0
 
 If cTpNf == 'S' .and. lAddMsg // Nota de saida
 

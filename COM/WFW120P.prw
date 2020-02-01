@@ -34,6 +34,7 @@ User Function WFW120P()
 **
 Local aAreaOld := GetArea()
 Local aAreaSC7 := SC7->(GetArea())
+Local nXi := 0
 
 If Funname() == 'MATA121'
 	If Altera .and. !Empty(aSC7Old) .and. Empty(aItenDiv)

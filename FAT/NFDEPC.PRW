@@ -129,6 +129,9 @@ Static Function RptDetail()
 *
 ***
 
+Local I  := 1
+Local nI2 := 0 
+
 SetRegua(Val(cNotaFina)-Val(cNotaInic))
 
 dbSelectArea("SF2")
@@ -245,7 +248,6 @@ While (! Eof()) .And. (SF2->F2_Filial == xFilial("SF2")) .And. (SF2->F2_Doc <= c
     xLUCRO     := {}                           // Margem de Lucro p/ ICMS Solidario
     xCLFISCAL  := {}
     xPESO_LIQ  := 0
-    I          := 1
     nPercISS   := 0
 
     For I := 1 to Len(xCOD_PRO)
@@ -683,6 +685,9 @@ Return .T.
 
 
 Static Function TestaSX1()
+
+Local nxY := 0
+Local nxZ := 0
 
 aPerguntas := {}
 

@@ -18,6 +18,7 @@ User Function ValidHora()
 
 Local   lRet      := .T.   
 Local   cCodGerHr := GetMv("US_GRHREX")
+Local 	nxJ := 0
 Private cMes      := PARAMIXB[01]
 Private cHoraFunc := "M->ZB_HrMes"+cMes
 Private cHrFuncio := "ZB_HRMES"+cMes

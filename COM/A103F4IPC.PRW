@@ -44,6 +44,7 @@ Local aCab, aNew, nAuxNew
 Local lContinua := .T.
 Local oDlgPed
 Local oQual
+Local nAuxCNT := 0
   
 #IFDEF SHELL
   	cVar := M->D1_COD
@@ -187,6 +188,8 @@ Local aArea		:= GetArea()
 Local aAreaSC7	:= SC7->(GetArea())
 Local aAreaSF4	:= SF4->(GetArea())
 Local aAreaSB1	:= SB1->(GetArea())
+Local ny := 0
+Local nCntFor := 0
 
 If Type("lPreNota") == Nil
    lPreNota := .F.

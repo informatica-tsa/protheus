@@ -81,9 +81,11 @@ Static Function GravTrab()
 *
 ****
 
+Local nXi := 0
+
 cSituaca   :=""
 // Situação
-For nXi:=1 To Len(MV_PAR09)
+For nXi := 1 To Len(MV_PAR09)
 	If Substring(MV_PAR09,nXi,1)<>'*'
 		cSituaca+="'"+Substring(MV_PAR09,nXi,1)+If(nXi==Len(MV_PAR09),"'","',")
 	Endif

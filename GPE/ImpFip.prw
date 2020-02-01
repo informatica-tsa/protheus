@@ -51,6 +51,8 @@ Local cArqsFip:=""
 Local aArqFIP:={}
 Local nXi:=0    
 Local nProc:=0
+Local nFip := 0 
+
 Private cCompet:=""
 Private nTipoArq:=0
 Private cCodAtiv:="00"
@@ -66,7 +68,7 @@ cDireArqu:=If(Empty(MV_PAR04),cDireArqu,Alltrim(MV_PAR04))
 lGerMov=(MV_PAR05==1)   
 lGerResumo=(MV_PAR07==1)   
 
-For nFip:=1 To 2   
+For nFip := 1 To 2   
 	nTipoArq:=nFip
 	cArqsFip:=cDireArqu+'FIP'+StrZero(nFip,1)+MV_PAR01
 	Adir(cArqsFip+'*.CSV',aArqFIP)
@@ -102,6 +104,8 @@ Local nBtLidos:=0
 Local nXz:=0     
 Local aDiasFip:={}
 Local lHEFunc:=.T.
+Local nXy := 0
+ 
 Private aExistFIP:={}
 Private cMat:=Space(6)
 Private cConta:=""
@@ -206,7 +210,7 @@ While nBtLidos < nTamFile  .And. cBuffer<>''
 				nXe:=1
 				
 			    // Codigo de Atividades
-				For nXy:=1 to Len(cCodAtiv)
+				For nXy := 1 to Len(cCodAtiv)
 					If Substr(cCodAtiv,nXy,1)=='#'
 						nXe++
 						nXy++
@@ -489,11 +493,12 @@ Local cMesFip:=StrZero(If(Substr(cAnoMes,5,2)=='01',12                    ,Val(S
 Local cAnoFip:=StrZero(If(Substr(cAnoMes,5,2)=='01',Val(Left(cAnoMes,4))-1,Val(Left(cAnoMes,4)))   ,4)
 Local dUltDiaMes:=LastDay(Stod(cAnoFip+cMesFip+'01'))
 Local aFIP:={}
+Local nXy := 0
 
 cDataIni:='99999999'
 cDataFim:=''
 
-For nXy:=1 To 31
+For nXy := 1 To 31
 		nDiaIni++
 		cDiaFip:=StrZero(nDiaIni,2)
 		If (cAnoFip+cMesFip+cDiaFip) > Dtos(dUltDiaMes)

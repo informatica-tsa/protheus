@@ -25,9 +25,12 @@ User Function MODSZZ(cAlias,nRecno,nOpcx)
 * Monta a tela de Manutenção
 *
 *****
+
 Local cTitulo:="Consulta Medição"
 Local aR:={}
 Local aC:={}
+Local nxI := 0
+
 Private aHeader:={}
 Private aCols:={} 
 Private acont:={}
@@ -112,6 +115,10 @@ Static Function GravaSZZ(nOpcx)
 * Grava os Dados
 *
 ****
+
+Local nHead := 0
+Local nGrvZZZ := 0
+ 
 //Local nGrvSZZ:=0
 Private cCampo:=""
 dbSelectArea("SZZ")
@@ -119,13 +126,13 @@ dbSetOrder(1)
 
 If nOpcx<>5
 	
-	For nGrvZZZ:=1 To Len(Acols)
+	For nGrvZZZ := 1 To Len(Acols)
 		If !GdDeleted(nGrvZZZ)
 			dbSelectArea("SZZ")
 			dbSetOrder(1)			
 			If Reclock("SZZ",!dbSeek(Xfilial("SZZ")+M->ZZ_PERIODO+M->ZZ_MAT))//+GdFieldGet("ZZ3_SBAREA",nGrvZZ3)))
 				//Grava os campos chaves
-				For nHead:=1 To Len(aHeader)
+				For nHead := 1 To Len(aHeader)
 					cCampo:="SZZ->"+aHeader[nHead,2]
 					&cCampo:=GdFieldget(aHeader[nHead,2],nGrvZZZ)
 				Next nHead

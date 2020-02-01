@@ -31,6 +31,7 @@
 
 User Function PEDCOM()
 
+Local nXi := 0
 Local cPedido
 Local aArqs:={Alias(),IndexOrd(),Recno()}
 Local lChamaRel:=.f.
@@ -170,9 +171,10 @@ EndIf
 
 DbSelectArea("SC7")
 DbSetOrder(1)
+
 If DbSeek(xFilial("SC7")+cPedido)
    lChamaRel:=.t.
-   For nXi:=1 To 11
+   For nXi := 1 To 11
        If RecLock("SZG",.t.)
           Replace ZG_FILIAL With xFilial("SZG")          	     
           Replace ZG_PEDIDO With SC7->C7_NUM

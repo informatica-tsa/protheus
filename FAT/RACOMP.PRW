@@ -277,11 +277,14 @@ Static function ProxUtil(dDataIni,nDias)
 * Calcula qual é dia Util
 *
 ****                     
+
 Local dDatafim:=dDataIni
-Local nDiasCor:=1       
-If !empty(dDataIni)
+Local nDiasCor:=1
+Local nxdias := 0       
+
+If ! Empty(dDataIni)
 	While nDiasCor<=nDias
-		For nxdias:=1 to 7
+		For nxdias := 1 to 7
 			If !StrZero(dow(dDatafim+nxdias),2,0)$'07/01' // Sabado e Domingo
 				 dDatafim:=Datavalida(dDatafim+nxdias)
 				 nDiasCor++
@@ -314,6 +317,10 @@ Static Function TestaSX1()
 * Sincroniza a tabela de perguntas SX1
 *
 ******
+
+Local nxY := 0
+Local nxZ := 0
+
 aPerguntas := {}
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -342,6 +349,7 @@ AADD(aPerguntas,{cPerg,"Ate emissao Pedido ?","D",08,0,"G","","","","","","",""}
 
 
 For nxZ := 1 To Len(aPerguntas)
+
     dbSelectArea("SX1")
     RecLock("SX1",!dbSeek(cPerg+StrZero(nxZ,2)))
     Replace  X1_Grupo   With  cPerg

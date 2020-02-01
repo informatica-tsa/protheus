@@ -16,18 +16,19 @@
 
 User Function VALTOTCONTR
 
-Local nSoma:=0
+Local nSoma := 0
+Local nXi := 0
 
 If !Empty(GdFieldGet("Z3_DTFATUR",n))
 	MsgStop("Evento já faturado! Não é permito alteração de valor!")
 	Return(.F.)
 EndIf
 
-For nXi:=1 To Len(aCols)
+For nXi := 1 To Len(aCols)
 	If nXi<>n   
-		nSoma+=GdFieldGet("Z3_VALOR",nXi)
+		nSoma += GdFieldGet("Z3_VALOR",nXi)
 	Else
-		nSoma+=M->Z3_VALOR
+		nSoma += M->Z3_VALOR
 	EndIf
 	If nSoma > SZ1->Z1_VRPREV
 		MsgStop("Valores dos Eventos maior que o valor do Contrato!")	

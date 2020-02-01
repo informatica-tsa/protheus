@@ -2,6 +2,9 @@
 
 User Function TESTSX1()        // incluido pelo assistente de conversao do AP5 IDE em 25/06/01
 
+Local nxY := 0
+Local nxZ := 0 
+
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Declaracao de variaveis utilizadas no programa atraves da funcao    ³
 //³ SetPrvt, que criara somente as variaveis definidas pelo usuario,    ³

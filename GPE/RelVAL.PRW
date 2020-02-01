@@ -227,6 +227,9 @@ Static Function ImpRes(oPrint,nLin)
 *
 *
 *******          
+
+Local nCount := 0
+
 oPrint:EndPage()
 oPrint:StartPage()
 ImpCab(oPrint,2)	
@@ -247,7 +250,8 @@ oPrint:Line(nLin,990,nLinFim,990)
 oPrint:Line(nLin,1390,nLinFim,1390)
 oPrint:Line(nLin+50,50,nLin+50,2000)
 nLin+=70
-For nCount:=1 To Len(aResTp)
+
+For nCount := 1 To Len(aResTp)
 	oPrint:Say(nLin,060,aResTp[nCount,1]+'-'+Tabela("Z4",aResTp[nCount,1]),oFont10)
 	oPrint:Say(nLin,750 ,TransForm(aResTp[nCount,2],"@E 99999.99"),oFont10,,,,2)
 	oPrint:Say(nLin,1150,TransForm(aResTp[nCount,3],"@E 999,999.99"),oFont10,,,,2)
@@ -257,6 +261,7 @@ For nCount:=1 To Len(aResTp)
 	nTot3+=aResTp[nCount,2]+aResTp[nCount,3]
 	nLin+=60
 Next nCount
+
 oPrint:Box(nLinFim+10,50,nLinFim+(50*2),2000)
 oPrint:Line(nLinFim+10,590,nLinFim+(50*2),590)
 oPrint:Line(nLinFim+10,990,nLinFim+(50*2),990)

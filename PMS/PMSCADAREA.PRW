@@ -27,9 +27,12 @@ User Function InputArea(cAlias,nRecno,nOpcx)
 * Monta a tela de Manutenção
 *
 *****
+
 Local cTitulo:="Cadastro de Area / Sub-Area"
 Local aC:={}
 Local aR:={}
+Local nxI := 0
+
 Private aHeader:={}
 Private aCols:={}
 
@@ -98,24 +101,32 @@ Static Function GravaZZ3(nOpcx)
 * Grava os Dados
 *
 ****
-Local nGrvSZT:=0
+Local nGrvSZT := 0
+Local nHead := 0
+Local nGrvZZ3 := 0
+
 Private cCampo:=""
+
 dbSelectArea("ZZ3")
 dbSetOrder(1)
+
 If nOpcx<>5
 	//CQuery:=" DELETE "+RetSqlName("ZZ3")+" Where ZZ3_PROJET='"+M->ZZ3_PROJET+"' AND ZZ3_AREA='"+M->ZZ3_AREA+"'"
 	//TcSqlExec(cQuery)
 	
-	For nGrvZZ3:=1 To Len(Acols)
+	For nGrvZZ3 := 1 To Len(Acols)
+
 		If !GdDeleted(nGrvZZ3)
 			dbSelectArea("ZZ3")
 			dbSetOrder(1)			
 			If Reclock("ZZ3",!dbSeek(Xfilial("ZZ3")+M->ZZ3_PROJET+M->ZZ3_AREA+GdFieldGet("ZZ3_SBAREA",nGrvZZ3)))
 				//Grava os campos chaves
-				For nHead:=1 To Len(aHeader)
+
+				For nHead := 1 To Len(aHeader)
 					cCampo:="ZZ3->"+aHeader[nHead,2]
 					&cCampo:=GdFieldget(aHeader[nHead,2],nGrvZZ3)
 				Next nHead
+
 				Replace  ZZ3_FILIAL With xFilial("ZZ3"),;
 				         ZZ3_PROJET With M->ZZ3_PROJET,;
    				   	ZZ3_AREA   With M->ZZ3_AREA,  ;

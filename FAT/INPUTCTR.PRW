@@ -111,6 +111,8 @@ RETURN
 */
 // Substituido pelo assistente de conversao do AP5 IDE em 25/06/01 ==> FUNCTION FMonTela
 Static FUNCTION FMonTela()
+
+Local nxI := 0
 Local aPosObj   := {} 
 Local aObjects  := {}                        
 Local aSize     := MsAdvSize(.F.,.F.) 
@@ -281,6 +283,9 @@ RETURN
 */
 // Substituido pelo assistente de conversao do AP5 IDE em 25/06/01 ==> FUNCTION FGravaArq
 Static FUNCTION FGravaArq()
+
+Local nxi := 0
+Local nxJ := 0 
 
 //  Gravar dados no SZ1
 //  Se nao existe append
@@ -479,6 +484,8 @@ RETURN
 // Substituido pelo assistente de conversao do AP5 IDE em 25/06/01 ==> Function MontaEven
 Static Function MontaEven()
 
+Local nxI := 0
+
 aHeader  := {}
 aCols    := {}
 DbSelectArea("SX3")
@@ -617,6 +624,9 @@ Return lRet
 // Substituido pelo assistente de conversao do AP5 IDE em 25/06/01 ==> Function GravEven
 Static Function GravEven()
 
+Local nXi := 0
+Local nxJ := 0
+ 
 If PARAMIXB =="V"
    Close(oDlg3)
    Return

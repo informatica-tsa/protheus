@@ -13,6 +13,7 @@ Return
 Static Function RunProc()
 
 Local cSZBMes := ""
+Local nXA := 0
 
 dbSelectArea("SZB")
 dbSetOrder(1)

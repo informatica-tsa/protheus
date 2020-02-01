@@ -569,8 +569,10 @@ Static Function ItensPC(oPrint,nLinha,aItensPC,cAliasTemp,aDadosFor,cChaveOld,aD
 *********************************************************************************
 * 
 ***        
+
 Local aAuxi   := {}
 Local nAjuste := 0
+Local nXi := 0
 
 oPrint:Box(nLinha,0050,nLinha+1150,2300) //Box Itens
 // Titulos das colunas dos itens
@@ -711,9 +713,11 @@ Static Function RodaPC(oPrint,nLinha,cNumPed,nTotPed,cCondPad,lPedLib,cCondPad,c
 *********************************************************************************
 * 
 ***
+
 Local aAssina    := {}
 Local cPrzEntreg := ""
 Local cPrzIniFim := ""
+Local nXi := 0
                   
 dbSelectArea("SC8")
 SC8->(dbSetOrder(1))//C8_FILIAL+C8_NUM+C8_FORNECE+C8_LOJA
@@ -769,9 +773,11 @@ oPrint:Say(nLinha,1250 ,OemToAnsi("C.5 COND. DE FRETE: ")+Iif(cTpFrete=="C","CIF
 nLinha += 50
 oPrint:Line(nLinha,050,nLinha,2300)
 oPrint:Say(nLinha,0060 ,OemToAnsi("C.6 Marcos contratuais: "),oFontCab,100) 
+
 nAuxi := 0
 nAuxi  += 40
-For nXi:=1 To MLCount(cMarcos,150)
+
+For nXi := 1 To MLCount(cMarcos,150)
     oPrint:Say(nLinha+nAuxi,070,StrTran(MemoLine(cMarcos,150,nXi),"#",Space(1)),oFontDad2,1000)       
     nAuxi  += 40
     If nXi >= 4
