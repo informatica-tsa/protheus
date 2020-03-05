@@ -495,7 +495,7 @@ If nPgAtu == 1
 	oPrint:Say(0245,0070,Alltrim(Capital(SM0->M0_ENDCOB))+" - "+ Alltrim(Capital(SM0->M0_BAIRCOB))+" - "+ Alltrim(SM0->M0_CEPCOB),oFontRos,100)
 	oPrint:Say(0295,0070,"Fone: "+SM0->M0_TEL+"      Fax: "+SM0->M0_FAX,oFontRos,100)
 	oPrint:Say(0345,0070,OemToAnsi("CPNJ: ")+Iif(Len(Alltrim(SM0->M0_CGC))==14,Transform(SM0->M0_CGC,"@R 99.999.999/9999-99"),Transform(SM0->M0_CGC,"@R 999.999.999-99")),oFontRos,100)
-	oPrint:Say(0345,0780,OemToAnsi("Inscrição Municipal: ")+SM0->M0_INSC,oFontRos,100)
+	oPrint:Say(0345,0780,OemToAnsi("Inscrição Estadual: ")+SM0->M0_INSC,oFontRos,100)
 	
 	oPrint:Say(0395,0070,"Comprador: "+sNameComp+"  "+OemToAnsi("Email: ")+GetNewpar("NM_MAILEMP","suprimentos@tsamg.com.br"),oFontRos,100)
 	oPrint:Say(0395,08000,OemToAnsi("Email Nota Fiscal: ")+GetNewpar("NM_MAILNF","tsamg@tsamg.com.br"),oFontRos,100)
