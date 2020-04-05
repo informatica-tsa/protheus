@@ -36,14 +36,15 @@ Local aAreaOld := GetArea()
 Local aAreaSC7 := SC7->(GetArea())
 Local nXi := 0
 
-If Funname() == 'MATA121'
+If  Funname() $ 'MATA121|ENCPEDC' 
 	If Altera .and. !Empty(aSC7Old) .and. Empty(aItenDiv)
 		dbSelectArea("SC7")
 		For nXi := 1 To Len(aSC7Old)     
 			SC7->(dbGoTo(aSC7Old[nXi][1]))
 			If !SC7->(Eof())
 				If RecLock("SC7",.F.)
-					Replace C7_CONAPRO With aSC7Old[nXi][2]
+					Replace C7_CONAPRO 	With aSC7Old[nXi][2]
+					Replace C7_APROV 	With aSC7Old[nXi][3]
 					SC7->(MsUnLock())
 				EndIf
 			EndIf
@@ -54,9 +55,11 @@ EndIf
 If l120Auto
 	Return(.T.)
 Endif
+
 If MsgBox("Deseja carregar mensagens padrao do contrato?","Atencao","YESNO",2)
    DialMsgFim()
 EndIf
+
 RestArea(aAreaOld)
 RestArea(aAreaSC7)
 
