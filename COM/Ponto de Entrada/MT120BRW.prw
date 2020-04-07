@@ -19,7 +19,7 @@ User Function MT120BRW
 *
 **
 aAdd(aRotina,{"E-mail"   ,'U_MailLib()',0,4})
-aAdd(aRotina,{"Inf Ad"   ,'U_WFW120P()',0,4})
+aAdd(aRotina,{"Inf Ad"   ,'U_LimpaVar()',0,4})
 
 
 
