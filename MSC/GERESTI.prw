@@ -118,7 +118,7 @@ Static Function ImpSZB()
 			   	cGrupoGer := SZB->ZB_GrupGer
 		   	endif
 			
-			/*if !dbSeek(xFilial("CT1")+cGrupoGer) .And. cEmpAnt='01' 
+			if !dbSeek(xFilial("CT1")+cGrupoGer) //Valida se o grupo gerencial existe
 			   If SZB->ZB_GrupGer$cMensCT1
 			   	Msgbox("Atenção, Grupo Gerencial: "+SZB->ZB_GrupGer+" Não Encontrado no Cadastro de Plano de Contas !, Informe ao setor contábil")
 			   	lMensagem:=.f.
@@ -127,7 +127,7 @@ Static Function ImpSZB()
 				dbSelectArea("SZB")
 				dbSkip()
 				Loop
-			Endif*/
+			Endif
 		
 			For i := 1 to 12      
 				if (SZB->ZB_ANO == '2013' .and. i >= 10 ) // ele processa 2013 até o mes 09
@@ -147,7 +147,7 @@ Static Function ImpSZB()
 		   	dbOrderNickName("GRP2") // CT1_FILIAL + CT1_GRUPO2 + CT1_CONTA
 		   	dbGotop()          
 		   	
-			/*if !dbSeek(xFilial("CT1")+SZB->ZB_GrupGer) .And. cEmpAnt='01' 
+			if !dbSeek(xFilial("CT1")+SZB->ZB_GrupGer) //Valida se o grupo gerencial existe
 			   If SZB->ZB_GrupGer$cMensCT1
 			   	Msgbox("Atenção, Grupo Gerencial: "+SZB->ZB_GrupGer+" Não Encontrado no Cadastro de Plano de Contas !, Informe ao setor contábil")
 			   	lMensagem:=.f.
@@ -156,7 +156,7 @@ Static Function ImpSZB()
 				dbSelectArea("SZB")
 				dbSkip()
 				Loop
-			Endif*/
+			Endif
 		
 			For i := 1 to 12
 				if (SZB->ZB_ANO == '2013' .and. i < 10 ) // ele processa 2013 a partir do mes 10
