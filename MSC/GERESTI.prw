@@ -91,8 +91,8 @@ Static Function ImpSZB()
 	
 	cQuery  := " DELETE FROM "+RetSqlName("SZ0")
 	cQuery  += " WHERE Z0_LINHA in ('ZZ','PC', 'EM') AND Z0_FILIAL IN (" + cListFil + ") AND"
-	cQuery  += "       Z0_REVISAO <> '' AND "
-	cQuery  += "       Z0_REVISAO BETWEEN '"+MV_PAR01+"' AND '"+MV_PAR02+"' AND Z0_VEICULO != 'S' "
+	cQuery  += "       Z0_REVISAO <> '' "
+	//cQuery  += " AND   Z0_REVISAO BETWEEN '"+MV_PAR01+"' AND '"+MV_PAR02+"' AND Z0_VEICULO != 'S' " SEMPRE EXCLUIR AS REVISOES AO GERAR ESTIMADO | Z0_VEICULO NAO POSSUI REVISAO PORTANTO NÃO PRECISA DESTA TRATATIVA
 	
 	TCSQLExec(cQuery)
 	lMensagem:=.t.
@@ -102,7 +102,7 @@ Static Function ImpSZB()
 	dbSetOrder(5)
 	SET SOFTSEEK ON
 	dbSeek(Xfilial("SZB")+cRevIni)
-	While ! Eof() .And. SZB->ZB_REVISAO<=cRevFim
+	While ! Eof() .And. SZB->ZB_REVISAO = cRevFim // NÃO TRAZER REVISOES ANTIGAS
 		
 	   IncProc("Importando Revisão.: "+SZB->ZB_REVISAO)
 	              
@@ -118,7 +118,7 @@ Static Function ImpSZB()
 			   	cGrupoGer := SZB->ZB_GrupGer
 		   	endif
 			
-			if !dbSeek(xFilial("CT1")+cGrupoGer) .And. cEmpAnt='01' 
+			/*if !dbSeek(xFilial("CT1")+cGrupoGer) .And. cEmpAnt='01' 
 			   If SZB->ZB_GrupGer$cMensCT1
 			   	Msgbox("Atenção, Grupo Gerencial: "+SZB->ZB_GrupGer+" Não Encontrado no Cadastro de Plano de Contas !, Informe ao setor contábil")
 			   	lMensagem:=.f.
@@ -127,7 +127,7 @@ Static Function ImpSZB()
 				dbSelectArea("SZB")
 				dbSkip()
 				Loop
-			Endif
+			Endif*/
 		
 			For i := 1 to 12      
 				if (SZB->ZB_ANO == '2013' .and. i >= 10 ) // ele processa 2013 até o mes 09
@@ -147,7 +147,7 @@ Static Function ImpSZB()
 		   	dbOrderNickName("GRP2") // CT1_FILIAL + CT1_GRUPO2 + CT1_CONTA
 		   	dbGotop()          
 		   	
-			if !dbSeek(xFilial("CT1")+SZB->ZB_GrupGer) .And. cEmpAnt='01' 
+			/*if !dbSeek(xFilial("CT1")+SZB->ZB_GrupGer) .And. cEmpAnt='01' 
 			   If SZB->ZB_GrupGer$cMensCT1
 			   	Msgbox("Atenção, Grupo Gerencial: "+SZB->ZB_GrupGer+" Não Encontrado no Cadastro de Plano de Contas !, Informe ao setor contábil")
 			   	lMensagem:=.f.
@@ -156,7 +156,7 @@ Static Function ImpSZB()
 				dbSelectArea("SZB")
 				dbSkip()
 				Loop
-			Endif
+			Endif*/
 		
 			For i := 1 to 12
 				if (SZB->ZB_ANO == '2013' .and. i < 10 ) // ele processa 2013 a partir do mes 10
@@ -187,7 +187,7 @@ Static Function ImpSZB()
 	                                                       
 	// Busca os valores orçados da tabela AK2 do PCO
 	if (MV_PAR01 != MV_PAR02)
-		MSGAlert(OemToAnsi('Os parametros Revisões inicial e Final São Diferentes. ' + chr(13) + chr(10) +' Para registro no Fluxo das revisão do PCO (AK2) será utilizada a Revisão final informada.'))
+		MSGAlert(OemToAnsi('Os parametros Revisões inicial e Final São Diferentes. ' + chr(13) + chr(10) +' Para registro no Fluxo das revisão do PCO (AK2) será utilizada a Revisão final informada.'),'Alerta: parametros divergentes.')
 	endif                                                                                                                                                                                               
 
 	FGrvPCO()
@@ -383,7 +383,7 @@ Static Function FGrvSZE()
 	Local lCria		:= .T.
 	Local cDoc		:= ""
 	Local cHist		:= "PREV RESTITUICAO ICMS/ST"
-	Local nTamCPo	:= TamSx3("Z0_DOC")[1]-2
+	//Local nTamCPo	:= TamSx3("Z0_DOC")[1]-2  não esta sendo usada
 	Local cCount	:= StrZero(1,TamSx3("Z0_DOC")[1]-2)
 
 	dbSelectArea("SZE")
