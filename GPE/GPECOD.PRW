@@ -22,9 +22,9 @@ User Function CodGpe(cTipo)
 	Local nIncre := 1
 	Local cPrimeira := ""
 	
-	
-	If     cTipo == '1' 
-		cQuery:="SELECT TOP 1 RA_MAT FROM "+RetSqlName("SRA")+" WHERE D_E_L_E_T_ = '' AND RA_MAT LIKE '00%' ORDER BY RA_MAT DESC" //FUNCIONARIO
+	//1=Normal;2=Pj;3=Estagiario;4=Autonomo;5=Diretor;6=Aprendiz                                                                      
+	If     cTipo == '1' .Or. cTipo == '6'
+		cQuery:="SELECT TOP 1 RA_MAT FROM "+RetSqlName("SRA")+" WHERE D_E_L_E_T_ = '' AND RA_MAT LIKE '00%' ORDER BY RA_MAT DESC" //FUNCIONARIO OU APRENDIZ
 		cPrimeira := "000001"
 	ElseIf cTipo == '2' 
 		cQuery:="SELECT TOP 1 RA_MAT FROM "+RetSqlName("SRA")+" WHERE D_E_L_E_T_ = '' AND RA_MAT LIKE '30%' ORDER BY RA_MAT DESC" //PJ
