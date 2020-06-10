@@ -621,7 +621,7 @@ Static Function GerFipAuto()
 				//Executa a Procedure de Gravação dos Dados....
 				IncProc("Gravando os dados na FIP...") 
 				If SM0->M0_CODIGO == "03"
-				   IncFipeAuto(cMat,cData,nHorasFip,cAnoMes   ,cConta  ,cTipoHr    ,cCodAtiv)
+				   IncFipeAut(cMat,cData,nHorasFip,cAnoMes   ,cConta  ,cTipoHr    ,cCodAtiv)
 				Else
 				   TCSPExec( xProcedures("IMPFIP"),cMat  ,cData          ,nHorasFip      ,cAnoMes   ,cConta  ,cTipoHr    ,cCodAtiv,    0      ,  0    ,cEmpAnt,cFilAnt,'S','S','FIPAUTO')
 				EndIf
@@ -891,7 +891,7 @@ Static Function ProcContab()
 
 Return()
 
-Static Function IncFipeAuto(cMat,cData,nHorasFip,cAnoMes   ,cConta  ,cTipoHr    ,cCodAtiv)
+Static Function IncFipeAut(cMat,cData,nHorasFip,cAnoMes   ,cConta  ,cTipoHr    ,cCodAtiv)
 Local lGeraReg      := .F.
 Local cQuery        := ""
 Local aAreaOld      := GetArea()
