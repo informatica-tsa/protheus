@@ -16,6 +16,8 @@
 
 #include "rwmake.ch"        // incluido pelo assistente de conversao do AP5 IDE em 25/06/01
 #Include "TopConn.ch"
+#include 'fileio.ch
+
 User Function GERESTI()
   
 	Local cPerg:="ESTSZB" 
@@ -40,7 +42,8 @@ User Function GERESTI()
 		@ 20,10 SAY "Econômico. Esta Rotina podera demandar"
 		@ 30,10 SAY " alguns minutos e nao e' recomendavel interrompe-la. Clique em <OK> para confirmar"
 		@ 40,10 SAY " ou <Cancela> para Cancelar."
-		@ 65,120 BMPBUTTON TYPE 01 ACTION (Confirma(),Close(oDlg1))
+		//Pergunte(cPerg,.F.) forca o carregamento das perguntas caso nao seja acionado os parametros
+		@ 65,120 BMPBUTTON TYPE 01 ACTION (Pergunte(cPerg,.F.),Confirma(),Close(oDlg1)) 
 		@ 65,148 BMPBUTTON TYPE 02 ACTION Close(oDlg1)
 		@ 65,178 BMPBUTTON TYPE 05 ACTION Pergunte(cPerg,.T.)
 		
@@ -52,13 +55,25 @@ User Function GERESTI()
 		MsgBox("O Estimado já esta sendo processado por "+Chr(13)+Chr(10)+MemoRead("CalcEstimado"+cEmpAnt+".txt"))
 	endif
 		
-Return
+Return	
 
 
 
 Static Function Confirma()
 
-	Processa( {|| IMPSZB() },"Importando Registros da Tabela SZB para a SZ0","Alterando Registro ..." )
+	Local cMes := MV_PAR02
+	Local cMesAnt := AnoMes(MonthSub(CTOD("01/"+RIGHT(ALLTRIM(cMes),2)+"/"+LEFT(ALLTRIM(cMes),4)),1))
+
+	If !ChecaRev(ALLTRIM(cMes))
+		If ChecaRev(cMesAnt)
+			GravaLog("log-Estimado-"+cEmpAnt+".log","Iniciado com sucesso! RevIni:"+MV_PAR01+"RevFim:"+MV_PAR02)
+			Processa( {|| IMPSZB() },"Importando Registros da Tabela SZB para a SZ0","Alterando Registro ..." )
+		Else
+			MsgBox("A Rev. ("+cMesAnt+") ainda está aberta! Portanto, a Rev ("+cMes+") não pode ser processada.")
+		EndIf
+	Else
+		MsgBox("O Estimado para esta Rev. ("+cMes+") já está fechado!")
+	EndIf
 	
 Return()
 
@@ -101,7 +116,7 @@ Static Function ImpSZB()
 	dbSelectArea("SZB")
 	dbSetOrder(5)
 	SET SOFTSEEK ON
-	dbSeek(Xfilial("SZB")+cRevIni)
+	dbSeek(Xfilial("SZB")+cRevFim)
 	While ! Eof() .And. SZB->ZB_REVISAO = cRevFim // NÃO TRAZER REVISOES ANTIGAS
 		
 	   IncProc("Importando Revisão.: "+SZB->ZB_REVISAO)
@@ -200,13 +215,82 @@ Static Function ImpSZB()
 	cQuery+="       AND (NOT '000034' IN (SELECT ZA_GRUPGER FROM "+RetSqlName("SZA")+" WHERE ZA_CONTA=Z0_CONTA )) "
 	TcSqlExec(cQuery)     
 	
+	IncProc("Executando query de atualizacao (EXEQUERY)")
+	
 	U_EXEQUERY(StrZero(Year(dDatabase),4)) //Query de atualizaçao do dados
+	
+	IncProc("Executando chamada de procedure...")
+	
+	GrvProcd(cRevFim)
+
+	GravaLog("log-Estimado-"+cEmpAnt+".log","Finalizado com sucesso! RevIni:"+MV_PAR01+"RevFim:"+MV_PAR02)
 	
 	MsgBox("Processo Finalizado !","Termino","INFO")
 	
 Return
 	   
+Static Function GrvProcd(cRef)
+ 
+	Local nResult := -1
 	
+	DO CASE
+		CASE cEmpAnt = '02'
+			nResult := TCSPEXEC("FluxoConsolidacao", cRef)
+		CASE cEmpAnt = '03'
+			nResult := TCSPEXEC("FluxoConsolidacaoLynx", cRef)
+		CASE cEmpAnt = '04'
+			nResult := TCSPEXEC("FluxoConsolidacaoMoc", cRef)
+         OTHERWISE
+         	nResult := -1
+    ENDCASE
+	
+	IF nResult = -1
+		GravaLog("log-cust-procedure-"+cEmpAnt+".log",'Erro na execução da Stored Procedure : '+TcSqlError())
+	Else
+		GravaLog("log-cust-procedure-"+cEmpAnt+".log","Execurado com sucesso! RevIni:"+MV_PAR01+"RevFim:"+MV_PAR02)
+	Endif
+ 
+Return
+
+Static function ChecaRev(cRev)
+
+	Local oFile
+	Local cLinha := ""
+	Local lRet := .F.
+	oFile := FWFileReader():New("log-Ctrl-Rev-Fluxo-"+cEmpAnt+".log")
+	if (oFile:Open())
+	   while (oFile:hasLine())
+	   		cLinha := oFile:GetLine()
+	   		//Conout(cRev)
+			if ALLTRIM(cLinha) == cRev
+				lRet := .T.
+				//Conout(cLinha)
+				Exit
+			EndIf
+	   end
+	   oFile:Close()
+	endif
+
+Return lRet
+
+Static Function GravaLog(cArq,cMsg )
+ 	
+	If !File(cArq)
+		nHandle := FCreate(cArq)
+	else
+		nHandle := fopen(cArq , FO_READWRITE + FO_SHARED )
+	Endif
+
+	If nHandle == -1
+		MsgStop('Erro de abertura : FERROR '+str(ferror(),4))
+	Else
+		FSeek(nHandle, 0, FS_END) 
+		FWrite(nHandle, Dtoc(Date())+" - "+Time()+" : "+cUserName+" : "+cMsg+Chr(13)+Chr(10))
+		fclose(nHandle) 
+	Endif
+	
+ 
+return
 
 Static Function FGravaSz0(cMesRefe)
 	

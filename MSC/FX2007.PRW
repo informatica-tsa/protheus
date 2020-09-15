@@ -53,6 +53,8 @@ Static Function Confirma()
 			If File("log-fluxo-"+cEmpAnt+".log")//Arquivo de log do fluxo.
 		  		FErase("log-fluxo-"+cEmpAnt+".log")
 			Endif
+
+			GravaLog("log-fluxo-"+cEmpAnt+".log","Iniciado com sucesso!")
 			
 			//LIMPA TABELA ANTES DE REALIZAR O PROCESSAMENTO
 			cQuery  := " DELETE FROM "+RetSqlName("SZ0")
@@ -77,6 +79,7 @@ Static Function Confirma()
 			Endif
 			FWrite(FCreate("Fluxo-"+cEmpAnt+".txt"),"Usuário: "+cUserName+Chr(13)+Chr(10)+" Data da Ultima geração do Fluxo:"+Dtoc(Date())+" - "+Time())
 		  	FErase("CalcFluxo-"+cEmpAnt+".txt")
+			GravaLog("log-fluxo-"+cEmpAnt+".log","Finalizado com sucesso!")
 			MsgBox("O Fluxo Gerencial "+sAnoAt+" processado com sucesso.")
 		Else
 			MsgBox("O Fluxo Gerencial já esta sendo processado por "+Chr(13)+Chr(10)+MemoRead("CalcFluxo"+cEmpAnt+".txt"))
@@ -92,3 +95,22 @@ Static Function Cancela()
 	Close(oDlg1)
 
 Return
+
+Static Function GravaLog(cArq,cMsg )
+ 	
+	If !File(cArq)
+		nHandle := FCreate(cArq)
+	else
+		nHandle := fopen(cArq , FO_READWRITE + FO_SHARED )
+	Endif
+
+	If nHandle == -1
+		MsgStop('Erro de abertura : FERROR '+str(ferror(),4))
+	Else
+		FSeek(nHandle, 0, FS_END) 
+		FWrite(nHandle, Dtoc(Date())+" - "+Time()+" : "+cUserName+" : "+cMsg+Chr(13)+Chr(10))
+		fclose(nHandle) 
+	Endif
+	
+ 
+return
