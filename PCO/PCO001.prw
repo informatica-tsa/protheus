@@ -32,10 +32,19 @@ User Function PCO001 (cCC)
 		DO CASE
 			CASE cClassi == 'D'
 				cXco := POSICIONE("SB1", 1, xFilial("SB1")+c1Produto, "B1_CTADESP")
+				if ALLTRIM(cXco) == ''
+					MSGALERT("Gentileza verificar junto a setor contábil: Conta orçamentária de Despesa não está preenchida no cadastro deste produto("+ALLTRIM(c1Produto)+")!","Cadastro de produto.")
+				EndIf
 			CASE cClassi == 'C'
 				cXco := POSICIONE("SB1", 1, xFilial("SB1")+c1Produto, "B1_CTACONS")
+				if ALLTRIM(cXco) == ''
+					MSGALERT("Gentileza verificar junto a setor contábil: Conta orçamentária de Consumo não está preenchida no cadastro deste produto("+ALLTRIM(c1Produto)+")!","Cadastro de produto.")
+				EndIf
 			CASE cClassi == 'I'
 				cXco := POSICIONE("SB1", 1, xFilial("SB1")+c1Produto, "B1_CTACONS")
+				if ALLTRIM(cXco) == ''
+					MSGALERT("Gentileza verificar junto a setor contábil: Conta orçamentária de Consumo não está preenchida no cadastro deste produto("+ALLTRIM(c1Produto)+")!","Cadastro de produto.")
+				EndIf
 		ENDCASE       
 	else      
 		/******************************************************************************
@@ -53,6 +62,9 @@ User Function PCO001 (cCC)
 		cFim = SubStr( cTemp, 7, 4 )
 		cMeio = PADL(ALLTRIM(STR(VAL(cFilAnt) - 19)),2,"0")
  		cXco := cIni+cMeio+cFim
+ 		if ALLTRIM(cXco) == ''
+			MSGALERT("Gentileza verificar junto a setor contábil: Conta orçamentária para CEI não está preenchida no cadastro deste produto("+ALLTRIM(c1Produto)+")!","Cadastro de produto.")
+		EndIf
  		
 	endif             
 	                          
