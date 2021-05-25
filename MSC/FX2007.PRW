@@ -1,5 +1,6 @@
 #include "rwmake.ch"        // incluido pelo assistente de conversao do AP5 IDE em 25/06/01
 #include "TopConn.ch"
+#include 'fileio.ch
 
 	/*
 	‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
