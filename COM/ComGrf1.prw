@@ -692,7 +692,7 @@ nLinha += 100
 	
 
 If Len(aItensPC) > 21    
-   If(Type(cMarcos)== "U",cMarcos := "",)//##### THIAGO #### VERIFICA SE A VARIAVEL EXISTE, SENÃO CRIA VAZIO ####
+   //If(Type(cMarcos)== "U",cMarcos := "",)//##### THIAGO #### VERIFICA SE A VARIAVEL EXISTE, SENÃO CRIA VAZIO ####
    RodaPC(oPrint,@nLinha,cChaveOld,nTotPed,cCondPad,lPedLib,cCondPad,cTpFrete,cDetCot,cMarcos)
    For nXi := 22 To Len(aItensPC)
        Aadd(aAuxi,aItensPC[nXi])
