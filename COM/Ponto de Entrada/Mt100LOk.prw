@@ -23,6 +23,8 @@ Local lRet      := .T.
 Local nPosCC    :=  0 
 Local nPosConta :=  0 
 Local nPosRatei :=  0 
+Local nPosref 	:=  0 
+Local nPosPed 	:=  0 
 Local aAreaOld  := GetArea()
 Local aAreaSD2  := SD2->(GetArea())
 Local aAreaSF1  := SF1->(GetArea())
@@ -31,6 +33,17 @@ Local aAreaSC6  := SC6->(GetArea())
 nPosCC    := aScan(aHeader,{|aAux|alltrim(aAux[2]) == "D1_CC"})
 nPosConta := aScan(aHeader,{|aAux|alltrim(aAux[2]) == "D1_CONTA"})
 nPosRatei := aScan(aHeader,{|aAux|alltrim(aAux[2]) == "D1_RATEIO"})
+
+nPosref   := aScan(aHeader,{|aAux|alltrim(aAux[2]) == "D1_DTREF"})
+nPosPed   := aScan(aHeader,{|aAux|alltrim(aAux[2]) == "D1_PEDIDO"})
+
+if !EMPTY(aCols[n,nPosPed])
+	if (!U_zValidaDate(aCols[n,nPosref],0,.F.,.F.,.F.))
+		MsgBox("Alterar data de entrega do pedido para o mês atual. Linha: "+cvaltochar(n)+" Data: "+cvaltochar(aCols[n,nPosref]),"Operação não permitida","STOP")		
+		//lRet := .F.
+		lRet := SenhaSkip()
+	EndIf
+EndIf
 
 If !aCols[n,Len(aHeader)+1]
 	If  !(aCols[n,nPosRatei] $ "1")
@@ -65,12 +78,6 @@ EndIf
 
 nPosTES 	:= aScan(aHeader,{|x| Alltrim(x[2]) == "D1_TES"})
 
-//If Altera 
-//  If Posicione("SF4",1,xFilial("SF4")+aCols[n,nPosTES],"F4_TRANFIL") <> "1" //Verifica se não é transferencia entre filiais 
-//	lRet:=VldAltSC()
-//  Endif
-//Endif
-
 
 RestArea(aAreaOld)
 RestArea(aAreaSD2)
@@ -79,101 +86,26 @@ RestArea(aAreaSC6)
 
 Return(lRet)
 
+//Somente para agilizar desenho da interface
+/*User Function TSenhaSkip()
 
+Return SenhaSkip()*/
 
-Static Function VldAltSC()
-************************************************************************************************************************************************
-* Valida se há Itens alterados
-*
-*****
+Static Function SenhaSkip()
 
-Local lRet := .T.
-Local aAreaSC := GetArea()
-Local nXi2 := 0
-Local nXi := 0
-cLibAlt := GdFieldGet("C1_LIBALT",1)
+Local cSenha := Space(32)
+Local bOk:={|| If(cSenha==GetMv("MV_ZSALTSC",,"372a53b60256781b1358db8d118e2a1b"),.T.,.F.) }
+Local lOk := .F.
 
-If cLibAlt <> 'S'
-	If !SC1->(dbSeek(Xfilial("SC1")+GdFieldget("C1_PRODUTO",1)+cA110Num+GdFieldget("C1_ITEM",1)))
-		lRet := .f.
-	Endif
-	If dA110Data < Date()
-		lRet := .f.
-	Endif
-	If DataValida(SC1->C1_EMISSAO) < Date() 
-		For nXi := 1 To Len(Acols)
-			// Valida se há novos Itens
-			If !SC1->(dbSeek(Xfilial("SC1")+GdFieldget("C1_PRODUTO",nXI)+cA110Num+GdFieldget("C1_ITEM",nXI)))
-				lRet := .F.	
-			Endif  
-			
-			//Valida a Data de Emissão
-			If lRet .And. dA110Data < Date()
-				lRet := .f.
-			Endif
-			
-			//Verifica  se a Linha foi excluida
-			If lRet .And. Gddeleted(nXi)
-				lRet := .f.                                    
-			Endif
-			//Valida se há campos alterados
-		    If lRet
-		    	For nXi2 := 1 To Len(aHeader)
-		    		xCmp := "SC1->"+aHeader[nXi2,2]
-		    		If lRet .And. GdFieldGet(aHeader[nXi2,2],nXi)<>&xCmp
-		    			lRet := .F.
-		    			Exit
-		    		Endif
-		    	Next nXi2
-		    Endif
-		    If !lRet
-		    	Exit
-		    Endif
-		Next nXi
-	Endif
-	If !lRet
-		If SenhaAlt()
-			lRet := .T.
-		Endif
-	Endif
-Endif	
-RestArea(aAreaSC)
+@ 000,000 TO 210,400 DIALOG oDlg TITLE "Senha de Liberação"
+@ 005,005 TO 089,190 TITLE "Autorizar lançamentos fora do padrão de data na linha: "+cvaltochar(n)
+//@ 005,005 TO 089,190 TITLE "Autorizar lançamentos fora do padrão de data"
+@ 20,007 SAY "Senha de Liberação: "
+@ 20,060 GET cSenha SIZE 100,300 Valid !Empty(cSenha) PASSWORD
 
-Return(lRet)
+@ 050,10 BMPBUTTON Type 01 ACTION  (If(Eval(bOk),(oDlg:End(),lOk:=.T.),(lOk:=.F.,Alert("Senha Incorreta"))))
+@ 050,40 BMPBUTTON Type 02 ACTION  (lOk:=.F.,oDlg:End())
 
-
-
-Static Function SenhaAlt()
-*************************************************************************************************************************************************
-*
-*
-****
-Local cSenha := Space(6)
-Local bOk:={|| If(cSenha==GetMv("MV_SALTSC",,"SENHA "),.t.,.F.) }
-Local lok := .F.
-
-DEFINE MSDIALOG oDlg TITLE "Senha de Liberação" FROM 0,0 TO 100,250 OF oMainWnd Pixel
-
-@ 01,05 Say " Solicitação de Compras com mais de 2 Dias" PIXEL OF oDlg
-@ 10,05 Say " Informe a Senha de Liberação:" PIXEL OF oDlg
-@ 10,83 Get cSenha Valid !Empty(cSenha) PASSWORD PIXEL OF oDlg
-
-DEFINE SBUTTON FROM 30, 10   TYPE 1 ENABLE OF oDlg ACTION (If(Eval(bOk),(oDlg:End(),AtuLin(),lOk:=.T.),(lOk:=.F.,Alert("Senha Incorreta"))))
-DEFINE SBUTTON FROM 30, 40   TYPE 2 ENABLE OF oDlg ACTION (lOk:=.F.,oDlg:End())
-ACTIVATE MSDIALOG oDlg CENTERED 
+ACTIVATE DIALOG oDlg CENTERED
 
 Return(lOk)
-
-
-Static Function AtuLin()
-************************************************************************************************************************************************
-*
-*
-******
-
-Local nXI := 0
-
-For nXi:=1 to Len(ACols)
-	GdFieldPut("C1_LIBALT",'S',nXi)
-Next nXi
-Return()
