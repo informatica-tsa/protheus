@@ -392,15 +392,19 @@ Static Function FGrvPCO()
 		do case 
 			case QAKD->AKD_TPSALD == 'PC'
 				if (QAKD->AKD_TIPO == '1')
-		   			cHist	:= 'EMPENHADO AKD - '
+		   			cHist	:= 'EMPENHADO AKD - ' // NA GERACAO DO PEDIDO
 		  		else
-		  			cHist	:= 'BAIXA EMPENHADO AKD - '                                                                      
+				  	if (QAKD->AKD_PROCES != '000056')
+		   				cHist	:= 'BAIXA EMPENHADO AKD - '  //NA ENTRADA DA NOTA
+					else
+						cHist	:= ''  //ELIMINA RESIDUO PC TIPO 2                                                              
+					endif                                                                 
 		  		endif
 			case QAKD->AKD_TPSALD == 'EM'
 				if (QAKD->AKD_TIPO == '1')
-					cHist  	:= 'DEBITO EMPENHADO - '
+					cHist  	:= 'DEBITO EMPENHADO - ' // NA GERACAO DO PEDIDO
 				else                                 
-					cHist  	:= 'BAIXA DEBITO EMPENHADO - '
+					cHist  	:= 'BAIXA DEBITO EMPENHADO - ' //NA ENTRADA DA NOTA 
 				endif
 			otherwise
 				cHist  	:= 'ESTIMADO AKD - '
