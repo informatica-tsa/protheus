@@ -1,3 +1,85 @@
+#INCLUDE "totvs.ch"
+#INCLUDE "protheus.ch"
+#INCLUDE "rwmake.ch"
+
+//-------------------------------------------------------------------
+/* {Protheus.doc} MT100LOK
+Ponto de Entrada Doc Entrada 
+Utilizado para validação saldo do projeto TSA 
+
+@protected TSA
+@author    Alex T. Souza
+@since     12/09/2019
+
+Alteracoes Realizadas desde a Estruturacao Inicial
+Data       Programador     Motivo
+/*/
+//-------------------------------------------------------------------
+User Function MT100LOK()
+Local aArea 		:= GetArea()
+Local nPSD1DtEnt   	:= aScan(aHeader,{|x| AllTrim(x[2]) == "D1_ZDTENT"})
+Local nPSD1Proj	 	:= aScan(aHeader,{|x| Alltrim(x[2]) == "D1_ZPRJ"})
+Local nPSD1Taref 	:= aScan(aHeader,{|x| Alltrim(x[2]) == "D1_ZTARE"})
+Local nPosQuant		:= aScan(aHeader,{|x| AllTrim(x[2]) == "D1_QUANT"})
+Local nPosVUnit   	:= aScan(aHeader,{|x| AllTrim(x[2]) == "D1_VUNIT"})
+Local nPosPc		:= aScan(aHeader,{|x| AllTrim(x[2]) == "D1_PEDIDO"})
+Local nPosItem   	:= aScan(aHeader,{|x| AllTrim(x[2]) == "D1_ITEM"})
+Local oSaldo
+Local nAbatSC		:= 0
+Local nAbatPC		:= 0
+Local lRet			:= .t.
+
+	// Chamada de fonte TSA 24/06/2021
+	lRet := TSAFunc()
+
+	If lRet .and. nPSD1DtEnt <> 0 .and. nPSD1Proj <> 0 .and. nPSD1Taref <> 0
+
+		//Posiciona SC7 para retirar valor do pedido do saldo
+		SC7->(DbSetOrder(1))
+		If SC7->(DbSeek(xFilial("SC7")+aCols[n,nPosPc]+aCols[n,nPosItem])) 
+			nAbatPC += (SC7->C7_QUANT-SC7->C7_QUJE)*SC7->C7_PRECO
+			
+			//Posiciona SC1 para retirar valor da SC do saldo
+			SC1->(DbSetOrder(1))
+			If SC1->(DbSeek(xFilial("SC1")+SC7->C7_NUMSC+SC7->C7_ITEMSC))
+				 nAbatSC += (SC1->C1_QUANT-SC1->C1_QUJE)*SC1->C1_XVUNIT	
+			Endif	
+		Endif
+		
+		oSaldo	:= Z_Saldo():New()
+			    
+		// Valor da linha da NF (Quant)*Preco Unitario
+		oSaldo:nValProc		:= aCols[n,nPosQuant]*aCols[n,nPosVUnit]    
+		
+		// Abate valor original do Pedido de Compras
+		oSaldo:nAbatSC		:= nAbatSC 		    		    
+		oSaldo:nAbatPC		:= nAbatPC
+			    
+		oSaldo:cCodFil 		:= 	xFilial("SD1")
+		oSaldo:cCodProj		:=  aCols[n,nPSD1Proj]
+		oSaldo:cCodTarefa 	:=  aCols[n,nPSD1Taref]
+		oSaldo:dDtEnt		:=  aCols[n,nPSD1DtEnt]
+		oSaldo:cCodProc		:= "003"
+		oSaldo:cProcesso	:= "Documento de Entrada"
+	
+	
+		oSaldo:ConsSaldo() 
+		oSaldo:Avalia()
+						
+		If !(oSaldo:lOk)                            
+	        If !IsBlind()	                            
+	        	nDet := Aviso("Bloqueio de Saldo",oSaldo:cMensagem,{"Fechar"},3)
+			Endif	
+			lRet := oSaldo:lOk
+		Endif
+
+
+	Endif	
+
+	RestArea(aArea)
+
+Return lRet
+
 /*
 +-----------------------------------------------------------------------+
 ¦Programa  ¦MT100LOK  ¦ Autor ¦ Crislei de A. Toledo  ¦ Data ¦23.03.2006¦
@@ -12,13 +94,11 @@
 +------------+--------+-------------------------------------------------¦
 ¦            ¦        ¦                                                 ¦
 +------------+--------+-------------------------------------------------+
+Alex Teixeira de Souza
+Fonte anterior TSA MT100LOK
+Ajustado para funçaõ TSAFunc para compatibilização com projeto TOP 24/06/2021
 */
-
-#include "Protheus.ch"
-#include "rwmake.ch"
-
-User Function Mt100LOk()
-
+Static Function TSAFunc()
 Local lRet      := .T.
 Local nPosCC    :=  0 
 Local nPosConta :=  0 
@@ -78,7 +158,6 @@ EndIf
 
 nPosTES 	:= aScan(aHeader,{|x| Alltrim(x[2]) == "D1_TES"})
 
-
 RestArea(aAreaOld)
 RestArea(aAreaSD2)
 RestArea(aAreaSF1)
@@ -109,3 +188,4 @@ Local lOk := .F.
 ACTIVATE DIALOG oDlg CENTERED
 
 Return(lOk)
+

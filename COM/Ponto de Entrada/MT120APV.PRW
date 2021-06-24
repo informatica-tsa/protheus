@@ -70,7 +70,7 @@ While !SC7->(Eof()) .And. xFilial("SC7")+cNumPed == SC7->(C7_FILIAL+C7_NUM)
           SC7->(MsUnLock())
        EndIF
     EndIf   
-   
+    
     SC7->(dbSkip())
 End
 
@@ -101,24 +101,25 @@ Else
          AND AL_VALORMX >= %Exp:Alltrim(Str(nValPed))%
          ORDER BY AL_VALOR,AL_VALORMX
       EndSql
-   EndIf
+   
 
-
-   dbSelectArea(cAliasTMP)
-   (cAliasTMP)->(dbGotop())
-   If !(cAliasTMP)->(Eof())
-      cRet := (cAliasTMP)->AL_COD
+	
+	   dbSelectArea(cAliasTMP)
+	   (cAliasTMP)->(dbGotop())
+	   If !(cAliasTMP)->(Eof())
+	      cRet := (cAliasTMP)->AL_COD
+	   EndIf
+	   dbSelectArea(cAliasTMP)
+	   (cAliasTMP)->(dbCloseArea())
+	            
+	   cQuery := "UPDATE "+RetSqlname("SC7")
+	   cQuery += " SET C7_APROV = '"+cRet+"'"
+	   cQuery += " WHERE C7_FILIAL='"+xFilial("SC7")+"' AND "
+	   cQuery += " C7_NUM='"+cNumPed+"'"
+	   cQuery += " AND D_E_L_E_T_=' ' "
+	   TcSqlExec(cQuery)
+	   TcRefresh("SC7")
    EndIf
-   dbSelectArea(cAliasTMP)
-   (cAliasTMP)->(dbCloseArea())
-            
-   cQuery := "UPDATE "+RetSqlname("SC7")
-   cQuery += " SET C7_APROV = '"+cRet+"'"
-   cQuery += " WHERE C7_FILIAL='"+xFilial("SC7")+"' AND "
-   cQuery += " C7_NUM='"+cNumPed+"'"
-   cQuery += " AND D_E_L_E_T_=' ' "
-   TcSqlExec(cQuery)
-   TcRefresh("SC7")
 EndIf
 
 RestArea(aAreaOld)

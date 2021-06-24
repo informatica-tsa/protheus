@@ -1,19 +1,66 @@
-#INCLUDE "Rwmake.ch"
-/*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
-ฑฑบPrograma  ณMTA120ISC  บ Autor ณ Rodrigo Alves    บ Data ณ  19/12/07  บฑฑ
-ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
-ฑฑบDescricao ณ Esse programa grava os dados do SIGAPCO da Solicitacao paraบฑฑ
-ฑฑบ          ณ pedido de compras direto                                   บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
-/*/
-User Function MT120ISC() 
+#INCLUDE "totvs.ch"
+#INCLUDE "protheus.ch"
+#INCLUDE "rwmake.ch"
 
-LOCAL n
+//-------------------------------------------------------------------
+/* {Protheus.doc} MT120ISC
+Ponto de Entrada F4 Pedido de Compras 
+Manipulacao aCol apos vinculo com solicitacao de compras
+
+@protected TSA
+@author    Alex T. Souza
+@since     16/09/2019
+
+Alteracoes Realizadas desde a Estruturacao Inicial
+Data       Programador     Motivo
+/*/
+//-------------------------------------------------------------------
+User Function MT120ISC()
+Local nPosDTEnt  := aScan(aHeader,{|x| AllTrim(x[2]) == "C7_ZDTENT"})
+Local nPosPrj 	 := aScan(aHeader,{|x| AllTrim(x[2]) == "C7_ZPRJ"})
+Local nPosTare	 := aScan(aHeader,{|x| AllTrim(x[2]) == "C7_ZTARE"})
+Local aArea 	 := GetArea()
+Local nXi,nXj	:= 0
+
+	If nPosDTEnt <> 0 .and. nTipoPed !=	2
+		aCols[n][nPosDTEnt] := SC1->C1_ZDTENT
+	Endif
+
+	If nPosPrj <> 0 .and. nTipoPed !=	2
+		aCols[n][nPosPrj] := SC1->C1_ZPRJ
+	Endif
+
+	If nPosTare <> 0 .and. nTipoPed !=	2
+		aCols[n][nPosTare] := SC1->C1_ZTARE
+	Endif
+
+	// Chamada de fonte TSA 24/06/2021
+	TSAFunc()
+
+	RestArea(aArea)
+
+Return 
+
+//-------------------------------------------------------------------
+/* {Protheus.doc} MT120ISC
+Ponto de Entrada F4 Pedido de Compras 
+Manipulacao aCol apos vinculo com solicitacao de compras
+
+@protected TSA
+@author    Alex T. Souza
+@since     16/09/2019
+
+Alteracoes Realizadas desde a Estruturacao Inicial
+Data       Programador     Motivo
+//-------------------------------------------------------------------
+Alex Teixeira de Souza
+Fonte anterior TSA MT100LOK
+Ajustado para fun็a๕ TSAFunc para compatibiliza็ใo com projeto TOP 24/06/2021
+//-------------------------------------------------------------------
+*/
+
+Static Function TSAFunc()
+Local n
 //LOCAL ctes  
 
 dBSelectArea('SB1')

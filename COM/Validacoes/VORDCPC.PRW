@@ -23,9 +23,15 @@ Local nPosORDC      := aScan(aHeader,{|x| Alltrim(x[2]) == "C7_ORDCOM" })
 Local nPosPROD      := aScan(aHeader,{|x| Alltrim(x[2]) == "C7_PRODUTO" })
 Local nContAux      := 0
 
+// Ajuste realizado Totvs 11/11/2019 
+// Na integração com TOP nao existe essa variavel
+If ValType(cOrdCom) == "U"
+	cOrdCom := Space(6)
+Endif	
+
 //CNTA130-> Geração do pedido pelo modulo de gestão de contratos.
 If Funname()$'CNTA120/CNTA130' .OR. cOrdCom==Nil
-	cOrdCom=Space(6)
+	cOrdCom := Space(6)
 Endif
 
 If Empty(cOrdCom)
@@ -44,5 +50,6 @@ For nContAux = 1 To Len(aCols)
 	EndIf
 	
 Next nContAux
+
 
 Return(cOrdCom)
