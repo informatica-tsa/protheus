@@ -28,10 +28,12 @@ User Function LPDT()        // incluido pelo assistente de conversao do AP5 IDE 
 Local cHISTORICO
 
 //TBH127 - AJUSTE NA REF. DATA CONTABIL
-//Local cDataRF := SubStr(DTOC(PARAMIXB[1]),1,6)+SubStr(DTOC(PARAMIXB[1]),9,2)
-//Local cDataCX := SubStr(DTOC(PARAMIXB[2]),1,6)+SubStr(DTOC(PARAMIXB[2]),9,2)
+
 Local cDataRF := SubStr(DTOC(PARAMIXB[1]),1,6)+SubStr(DTOC(PARAMIXB[1]),7,2)
 Local cDataCX := SubStr(DTOC(PARAMIXB[2]),1,6)+SubStr(DTOC(PARAMIXB[2]),7,2)
+
+Local nDataRF := LEN(AllTrim(DTOC(PARAMIXB[1])))
+Local nDataCX := LEN(AllTrim(DTOC(PARAMIXB[2])))
 
 Local cHistor := PARAMIXB[3]
 Local aArea   := GetArea()
@@ -39,6 +41,13 @@ Local _aArea   		:= {}
 Local _aAlias  		:= {}
 
 CtrlArea(1,@_aArea,@_aAlias,{"SF2","SF3","SF1","SA2","SE1","SE2","CT1","CT5","CTT"}) // GetArea
+
+if nDataRF == 10 
+   cDataRF := SubStr(DTOC(PARAMIXB[1]),1,6)+SubStr(DTOC(PARAMIXB[1]),9,2)
+endif
+if nDataCX == 10 
+   cDataCX := SubStr(DTOC(PARAMIXB[2]),1,6)+SubStr(DTOC(PARAMIXB[2]),9,2)
+endif
 
 If SD1->D1_TIPO <> "D"
    // ALteracao efetuada por Tiago Augusto Gomes em 19/03/01
