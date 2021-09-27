@@ -88,7 +88,7 @@ User Function CHECKSC7(nValor)
 	DbSelectArea("QRAKD")
 	dbclosearea()
 
-	nRvalor := IF(!EMPTY(SC8->C8_NUMSC).AND.SC8->C8_XPCO=="S" .AND. lControl, nValor ,0)
+	nRvalor := IF(!EMPTY(SC8->C8_NUMSC) .AND. SC8->C8_XPCO=="S" .AND. lControl .AND. EMPTY(SC8->C8_ZPRJ), nValor ,0)
 
 Return nRvalor
 
