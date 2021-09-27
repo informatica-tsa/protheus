@@ -220,7 +220,7 @@ WsMethod InsertVagas WsReceive cDadJSON WsSend cMsgJSON WsService zWsRecrutament
 									MsUnlock() 
 									
 									//MSMM(,LEN(cQS_ZATIVI),,cQS_ZATIVI,1,,,"SQS","QS_ZCODATI")
-									MSMM(,LEN(cQS_PERFIL),,cQS_PERFIL,1,,,"SQS","QS_CODPERF")
+									MSMM(,LEN(cQS_PERFIL),,cQS_PERFIL,1,,,"SQS","QS_CODPERF","SYP",)
 									
 									//JSON de retorno
 									::cMsgJSON += ' {                               '    + CRLF
