@@ -84,7 +84,7 @@ Local nXi
 			    
 	// Valor da linha do PC	 (Quant)*Preco Unitario
 		
-	If !Empty(aCols[n,nPSC7Proj])
+	If !Empty(Alltrim(aCols[n,nPSC7Proj]))
 		
 		oSaldo:nValProc		:= aCols[n,nPosQtd]*aCols[n,nPosPrc]    
 		

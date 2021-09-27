@@ -34,45 +34,47 @@ Local lRet			:= .t.
 
 	If lRet .and. nPSD1DtEnt <> 0 .and. nPSD1Proj <> 0 .and. nPSD1Taref <> 0
 
-		//Posiciona SC7 para retirar valor do pedido do saldo
-		SC7->(DbSetOrder(1))
-		If SC7->(DbSeek(xFilial("SC7")+aCols[n,nPosPc]+aCols[n,nPosItem])) 
-			nAbatPC += (SC7->C7_QUANT-SC7->C7_QUJE)*SC7->C7_PRECO
-			
-			//Posiciona SC1 para retirar valor da SC do saldo
-			SC1->(DbSetOrder(1))
-			If SC1->(DbSeek(xFilial("SC1")+SC7->C7_NUMSC+SC7->C7_ITEMSC))
-				 nAbatSC += (SC1->C1_QUANT-SC1->C1_QUJE)*SC1->C1_XVUNIT	
-			Endif	
-		Endif
-		
-		oSaldo	:= Z_Saldo():New()
-			    
-		// Valor da linha da NF (Quant)*Preco Unitario
-		oSaldo:nValProc		:= aCols[n,nPosQuant]*aCols[n,nPosVUnit]    
-		
-		// Abate valor original do Pedido de Compras
-		oSaldo:nAbatSC		:= nAbatSC 		    		    
-		oSaldo:nAbatPC		:= nAbatPC
-			    
-		oSaldo:cCodFil 		:= 	xFilial("SD1")
-		oSaldo:cCodProj		:=  aCols[n,nPSD1Proj]
-		oSaldo:cCodTarefa 	:=  aCols[n,nPSD1Taref]
-		oSaldo:dDtEnt		:=  aCols[n,nPSD1DtEnt]
-		oSaldo:cCodProc		:= "003"
-		oSaldo:cProcesso	:= "Documento de Entrada"
-	
-	
-		oSaldo:ConsSaldo() 
-		oSaldo:Avalia()
-						
-		If !(oSaldo:lOk)                            
-	        If !IsBlind()	                            
-	        	nDet := Aviso("Bloqueio de Saldo",oSaldo:cMensagem,{"Fechar"},3)
-			Endif	
-			lRet := oSaldo:lOk
-		Endif
+		If !Empty(Alltrim(aCols[n,nPSD1Proj]))
 
+			//Posiciona SC7 para retirar valor do pedido do saldo
+			SC7->(DbSetOrder(1))
+			If SC7->(DbSeek(xFilial("SC7")+aCols[n,nPosPc]+aCols[n,nPosItem])) 
+				nAbatPC += (SC7->C7_QUANT-SC7->C7_QUJE)*SC7->C7_PRECO
+				
+				//Posiciona SC1 para retirar valor da SC do saldo
+				SC1->(DbSetOrder(1))
+				If SC1->(DbSeek(xFilial("SC1")+SC7->C7_NUMSC+SC7->C7_ITEMSC))
+					nAbatSC += (SC1->C1_QUANT-SC1->C1_QUJE)*SC1->C1_XVUNIT	
+				Endif	
+			Endif
+			
+			oSaldo	:= Z_Saldo():New()
+					
+			// Valor da linha da NF (Quant)*Preco Unitario
+			oSaldo:nValProc		:= aCols[n,nPosQuant]*aCols[n,nPosVUnit]    
+			
+			// Abate valor original do Pedido de Compras
+			oSaldo:nAbatSC		:= nAbatSC 		    		    
+			oSaldo:nAbatPC		:= nAbatPC
+					
+			oSaldo:cCodFil 		:= 	xFilial("SD1")
+			oSaldo:cCodProj		:=  aCols[n,nPSD1Proj]
+			oSaldo:cCodTarefa 	:=  aCols[n,nPSD1Taref]
+			oSaldo:dDtEnt		:=  aCols[n,nPSD1DtEnt]
+			oSaldo:cCodProc		:= "003"
+			oSaldo:cProcesso	:= "Documento de Entrada"
+		
+		
+			oSaldo:ConsSaldo() 
+			oSaldo:Avalia()
+							
+			If !(oSaldo:lOk)                            
+				If !IsBlind()	                            
+					nDet := Aviso("Bloqueio de Saldo",oSaldo:cMensagem,{"Fechar"},3)
+				Endif	
+				lRet := oSaldo:lOk
+			Endif
+		Endif
 
 	Endif	
 
