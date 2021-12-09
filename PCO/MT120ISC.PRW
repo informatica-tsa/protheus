@@ -20,7 +20,6 @@ Local nPosDTEnt  := aScan(aHeader,{|x| AllTrim(x[2]) == "C7_ZDTENT"})
 Local nPosPrj 	 := aScan(aHeader,{|x| AllTrim(x[2]) == "C7_ZPRJ"})
 Local nPosTare	 := aScan(aHeader,{|x| AllTrim(x[2]) == "C7_ZTARE"})
 Local aArea 	 := GetArea()
-Local nXi,nXj	:= 0
 
 	If nPosDTEnt <> 0 .and. nTipoPed !=	2
 		aCols[n][nPosDTEnt] := SC1->C1_ZDTENT
@@ -85,7 +84,7 @@ ACOLS[N,nPos4]:=SC1->C1_XOPER
 ACOLS[N,nPos5]:=CTOD(" / / ")
 ACOLS[N,nPos6]:=SC1->C1_XPCO 
 //ACOLS[N,nPos7]:=SC1->C1_NFROTA
-ACOLS[N,nPos8]:=SC1->C1_XPCO1	  
+ACOLS[N,nPos8]:=SC1->C1_XPCO1	
 
        
 Return

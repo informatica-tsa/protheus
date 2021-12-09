@@ -25,7 +25,7 @@ Local nContAux      := 0
 
 // Ajuste realizado Totvs 11/11/2019 
 // Na integração com TOP nao existe essa variavel
-If ValType(cOrdCom) == "U"
+If Type("cOrdCom") == "U"
 	cOrdCom := Space(6)
 Endif	
 

@@ -31,6 +31,7 @@ Local nGrupoGeral := 0
 Local aGrAprov    := {}
 Local aAreaOld    := GetArea()
 Local cNumPed     := SC7->C7_NUM
+Local cOrigem     := SC7->C7_ORIGEM
 Local aAreaSC7    := SC7->(GetArea())
 
 dbSelectArea("CTD")
@@ -74,7 +75,10 @@ While !SC7->(Eof()) .And. xFilial("SC7")+cNumPed == SC7->(C7_FILIAL+C7_NUM)
     SC7->(dbSkip())
 End
 
-If nGrupoFree == nGrupoGeral // Nao pode bloquear este pedido.
+//Adicionado tratativa para que pedidos integrados pelo processo de viagem sejam criados liberados.
+//Em caso de alteração, alçada de aprovação será acionada. 
+//Thiago V. dos Santos 02/12/2021
+If (nGrupoFree == nGrupoGeral .or. ( alltrim(cOrigem) == 'LIGAI' .and. inclui) ) // Nao pode bloquear este pedido.
    cRet := ""
    
    cQuery := "UPDATE "+RetSqlname("SC7")
@@ -149,7 +153,7 @@ Static Function SelGrup(aGrAprov)
 **
 Local oDlgGrp
 Local oSelGroup 
-Local nXi       := 0
+//Local nXi       := 0
 Local cRet      := ""
 Local aCabGrp   := {} 
 Local aDadGrp   := {}
