@@ -61,9 +61,10 @@ Static Function Confirma()
 			cQuery  := " DELETE FROM "+RetSqlName("SZ0")
 			TCSQLExec(cQuery)      
 			       
-			ExecBlock("GER2007",.F.,.F.)   //Rotina que gera oFluxo Economico Baseado nos lançamentos contábeis
-			ExecBlock("GER102013",.F.,.F.) //Rotina que gera oFluxo Economico Baseado nos lançamentos contábeis | Para gerar com novos grupos(CT1_GRUPO2) a partir de 01/10/2013 - Ricardo NM
-			ExecBlock("IMPSC6",.F.,.F.)    //Rotina de Geracao de Pedidos de Venda
+			ExecBlock("GER2007",.F.,.F.)    //Rotina que gera oFluxo Economico Baseado nos lançamentos contábeis
+			ExecBlock("GER102013",.F.,.F.)  //Rotina que gera oFluxo Economico Baseado nos lançamentos contábeis | Para gerar com novos grupos(CT1_GRUPO2) a partir de 01/10/2013 - Ricardo NM
+			ExecBlock("IMPSC6",.F.,.F.)     //Rotina de Geracao de Pedidos de Venda
+			ExecBlock("GRVEICULOS",.F.,.F.) //Rotina de geração de Locação interna de veiculos
 			
 			For nCnt := 0 To nHist Step 1
 				U_EXEQUERY(cValToChar(Ano))//Rotina de atualização de dados

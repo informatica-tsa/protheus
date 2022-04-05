@@ -62,7 +62,7 @@ Local   aCabec    := {}
 Local   aDados    := {}
 Local   cAliasTMP := ""
 Local   aLegenda  := {}
-Local   nVlrDia   := GetNewPar("NM_VLRDIA",50)
+//Local   nVlrDia   := GetNewPar("NM_VLRDIA",50)
 Private aCols     := {}     
 Private aHeader   := {}
 
@@ -131,19 +131,19 @@ Do Case
    Case nOpc == 5
         cAliasTMP := GetNextAlias()  
         BeginSql Alias cAliasTMP //Inicio do Embedded SQL
-           SELECT ZZ1_PLACA,ZZ1_PROJET,SUM(ZZ1_DIARIA) DIARIA , SUM(ZZ1_VALOR)  VALOR , LEFT(ZZ1_DTAFIM,6) ZZ1_DTAFIM,COUNT(*) TOTAL
+           SELECT ZZ1_PLACA,ZZ1_PROJET,ZZ1_PROJC,SUM(ZZ1_DIARIA) DIARIA , SUM(ZZ1_VALOR)  VALOR , LEFT(ZZ1_DTAFIM,6) ZZ1_DTAFIM,COUNT(*) TOTAL
            FROM %table:ZZ1% ZZ1
            WHERE ZZ1_STATUS = %Exp:'2'%
            AND ZZ1.%NotDel%
            AND ZZ1_FILIAL = %xFilial:ZZ1%
            AND ZZ1_DTAFIM != %Exp:''%
-           GROUP BY ZZ1_PLACA,ZZ1_PROJET,LEFT(ZZ1_DTAFIM,6)
+           GROUP BY ZZ1_PLACA,ZZ1_PROJET,ZZ1_PROJC,LEFT(ZZ1_DTAFIM,6)
            ORDER BY ZZ1_PLACA           
         EndSql                                
         
         dbSelectArea(cAliasTMP)
         (cAliasTMP)->(dbGoTop())
-        (cAliasTMP)->(dbEval( {|| Aadd(aDados,{.T.,(cAliasTMP)->ZZ1_PLACA,(cAliasTMP)->ZZ1_PROJET,(cAliasTMP)->DIARIA,TransForm((cAliasTMP)->VALOR,"@E 99999.99"),Right((cAliasTMP)->ZZ1_DTAFIM,2)+'/'+SubStr((cAliasTMP)->ZZ1_DTAFIM,3,2) /*RIGHT(DTOC(STOD((cAliasTMP)->ZZ1_DTAFIM)),5)*/,(cAliasTMP)->TOTAL}) } ))        
+        (cAliasTMP)->(dbEval( {|| Aadd(aDados,{.T.,(cAliasTMP)->ZZ1_PLACA,(cAliasTMP)->ZZ1_PROJET,(cAliasTMP)->DIARIA,TransForm((cAliasTMP)->VALOR,"@E 99999.99"),Right((cAliasTMP)->ZZ1_DTAFIM,2)+'/'+SubStr((cAliasTMP)->ZZ1_DTAFIM,3,2) /*RIGHT(DTOC(STOD((cAliasTMP)->ZZ1_DTAFIM)),5)*/,(cAliasTMP)->TOTAL,(cAliasTMP)->ZZ1_PROJC}) } ))        
 
         dbSelectArea(cAliasTMP)
         (cAliasTMP)->(dbCloseArea())
@@ -157,25 +157,25 @@ Do Case
            aadd(aCabec,OemToansi("Diarias")) 
            aadd(aCabec,OemToansi("Valor")) 
            aadd(aCabec,OemToansi("Data Referencia")) 
-           aadd(aCabec,OemToansi("No Locações")) 
+           aadd(aCabec,OemToansi("No Locações"))
            View02(nOpc,aCabec,aDados)
         EndIf
    Case nOpc == 6 // Exclusao
         If ZZ1->ZZ1_STATUS == '3'
            cAliasTMP := GetNextAlias()  
            BeginSql Alias cAliasTMP //Inicio do Embedded SQL
-              SELECT ZZ1_PLACA,ZZ1_PROJET,SUM(ZZ1_DIARIA) DIARIA , SUM(ZZ1_VALOR)  VALOR , LEFT(ZZ1_DTAFIM,6) ZZ1_DTAFIM ,
+              SELECT ZZ1_PLACA,ZZ1_PROJET,ZZ1_PROJC,SUM(ZZ1_DIARIA) DIARIA , SUM(ZZ1_VALOR)  VALOR , LEFT(ZZ1_DTAFIM,6) ZZ1_DTAFIM ,
               COUNT(*) TOTAL ,MAX(ZZ1_RCRED) ZZ1_RCRED, MAX(ZZ1_RDEB) ZZ1_RDEB
               FROM %table:ZZ1% ZZ1
               WHERE ZZ1_STATUS = %Exp:'3'%
               AND ZZ1.%NotDel%
               AND ZZ1_FILIAL = %xFilial:ZZ1%
-              GROUP BY ZZ1_PLACA,ZZ1_PROJET,LEFT(ZZ1_DTAFIM,6)
+              GROUP BY ZZ1_PLACA,ZZ1_PROJET,ZZ1_PROJC,LEFT(ZZ1_DTAFIM,6)
               ORDER BY ZZ1_PLACA           
            EndSql
            dbSelectArea(cAliasTMP)
            (cAliasTMP)->(dbGoTop())
-           (cAliasTMP)->(dbEval( {|| Aadd(aDados,{.T.,(cAliasTMP)->ZZ1_PLACA,(cAliasTMP)->ZZ1_PROJET,(cAliasTMP)->DIARIA,TransForm((cAliasTMP)->VALOR,"@E 99999.99"),Right((cAliasTMP)->ZZ1_DTAFIM,2)+'/'+SubStr((cAliasTMP)->ZZ1_DTAFIM,3,2) /*RIGHT(DTOC(STOD((cAliasTMP)->ZZ1_DTAFIM)),5)*/,(cAliasTMP)->TOTAL,(cAliasTMP)->ZZ1_RCRED,(cAliasTMP)->ZZ1_RDEB     }) } ))        
+           (cAliasTMP)->(dbEval( {|| Aadd(aDados,{.T.,(cAliasTMP)->ZZ1_PLACA,(cAliasTMP)->ZZ1_PROJET,(cAliasTMP)->DIARIA,TransForm((cAliasTMP)->VALOR,"@E 99999.99"),Right((cAliasTMP)->ZZ1_DTAFIM,2)+'/'+SubStr((cAliasTMP)->ZZ1_DTAFIM,3,2) /*RIGHT(DTOC(STOD((cAliasTMP)->ZZ1_DTAFIM)),5)*/,(cAliasTMP)->TOTAL,(cAliasTMP)->ZZ1_RCRED,(cAliasTMP)->ZZ1_RDEB,(cAliasTMP)->ZZ1_PROJC     }) } ))        
 
            dbSelectArea(cAliasTMP)
            (cAliasTMP)->(dbCloseArea())
@@ -205,7 +205,7 @@ Do Case
               EndIf
            Else
            
-              If MsgBox("Deseja apagar a Loção ?","Atencao","YESNO",2) 
+              If MsgBox("Deseja apagar a Locação ?","Atencao","YESNO",2) 
                  If RecLock("ZZ1",.F.)
                     ZZ1->(dbDelete())
                     ZZ1->(MsUnLock())
@@ -222,10 +222,13 @@ Do Case
 
 
    Case nOpc == 8 // Alterar
-        If ZZ1->ZZ1_STATUS == "2"
-           lDataFim := .F.
-           AxAltera("ZZ1",ZZ1->(Recno()),4,,,,,"AllwaysTrue()",,,/*aButtons*/)
-        EndIf
+
+      If ZZ1->ZZ1_STATUS == "2"
+         lDataFim := .F.
+         AxAltera("ZZ1",ZZ1->(Recno()),4,,,,,"AllwaysTrue()",,,/*aButtons*/)
+      else
+         MsgInfo(OemToansi("Somente registros entregues podem ser alterados. Confira o status do veículo!"), "Atenção!")
+      EndIf
 
    Case nOpc == 9
 
@@ -391,17 +394,14 @@ Static Function View02(nOpcAux,aCabec,aDados)
 Local   oDlg
 Local   oFatura
 Local   nXi       := 1
-Local   nYi       := 0
-Local   cCpoAtu   := ""
 Local   cQuery    := ""
-Local   aRegSZ0   := {}
 Local   lClose    := .F.
 Local   aObjects  := {}
 Local   aPosObj   := {}
 Local   aSize     := MsAdvSize(.t.,.f.,300) //(lEnchoiceBar,lTelaPadrao,ntamanho_linhas)
 Local   oOk       := LoadBitmap(GetResources(), "LBTIK_OCEAN.BMP")
 Local   oNo       := LoadBitmap(GetResources(), "LBNO_OCEAN.BMP")
-Local   aInfo     := {aSize[1],aSize[2],aSize[3],aSize[4],3,3}
+Local   aInfo     := {aSize[1],aSize[2],aSize[3],aSize[4]-40,3,3} //aSize[4] Ajustado para não ultrapassar tela
 
 
 
@@ -430,100 +430,39 @@ oDlg:Activate(,,, .T.,{||  }, ,{||  EnchoiceBar(oDlg,{|| lClose :=.T.,oDlg:End()
 If lClose
    If nOpcAux == 5 // Faturamento
       For nXi := 1 To Len(aDados)
-          If aDados[nXi][1]
-             aRegSZ0   := {}
-             // Gera o Credito da Locação
-             If RecLock("SZ0",.T.)
-			    Replace Z0_FILIAL  With xFilial("SZ0"),;
-				        Z0_LINHA   With "00"  ,;
-                        Z0_DATA    With aDados[nXi][6],;
-                        Z0_HIST    With 'RECEITA LOC VEICULO PRJ.: 9999G' ,;
-                        Z0_DTVENC  With aDados[nXi][6] ,;
-                        Z0_LOTE    With "009999" ,;
-                        Z0_DOC     With aDados[nXi][3]  ,;
-                        Z0_VALOR   With Val(aDados[nXi][5])         ,;
-                        Z0_DTCAIXA With aDados[nXi][6]       ,;
-                        Z0_DTREF   With aDados[nXi][6]       ,;
-                        Z0_CONTA   With "4113070001"        ,;
-                        Z0_CC      With '9999G'       ,;
-                        Z0_SETORIG With Posicione("SZ2",3,Xfilial("cCusto")+'9999G',"Z2_SETOR")       ,;
-                        Z0_DTLANC  with Lastday(ctod('01/'+aDados[nXi][6])),;
-                        Z0_RECEITA With Val(aDados[nXi][5]),;
-                        Z0_SUBCTA  With '9999G',;
-                        Z0_FATOR   With 1,;
-                        Z0_DESGER  With 'RECEITAS DE SERVICOS',;
-                        Z0_DESC01  With ' PLACA: '+aDados[nXi][2] + " No diarias "+Alltrim(str(aDados[nXi][4])),;
-                        Z0_GRUPGER With '001001',;
-                        Z0_VEICULO With 'S',;
-                        Z0_SITUAC  With '0'
-		        SZ0->(MsUnlock())
-		        Aadd(aRegSZ0,SZ0->(Recno()))
-             EndIf
-             
-             // Gera o debito da locação para o Projeto
+         If aDados[nXi][1]
 
-             If RecLock("SZ0",.T.)
-			    Replace Z0_FILIAL  With xFilial("SZ0"),;
-				        Z0_LINHA   With "00"  ,;
-                        Z0_DATA    With aDados[nXi][6],;
-                        Z0_HIST    With 'CUSTO LOC VEICULO PRJ.: '+aDados[nXi][3] ,;
-                        Z0_DTVENC  With aDados[nXi][6] ,;
-                        Z0_LOTE    With "009999" ,;
-                        Z0_DOC     With aDados[nXi][3]  ,;
-                        Z0_VALOR   With Val(aDados[nXi][5]) * -1        ,;
-                        Z0_DTCAIXA With aDados[nXi][6]       ,; 
-                        Z0_DTREF   With aDados[nXi][6]       ,; 
-                        Z0_CONTA   With "4113070001"        ,; 
-                        Z0_CC      With aDados[nXi][3]       ,;
-                        Z0_SETORIG With Posicione("SZ2",3,Xfilial("cCusto")+aDados[nXi][3],"Z2_SETOR")       ,;
-                        Z0_DTLANC  with Lastday(ctod('01/'+aDados[nXi][6])),;
-                        Z0_CUSTO   With Val(aDados[nXi][5]) * -1,;
-                        Z0_SUBCTA  With aDados[nXi][3],;
-                        Z0_FATOR   With 1,;
-                        Z0_DESGER  With 'DESPESAS COM VEICULOS',;
-                        Z0_DESC01  With ' PLACA: '+aDados[nXi][2] + " No diarias "+Alltrim(str(aDados[nXi][4])),;
-                        Z0_VEICULO With 'S',;
-                        Z0_SITUAC  With '0'
-		                SZ0->(MsUnlock())
-		                Aadd(aRegSZ0,SZ0->(Recno()))
-             EndIf
-             
-             For nYi := 1 To 2
-                 cCpoAtu := Iif(nYi==1,'ZZ1_RCRED','ZZ1_RDEB')
-                 cQuery := "UPDATE " + RetSqlname("ZZ1") + " SET "+cCpoAtu+" = "+Str(aRegSZ0[nYi],15) + " , ZZ1_STATUS = '3' "
-                 cQuery += " WHERE ZZ1_FILIAL = '"+xFilial("ZZ1")+"'"
-                 cQuery += " AND ZZ1_PROJET =  '"+aDados[nXi][3]+"'"
-                 cQuery += " AND D_E_L_E_T_ = ''"
-                 cQuery += " AND ZZ1_DTAFIM != '' " 
-                 cQuery += " AND ZZ1_PLACA = '"+aDados[nXi][2]+"'" 
-                 cQuery += " AND ZZ1_STATUS = '"+Str((nYi+1),1)+"'"
-                 TcSqlExec(cQuery)
-                 TcRefresh("ZZ1")             
-             Next nYi
-          EndIf
+            cQuery := "UPDATE " + RetSqlname("ZZ1") + " SET ZZ1_STATUS = '3' "
+            cQuery += " WHERE ZZ1_FILIAL = '"+xFilial("ZZ1")+"'"
+            cQuery += " AND ZZ1_PROJET =  '"+aDados[nXi][3]+"'"
+            cQuery += " AND ZZ1_PROJC =  '"+aDados[nXi][8]+"'"
+            cQuery += " AND D_E_L_E_T_ = ''"
+            cQuery += " AND ZZ1_DTAFIM != '' " 
+            cQuery += " AND ZZ1_PLACA = '"+aDados[nXi][2]+"'" 
+            cQuery += " AND ZZ1_STATUS = '2'"
+
+            TcSqlExec(cQuery)
+            TcRefresh("ZZ1")             
+
+         EndIf
       Next nXi
    ElseIf nOpcAux == 6  // Exlusao do faturamento
       dbSelectArea("SZ0")
       For nXi := 1 To Len(aDados)
           If aDados[nXi][1]
-             aRegSZ0   := {aDados[nXi][8],aDados[nXi][9]}
-             For nYi := 1 To 2
-                 SZ0->(dbGoTo(aRegSZ0[nYi]))
-                 If !SZ0->(Eof())
-                    If RecLock("SZ0",.F.)
-                       SZ0->(dbDelete())
-                       SZ0->(MsUnLock())
-                    Endif
-                 EndIf
-             Next nYi
+            
+            cQuery := "UPDATE " + RetSqlname("ZZ1") + " SET ZZ1_STATUS = '2', ZZ1_RCRED = 0, ZZ1_RDEB = 0  "
+            cQuery += " WHERE ZZ1_FILIAL = '"+xFilial("ZZ1")+"'"
+            cQuery += " AND ZZ1_PROJET =  '"+aDados[nXi][3]+"'"
+            cQuery += " AND ZZ1_PROJC =  '"+aDados[nXi][10]+"'"
+            cQuery += " AND RIGHT(LEFT(ZZ1_DTAFIM,6),2)+'/'+SUBSTRING(ZZ1_DTAFIM,3,2) =  '"+aDados[nXi][6]+"'"
+            cQuery += " AND D_E_L_E_T_ = ''"
+            cQuery += " AND ZZ1_PLACA = '"+aDados[nXi][2]+"'" 
+            cQuery += " AND ZZ1_STATUS = '3'"
 
-             cQuery := "UPDATE " + RetSqlname("ZZ1") + " SET ZZ1_RCRED = 0 ,ZZ1_RDEB = 0 , ZZ1_STATUS = '2' "
-             cQuery += " WHERE ZZ1_FILIAL = '"+xFilial("ZZ1")+"'"
-             cQuery += " AND ZZ1_RCRED = "+Str(aDados[nXi][8])
-             cQuery += " AND ZZ1_STATUS = '3'"
-             
-             TcSqlExec(cQuery)
-             TcRefresh("ZZ1")                   
+            TcSqlExec(cQuery)
+            TcRefresh("ZZ1")   
+
           EndIf
       Next nXi       
    EndIf
@@ -548,3 +487,114 @@ If nCol == 1
 EndIf
 
 Return
+
+
+User Function GrVeiculos()
+
+   Local nYi         := 0
+   Local cCpoAtu     := ""
+   Local aRegSZ0     := {}
+   Local aAreaOld    := GetArea()
+   Local cAliasTMP   := GetNextAlias() 
+
+   //Remove todos os lancamentos de veiculo
+   cQuery  := " DELETE "+RetSqlName("SZ0")
+   cQuery  += " WHERE Z0_VEICULO = 'S' "
+   TCSQLExec(cQuery)
+
+   BeginSql Alias cAliasTMP //Inicio do Embedded SQL
+      SELECT ZZ1_FILIAL,ZZ1_PLACA,ZZ1_PROJET,ZZ1_PROJC,SUM(ZZ1_DIARIA) DIARIA , SUM(ZZ1_VALOR)  VALOR , LEFT(ZZ1_DTAFIM,6) ZZ1_DTAFIM,COUNT(*) TOTAL
+      FROM %table:ZZ1% ZZ1
+      WHERE ZZ1_STATUS = %Exp:'3'%
+      AND ZZ1.%NotDel%
+     // AND LEFT(ZZ1_DTAFIM,6) >= '202204'
+      GROUP BY ZZ1_FILIAL,ZZ1_PLACA,ZZ1_PROJET,ZZ1_PROJC,LEFT(ZZ1_DTAFIM,6)
+      ORDER BY ZZ1_PLACA           
+   EndSql                                
+
+   dbSelectArea(cAliasTMP)
+   (cAliasTMP)->(dbGoTop())
+   
+   While !(cAliasTMP)->(Eof())
+      aRegSZ0   := {}
+      If RecLock("SZ0",.T.)
+         // Gera o Credito da Locação
+         Replace Z0_FILIAL  With (cAliasTMP)->ZZ1_FILIAL,;
+                  Z0_LINHA   With "00"  ,;
+                  Z0_DATA    With Right((cAliasTMP)->ZZ1_DTAFIM,2)+'/'+SubStr((cAliasTMP)->ZZ1_DTAFIM,3,2),;
+                  Z0_HIST    With 'RECEITA LOC VEICULO PRJ.: '+(cAliasTMP)->ZZ1_PROJC ,;
+                  Z0_DTVENC  With Right((cAliasTMP)->ZZ1_DTAFIM,2)+'/'+SubStr((cAliasTMP)->ZZ1_DTAFIM,3,2) ,;
+                  Z0_LOTE    With "009999" ,;
+                  Z0_DOC     With (cAliasTMP)->ZZ1_PROJC  ,;
+                  Z0_VALOR   With Val(TransForm((cAliasTMP)->VALOR,"@E 99999.99"))         ,;
+                  Z0_DTCAIXA With Right((cAliasTMP)->ZZ1_DTAFIM,2)+'/'+SubStr((cAliasTMP)->ZZ1_DTAFIM,3,2)       ,;
+                  Z0_DTREF   With Right((cAliasTMP)->ZZ1_DTAFIM,2)+'/'+SubStr((cAliasTMP)->ZZ1_DTAFIM,3,2)       ,;
+                  Z0_CONTA   With "4113070001"        ,;
+                  Z0_CC      With (cAliasTMP)->ZZ1_PROJC       ,;
+                  Z0_SETORIG With Posicione("SZ2",3,Xfilial("cCusto")+(cAliasTMP)->ZZ1_PROJC,"Z2_SETOR")       ,;
+                  Z0_DTLANC  with Lastday(ctod('01/'+Right((cAliasTMP)->ZZ1_DTAFIM,2)+'/'+SubStr((cAliasTMP)->ZZ1_DTAFIM,3,2))),;
+                  Z0_RECEITA With Val(TransForm((cAliasTMP)->VALOR,"@E 99999.99")),;
+                  Z0_SUBCTA  With (cAliasTMP)->ZZ1_PROJC,;
+                  Z0_FATOR   With 1,;
+                  Z0_DESGER  With 'RECEITAS DE SERVICOS(VEICULOS)',;
+                  Z0_DESC01  With ' PLACA: '+(cAliasTMP)->ZZ1_PLACA+ " No diarias "+Alltrim(str((cAliasTMP)->DIARIA)),;
+                  Z0_GRUPGER With '001001',;
+                  Z0_VEICULO With 'S',;
+                  Z0_SITUAC  With '0'
+         SZ0->(MsUnlock())
+         Aadd(aRegSZ0,SZ0->(Recno()))
+      EndIf
+
+      If RecLock("SZ0",.T.)
+         // Gera o Debito da Locação
+         Replace  Z0_FILIAL  With (cAliasTMP)->ZZ1_FILIAL,;
+                  Z0_LINHA   With "00"  ,;
+                  Z0_DATA    With Right((cAliasTMP)->ZZ1_DTAFIM,2)+'/'+SubStr((cAliasTMP)->ZZ1_DTAFIM,3,2),;
+                  Z0_HIST    With 'CUSTO LOC VEICULO PRJ.: '+(cAliasTMP)->ZZ1_PROJET ,;
+                  Z0_DTVENC  With Right((cAliasTMP)->ZZ1_DTAFIM,2)+'/'+SubStr((cAliasTMP)->ZZ1_DTAFIM,3,2) ,;
+                  Z0_LOTE    With "009999" ,;
+                  Z0_DOC     With (cAliasTMP)->ZZ1_PROJET  ,;
+                  Z0_VALOR   With Val(TransForm((cAliasTMP)->VALOR,"@E 99999.99"))*-1         ,;
+                  Z0_DTCAIXA With Right((cAliasTMP)->ZZ1_DTAFIM,2)+'/'+SubStr((cAliasTMP)->ZZ1_DTAFIM,3,2)       ,;
+                  Z0_DTREF   With Right((cAliasTMP)->ZZ1_DTAFIM,2)+'/'+SubStr((cAliasTMP)->ZZ1_DTAFIM,3,2)       ,;
+                  Z0_CONTA   With "4113070001"        ,;
+                  Z0_CC      With (cAliasTMP)->ZZ1_PROJET       ,;
+                  Z0_SETORIG With Posicione("SZ2",3,Xfilial("cCusto")+(cAliasTMP)->ZZ1_PROJET,"Z2_SETOR")       ,;
+                  Z0_DTLANC  with Lastday(ctod('01/'+Right((cAliasTMP)->ZZ1_DTAFIM,2)+'/'+SubStr((cAliasTMP)->ZZ1_DTAFIM,3,2))),;
+                  Z0_CUSTO   With Val(TransForm((cAliasTMP)->VALOR,"@E 99999.99"))*-1  ,;
+                  Z0_SUBCTA  With (cAliasTMP)->ZZ1_PROJET,;
+                  Z0_FATOR   With 1,;
+                  Z0_DESGER  With 'DESPESAS COM VEICULOS',;
+                  Z0_DESC01  With ' PLACA: '+(cAliasTMP)->ZZ1_PLACA+ " No diarias "+Alltrim(str((cAliasTMP)->DIARIA)),;
+                  Z0_GRUPGER With '000029',;
+                  Z0_VEICULO With 'S',;
+                  Z0_SITUAC  With '0'
+         SZ0->(MsUnlock())
+         Aadd(aRegSZ0,SZ0->(Recno()))
+      EndIf
+
+      For nYi := 1 To 2
+
+         cCpoAtu := Iif(nYi==1,'ZZ1_RCRED','ZZ1_RDEB')
+         cQuery := "UPDATE " + RetSqlname("ZZ1") + " SET "+cCpoAtu+" = "+Str(aRegSZ0[nYi],15)
+         cQuery += " WHERE ZZ1_FILIAL = '"+(cAliasTMP)->ZZ1_FILIAL+"'"
+         cQuery += " AND ZZ1_PROJET =  '"+(cAliasTMP)->ZZ1_PROJET+"'"
+         cQuery += " AND ZZ1_PROJC =  '"+(cAliasTMP)->ZZ1_PROJC+"'"
+         cQuery += " AND D_E_L_E_T_ = ''"
+         cQuery += " AND LEFT(ZZ1_DTAFIM,6) = '"+LEFT((cAliasTMP)->ZZ1_DTAFIM,6)+"' " 
+         cQuery += " AND ZZ1_PLACA = '"+(cAliasTMP)->ZZ1_PLACA+"'" 
+         cQuery += " AND ZZ1_STATUS = '3'"
+         TcSqlExec(cQuery)
+           
+      Next nYi
+
+
+      (cAliasTMP)->(dbSkip())
+   End
+
+
+   dbSelectArea(cAliasTMP)
+   (cAliasTMP)->(dbCloseArea())
+   RestArea(aAreaOld)
+
+return
