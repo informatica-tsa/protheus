@@ -35,10 +35,17 @@ User Function CodGpe(cTipo)
 	ElseIf cTipo == '4'
 		cQuery:="SELECT TOP 1 RA_MAT FROM "+RetSqlName("SRA")+" WHERE D_E_L_E_T_ = '' AND RA_MAT LIKE '03%' ORDER BY RA_MAT DESC" //AUTONOMO
 		cPrimeira := "030001"
-	Else	
-		cQuery:="SELECT TOP 1 RA_MAT FROM "+RetSqlName("SRA")+" WHERE D_E_L_E_T_ = '' AND RA_MAT LIKE '99%' ORDER BY RA_MAT ASC" //DIRETORIA
-		cPrimeira := "999999"
-		nIncre := -1
+	Else
+		if cEmpAnt != "03"	
+			//Matricula de diretoria da TSA começa com 999999 e vai diminuindo
+			cQuery:="SELECT TOP 1 RA_MAT FROM "+RetSqlName("SRA")+" WHERE D_E_L_E_T_ = '' AND RA_MAT LIKE '99%' ORDER BY RA_MAT ASC" //DIRETORIA
+			cPrimeira := "999999"
+			nIncre := -1
+		else
+			//Matricula de diretoria da Lynx começa com 990001 e vai aumentando
+			cQuery:="SELECT TOP 1 RA_MAT FROM "+RetSqlName("SRA")+" WHERE D_E_L_E_T_ = '' AND RA_MAT LIKE '990%' ORDER BY RA_MAT DESC" //DIRETORIA
+			cPrimeira := "990001"
+		EndIf
 	EndIf
 	
 	cMatricula:= ""
