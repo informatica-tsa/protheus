@@ -27,6 +27,7 @@ Local cAliasTMP   := ""
 Local cCodAprov   := ""
 Local nValPed     := 0
 Local nGrupoFree  := 0
+Local lAltGrpApv  := .F.
 Local nGrupoGeral := 0
 Local aGrAprov    := {}
 Local aAreaOld    := GetArea()
@@ -47,9 +48,15 @@ SC7->(dbSeek(xFilial("SC7")+SC7->C7_NUM))
 While !SC7->(Eof()) .And. xFilial("SC7")+cNumPed == SC7->(C7_FILIAL+C7_NUM)
     SB1->(dbSeek(xFilial("SB1")+SC7->C7_PRODUTO))
     nGrupoGeral++
-    If Alltrim(SB1->B1_GRUPO) $ GetNewPar("NM_GRPFREE","")
-       nGrupoFree++
-    Endif
+
+   If Alltrim(SB1->B1_GRUPO) $ GetNewPar("NM_GRPFREE","")
+      nGrupoFree++
+   Endif
+
+   If Alltrim(SC7->C7_XOPER) $ GetNewPar("ZZ_GRUPO","")
+      lAltGrpApv := .T.
+   Endif
+
     nValPed += SC7->C7_TOTAL
     If !Empty(SC7->C7_ITEMCTA)
        CTD->(dbSeek(xFilial("CTD")+SC7->C7_ITEMCTA))
@@ -95,19 +102,31 @@ Else
       If Len(aGrAprov) > 1
          cCodAprov := SelGrup(aGrAprov)
       EndIf
-      cAliasTMP := GetNextAlias()  
-      BeginSql Alias cAliasTMP //Inicio do Embedded SQL
-         SELECT TOP 1 AL_COD,AL_VALOR,AL_VALORMX  FROM %table:SAL% SAL
-         WHERE AL_FILIAL = %xFilial:SAL%
-         AND SAL.%NotDel%
-         AND AL_GERENTE = %Exp:cCodAprov%
-         AND AL_VALOR <= %Exp:Alltrim(Str(nValPed))%
-         AND AL_VALORMX >= %Exp:Alltrim(Str(nValPed))%
-         ORDER BY AL_VALOR,AL_VALORMX
-      EndSql
-   
+      cAliasTMP := GetNextAlias() 
+      If (lAltGrpApv)
+         BeginSql Alias cAliasTMP //Inicio do Embedded SQL
+            SELECT TOP 1 AL_COD,AL_VALOR,AL_VALORMX  FROM %table:SAL% SAL
+            WHERE AL_FILIAL = %xFilial:SAL%
+            AND SAL.%NotDel%
+            AND AL_GERENTE = %Exp:cCodAprov%
+            AND AL_VALOR <= %Exp:Alltrim(Str(nValPed))%
+            AND AL_VALORMX >= %Exp:Alltrim(Str(nValPed))%
+            AND AL_DESC LIKE '{INFO}%'
+            ORDER BY AL_VALOR,AL_VALORMX
+         EndSql
+      else
+         BeginSql Alias cAliasTMP //Inicio do Embedded SQL
+            SELECT TOP 1 AL_COD,AL_VALOR,AL_VALORMX  FROM %table:SAL% SAL
+            WHERE AL_FILIAL = %xFilial:SAL%
+            AND SAL.%NotDel%
+            AND AL_GERENTE = %Exp:cCodAprov%
+            AND AL_VALOR <= %Exp:Alltrim(Str(nValPed))%
+            AND AL_VALORMX >= %Exp:Alltrim(Str(nValPed))%
+            AND AL_DESC NOT LIKE '{INFO}%'
+            ORDER BY AL_VALOR,AL_VALORMX
+         EndSql
+      EndIf
 
-	
 	   dbSelectArea(cAliasTMP)
 	   (cAliasTMP)->(dbGotop())
 	   If !(cAliasTMP)->(Eof())
