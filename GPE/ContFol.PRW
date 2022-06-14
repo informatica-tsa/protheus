@@ -116,7 +116,7 @@ Static Function ProcFol()
 		ENDIF
 
 		IF lOK .And. !lGerContab //Somente gera log aqui se não estiver contabilizando
-			//Escrever aqui rotina de log
+			ErroContb() //Envia Relatorio de contabilizacao
 		ENDIF
 
 	Endif
@@ -125,7 +125,7 @@ Static Function ProcFol()
 		IncProc("Aguarde Contabilizando....","Aguarde...")
 		ProcContab()
 
-		//Escrever aqui rotina de log
+		ErroContb() //Envia Relatorio de contabilizacao
 
 	Endif
 	
@@ -937,3 +937,107 @@ Endif
 
 RestArea(aAreaOld)
 Return
+
+
+Static Function ErroContb()
+	
+	Local lRet:=.T.
+	Local cEol:=Chr(13)
+	Local cAccount  := GetMv("MV_WFACC") 
+	Local cCtaPass  := GetMv("MV_WFPASSW")
+	Local cCtaSmpt  := GetMv("MV_WFSMTP") 
+	Local cSendBy   := cmail
+	Local cMens:=""
+	
+
+	cQuery =" SELECT (SELECT TOP 1 RA_NOME FROM "+RetSqlName("SRA")+" WHERE RC_MAT = RA_MAT) AS COLABORADOR ,* FROM "
+    cQuery+=" ("
+	cQuery+=" SELECT RC_FILIAL, RC_PD, RC_MAT, SUM(RC_VALOR) AS VALOR FROM "+RetSqlName("SRC")+"  AS SRC"
+	cQuery+=" INNER JOIN "+RetSqlName("SRV")+" AS SRV ON SRV.RV_COD = SRC.RC_PD"
+	cQuery+=" WHERE SRC.D_E_L_E_T_ = '' AND SRV.D_E_L_E_T_ = '' AND RC_PERIODO = '"+cAnoMes+"' AND (SRV.RV_LPADRAO <> '')"
+	cQuery+=" GROUP BY RC_FILIAL,RC_MAT,RC_PD"
+	cQuery+=" ) AS SRC"
+	cQuery+=" LEFT JOIN"
+	cQuery+=" ( "
+	cQuery+=" SELECT Z7_FILMAT, Z7_PD, Z7_MAT, SUM(Z7_VLRAT) AS VALOR FROM "+RetSqlName("SZ7")+" AS SZ7  "
+	cQuery+=" INNER JOIN "+RetSqlName("SRV")+" AS SRV ON SRV.RV_COD = SZ7.Z7_PD "
+	cQuery+=" WHERE SZ7.D_E_L_E_T_ = '' AND SRV.D_E_L_E_T_ = ''  AND (SRV.RV_LPADRAO <> '') AND Z7_DTLANC LIKE '"+cAnoMes+"%' "
+	cQuery+=" GROUP BY Z7_FILMAT,Z7_MAT, Z7_PD "
+	cQuery+=" ) AS SZ7 ON Z7_FILMAT = RC_FILIAL AND Z7_PD = RC_PD AND Z7_MAT = RC_MAT "
+	cQuery+=" WHERE Z7_FILMAT IS NULL AND RC_FILIAL BETWEEN '"+cFilde+"' AND '"+cFilAte+"'"; "
+
+
+	TcQuery cQuery Alias QSFIP New
+	 
+	cMens:=' <html> '+cEol
+	cMens+='	<head>'+cEol
+	cMens+='		<TITLE>'+if(cEmpAnt='03','LYNX','TSA')+'- Erros de contabilizacao da folha</TITLE>'+cEol
+	cMens+='	</head>'+cEol
+	cMens+='	<Table border=2 cellspacing=0 bordercolor="black" width=800 >'+cEol
+	cMens+='		<tr>'+cEol
+	cMens+='			<td align="Left" colspan=5  bgColor="Red" >'+cEol
+	cMens+='				<B> Segue abaixo a lista de erros de contabilizacao.</B><br>'+cEol
+	cMens+=' 				Parametros: <br>'
+	cMens+=' 				Ano Mes Referência:'+cAnoMes+'<br>'
+	cMens+=' 				Filial de:'+cFilDe+' Até '+cFilAte+'<br><br>'
+	cMens+='				<B> Consideracoes importantes:</B><br>'+cEol
+	cMens+='				&nbsp;&nbsp;* Se houve verba de rateio de hora extra listada, confira o rateio da mesma para o colaborador indicado.<br>'+cEol
+	cMens+='				&nbsp;&nbsp;* Se houve verba de rateio de horas normais listada, confira se o profissional lancou horas no periodo no redmine.<br>'+cEol
+	cMens+='				&nbsp;&nbsp;* Se todos os registros da verba foram listados, confira as parametrizacoes de rateio da verba em questao.<br>'+cEol
+	cMens+='			</td>'+cEol
+	cMens+='		</tr>'+cEol
+	cMens+='		<tr>'+cEol
+	cMens+='			<td colspan=5 > </td>'+cEol
+	cMens+='		</tr>'+cEol
+	cMens+='		<tr>'+cEol
+	cMens+='			<td align=center colspan=5  bgColor="Red">'+cEol
+	cMens+='				<P>Lista de Funcionários'+cEol
+	cMens+='			</td>'+cEol
+	cMens+='		</tr>'+cEol
+	cMens+='		<tr>'+cEol
+	cMens+='			<td bgColor="Silver">Filial</td>'+cEol
+	cMens+='			<td bgColor="Silver">Funcionário</td>'+cEol
+	cMens+='			<td bgColor="Silver">Matricula</td>'+cEol
+	cMens+='			<td bgColor="Silver">Verba</td>'+cEol
+	cMens+='			<td bgColor="Silver">Valor</td>'+cEol
+	cMens+='		</tr>'+cEol
+
+	dbSelectArea("QSFIP")
+	dbGotop()
+
+	While !Eof()
+		
+		cMens+='		<tr>'+cEol	
+		cMens+='			<td>'+QSFIP->RC_FILIAL+'</td>'+cEol
+		cMens+='			<td>'+QSFIP->COLABORADOR+'</td>'+cEol
+	    cMens+='			<td>'+QSFIP->RC_MAT+'</td>'+cEol
+		cMens+='			<td>'+QSFIP->RC_PD+'</td>'+cEol
+		cMens+='			<td>'+cvaltochar(QSFIP->VALOR)+'</td>'+cEol
+		cMens+='		</tr>'+cEol   
+		lRet:=.F.
+		
+		dbSelectArea("QSFIP")
+		dbSkip()
+
+	EndDo
+
+	dbSelectArea("QSFIP")
+	dbCloseArea()
+	
+	cMens+='	</table>'+cEol
+	cMens+='</html> '+cEol
+	
+	nFile:=Fcreate("\custom_logs\folha_contabilizacao\logContabilizacao-"+cEmpAnt+".html")
+	Fwrite(nFile,cMens)
+	Fclose(nFile)                                         
+	
+	if (!lRet)
+	
+		CONNECT SMTP SERVER cCtaSmpt ACCOUNT cAccount PASSWORD cCtaPass 
+	
+		SEND MAIL FROM  cSendBy TO  cSendBy SUBJECT '[Restrito] Relatorio de contabilizacao da folha ('+cAnoMes+') ' BODY cMens 
+	
+		DISCONNECT SMTP SERVER
+	endif
+
+Return(lRet)
