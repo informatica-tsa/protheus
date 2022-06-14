@@ -908,7 +908,7 @@ nLinha += 100
 oPrint:Line(nLinha,050,nLinha,2300)
 
 nLinha += 175
-oPrint:Box( nLinha,0050,nLinha+250,2300) //Box de Aceite
+oPrint:Box( nLinha,0050,nLinha+300,2300) //Box de Aceite
 
 oPrint:Say(nLinha,0060,OemToAnsi("E- ACEITE DO PEDIDO"),oFontCab,100) 
 nLinha += 50
@@ -920,6 +920,8 @@ nLinha += 50
 oPrint:Say(nLinha,0060 ,OemToAnsi("Assinatura:_______________________________________________________"),oFontIte,100)
 nLinha += 50
 oPrint:Say(nLinha,0060 ,OemToAnsi("O pagamento de nota fiscal somente será liebrado mediante o recebimento do aceite deste pedido."),oFontIte,100)
+nLinha += 50
+oPrint:Say(nLinha,0060 ,OemToAnsi("A NOTA FISCAL deverá ser enviada para o e-mail: tsanfe@tsaengenharia.com"),oFontIte,100)
 
 
 Return

@@ -85,7 +85,6 @@ Static Function ProcFol()
 		lOK:=.f.
 	Endif
 	
-	
 	If lGerFIPFerias
 		IncProc("Aguarde gerando FIP para Funcionários de Férias e Afastados","Aguarde...")
 		lOK:=GerFIPFer()
@@ -114,12 +113,20 @@ Static Function ProcFol()
 			lOK:=GerRatFol()
 		else
 			MSGSTOP('Ocorreram erros de validação, consulte e-mail para mais detalhes.')
-		Endif	
+		ENDIF
+
+		IF lOK .And. !lGerContab //Somente gera log aqui se não estiver contabilizando
+			//Escrever aqui rotina de log
+		ENDIF
+
 	Endif
 	
 	If lOK .And. lGerContab
 		IncProc("Aguarde Contabilizando....","Aguarde...")
 		ProcContab()
+
+		//Escrever aqui rotina de log
+
 	Endif
 	
 Return(.T.)

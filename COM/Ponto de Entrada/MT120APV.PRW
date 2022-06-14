@@ -53,7 +53,7 @@ While !SC7->(Eof()) .And. xFilial("SC7")+cNumPed == SC7->(C7_FILIAL+C7_NUM)
       nGrupoFree++
    Endif
 
-   If Alltrim(SC7->C7_XOPER) $ GetNewPar("ZZ_GRUPO","")
+   If Alltrim(SC7->C7_XOPER) $ GetNewPar("ZZ_GRUPO","") .And. Alltrim(SC7->C7_ITEMCTA) != '9301A'
       lAltGrpApv := .T.
    Endif
 

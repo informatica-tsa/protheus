@@ -157,6 +157,11 @@ Default xRet 		:= NIL
 
 		//Cria e conecta no Wsdl
 		oWsdl := TWsdlManager():New()
+		//oWsdl:lVerbose 				:= .T.
+		oWsdl:nTimeout 				:= 300		
+		oWsdl:nConnectionTimeout 	:= 300
+		oWsdl:lSSLInsecure 			:= .T.
+		oWsdl:bNoCheckPeerCert 		:= .T. // Desabilita o check de CAs
 		//-----------------------------------------------------------------------
 		// Faz o parse de uma URL
 		//-----------------------------------------------------------------------

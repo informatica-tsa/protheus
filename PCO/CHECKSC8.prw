@@ -111,3 +111,50 @@ Static Function GravaLog(cArq,cMsg )
 	
  
 return
+
+
+
+User Function DCHECKSD1()
+
+	Local dtsolic := POSICIONE("SC1",6,XFILIAL("SC1")+SD1->D1_PEDIDO+SD1->D1_ITEMPC,"C1_EMISSAO")
+	Local dpedido := POSICIONE("SC7",1,XFILIAL("SC7")+SD1->D1_PEDIDO+SD1->D1_ITEMPC,"C7_DATPRF")
+	Local dDate := IIF ;
+					(;
+						!EMPTY(SD1->D1_ITEMPC) .AND. SD1->D1_XPCO=="S",;
+						IIF;
+							( ;
+								!EMPTY(dtsolic), dtsolic, dpedido;
+							)  ,;
+						D1_EMISSAO ;
+					)
+
+Return dDate
+
+
+//TEMPORARIO
+User Function CTBNFEDT()
+
+	Local aItems:= {'DIGITACAO','EMISSAO'}
+	Local lok := .F.
+	Local   oFontCab  := TFont():New("Arial",10,,,.T.,,,,.F.,.F.)
+	Local lRet:= .F.
+	
+	cCombo1:= aItems[1]
+	DEFINE MSDIALOG oDlg TITLE "Definições Gerais" FROM 0,0 TO 100,250 OF oMainWnd Pixel
+	
+	TComboBox():New(010,005,{|U|if(PCount()>0,cCombo1:=U,cCombo1)},aItems,80,09,oDlg,,,,,,.T.,oFontCab,,,,,,,,"cCombo1")
+	
+	@ 01,05 Say "Informe por qual data deseja contabilizar" PIXEL OF oDlg
+	
+	DEFINE SBUTTON FROM 30, 10   TYPE 1 ENABLE OF oDlg ACTION (lOk:=.T.,oDlg:End())
+	DEFINE SBUTTON FROM 30, 40   TYPE 2 ENABLE OF oDlg ACTION (lOk:=.F.,oDlg:End())
+	ACTIVATE MSDIALOG oDlg CENTERED 
+
+	if cCombo1 == 'DIGITACAO'
+		lRet := .F.
+	else
+		lRet := .T.
+	ENDIF
+
+Return(lRet)
+
