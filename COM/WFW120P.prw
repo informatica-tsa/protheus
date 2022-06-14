@@ -92,7 +92,7 @@ Static Function DialMsgFim()
 	Local aPosObj     := {}
 	Local cMarCont    := Iif(!Empty(SC7->C7_MARCOS),SC7->C7_MARCOS,"")
 	Local cEscopo     := Iif(!Empty(SC7->C7_ESCOPO),SC7->C7_ESCOPO,"")
-	Local cCondGerais := Iif(!Empty(SC7->C7_CONDGER),SC7->C7_CONDGER,MemoRead( "\Cond_Gerais\Cond_gerais.txt"))
+	Local cCondGerais := Iif(!Empty(SC7->C7_CONDGER),SC7->C7_CONDGER,MemoRead( "\custom_files\cond_gerais\Cond_gerais.txt"))
 	Local lFlatMode   := If(FindFunction("FLATMODE"),FlatMode(),SetMDIChild())
 	Local aSize    	  := MsAdvSize(.T.,.F.,Iif(lFlatMode,330,300)) //(lEnchoiceBar,lTelaPadrao,ntamanho_linhas)
 	Local aInfo    	  := {aSize[1],aSize[2],aSize[3],aSize[4],3,3}

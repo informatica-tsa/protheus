@@ -214,7 +214,7 @@ EndIf
 
 
 // Calcula o numero total de paginas.
-//cCGerais := MemoRead( "\Cond_Gerais\Cond_gerais.txt")
+//cCGerais := MemoRead( "\custom_files\cond_gerais\Cond_gerais.txt")
 nTotPg := Int((nTotItens / 22)) + Iif(Int((nTotItens / 22)) - (nTotItens / 22) == 0,0,1)
 nTotPg += IIf((MLCount(cCGerais,250) / 55) - int(MLCount(cCGerais,250) / 55) == 0,int(MLCount(cCGerais,250) / 55),1+int(MLCount(cCGerais,250) / 55))
 /* Condicoes gerais antigas
@@ -937,7 +937,7 @@ Local aRetAss   := {}
 Local cAliasSCR := ""
 Local cIdUsrOld := PswID()
 Local aAreaOld  := GetArea()
-Local cPathAssi := GetNewPar("NM_ASSINA","\assinatura\")
+Local cPathAssi := GetNewPar("NM_ASSINA","\custom_files\assinatura\")
 
 If lPedLib
    Aadd(aRetAss,{'N„O SE APLICA',cPathAssi+"NAOSEAPLICA.bmp",STOD(""),""}) //01 Titulo,02 Imagem,03 Data da Lib,04 Nome - Nivel 1

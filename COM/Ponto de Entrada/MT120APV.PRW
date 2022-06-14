@@ -72,7 +72,7 @@ While !SC7->(Eof()) .And. xFilial("SC7")+cNumPed == SC7->(C7_FILIAL+C7_NUM)
     If AllTrim(FunName()) == "MATA160" .Or. AllTrim(FunName()) == "MATA161"
        If RecLock("SC7",.F.)
           Replace C7_DESTINA With SC8->C8_DESTINA,;
-                  C7_CONDGER With MemoRead( "\Cond_Gerais\Cond_gerais.txt"),;
+                  C7_CONDGER With MemoRead( "\custom_files\cond_gerais\Cond_gerais.txt"),;
                   C7_ICMSRET With SC8->C8_ICMSRET
                   
           SC7->(MsUnLock())
