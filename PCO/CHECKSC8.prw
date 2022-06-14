@@ -42,7 +42,7 @@ User function CHECKSC8
 			nControl := nControl+1			
 			cQuery2  := "UPDATE "+RetSqlName("AKD")+" SET D_E_L_E_T_ = '*' , R_E_C_D_E_L_ = R_E_C_N_O_  WHERE R_E_C_N_O_ = "+cvaltochar(QRAKD->R_E_C_N_O_)
 			TCSQLExec(cQuery2)
-			GravaLog("log_cust_remove_cotacao_alt_pedido-"+cEmpAnt+".log","Pedido: "+QRSC8->C8_NUMPED+" => Valor: "+cValToChar(QRSC8->C8_TOTAL)+" Item: "+QRSC8->C8_ITEM+" Cotacao: "+QRSC8->C8_NUM+" Chave: "+cChave+" Query: "+cQuery2 )
+			GravaLog("\custom_logs\pedido\log_cust_remove_cotacao_alt_pedido-"+cEmpAnt+".log","Pedido: "+QRSC8->C8_NUMPED+" => Valor: "+cValToChar(QRSC8->C8_TOTAL)+" Item: "+QRSC8->C8_ITEM+" Cotacao: "+QRSC8->C8_NUM+" Chave: "+cChave+" Query: "+cQuery2 )
 			
 			DbSelectArea("QRAKD")
 			DbSkip()
@@ -56,7 +56,7 @@ User function CHECKSC8
 	EndDo
 
 	if nControl == 0
-		GravaLog("log_cust_remove_cotacao_alt_pedido-"+cEmpAnt+".log","Pedido: "+SC7->C7_NUM+" Item: "+SC7->C7_ITEM+" Cotacao: "+SC7->C7_NUMCOT+" => Nao foram encontrados itens para remover da AKD" )
+		GravaLog("\custom_logs\pedido\log_cust_remove_cotacao_alt_pedido-"+cEmpAnt+".log","Pedido: "+SC7->C7_NUM+" Item: "+SC7->C7_ITEM+" Cotacao: "+SC7->C7_NUMCOT+" => Nao foram encontrados itens para remover da AKD" )
 	EndIf	
 	
 	/*Fechando e restaurando area*/
@@ -81,7 +81,7 @@ User Function CHECKSC7(nValor)
 
 	while !Eof()
 		lControl := .F.
-		GravaLog("log_cust_remove_cotacao_alt_pedido-"+cEmpAnt+".log","Pedido: "+SC8->C8_NUMPED+" ItemPed: "+SC8->C8_ITEM+" Cotacao: "+SC8->C8_NUM+" Skip lancamento(Pedido ja existente na AKD pela SC7) " )
+		GravaLog("\custom_logs\pedido\log_cust_remove_cotacao_alt_pedido-"+cEmpAnt+".log","Pedido: "+SC8->C8_NUMPED+" ItemPed: "+SC8->C8_ITEM+" Cotacao: "+SC8->C8_NUM+" Skip lancamento(Pedido ja existente na AKD pela SC7) " )
 		DbSelectArea("QRAKD")
 		DbSkip()
 	EndDo			
@@ -132,12 +132,12 @@ Return dDate
 
 
 //TEMPORARIO
-User Function CTBNFEDT()
+/*User Function CTBNFEDT()
 
-	Local aItems:= {'DIGITACAO','EMISSAO'}
-	Local lok := .F.
-	Local   oFontCab  := TFont():New("Arial",10,,,.T.,,,,.F.,.F.)
-	Local lRet:= .F.
+	Local aItems		:= {'DIGITACAO','EMISSAO'}
+	Local lok 			:= .F.
+	Local oFontCab  	:= TFont():New("Arial",10,,,.T.,,,,.F.,.F.)
+	Local lRet			:= .F.
 	
 	cCombo1:= aItems[1]
 	DEFINE MSDIALOG oDlg TITLE "Definições Gerais" FROM 0,0 TO 100,250 OF oMainWnd Pixel
@@ -156,5 +156,5 @@ User Function CTBNFEDT()
 		lRet := .T.
 	ENDIF
 
-Return(lRet)
+Return(lRet)*/
 

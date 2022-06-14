@@ -23,10 +23,10 @@ User Function GERESTI()
 	Local cPerg:="ESTSZB" 
 	Local aPerg:={}
 	
-	If !File("CalcEstimado-"+cEmpAnt+".txt")              
+	If !File("\custom_logs\fluxo\CalcEstimado-"+cEmpAnt+".txt")              
 	
 		//Cria o Arquivo com as informações de Quem esta Executando
-		nFile:=FCreate("CalcEstimado-"+cEmpAnt+".txt")
+		nFile:=FCreate("\custom_logs\fluxo\CalcEstimado-"+cEmpAnt+".txt")
 		FWrite(nFile,"Usuário:"+cUserName+Chr(13)+Chr(10))
 		FWrite(nFile,"Inicio do Calculo:"+Dtoc(Date())+" - "+Time()+Chr(13)+Chr(10))
 		FClose(nFile)          
@@ -50,9 +50,9 @@ User Function GERESTI()
 		ACTIVATE DIALOG oDlg1 CENTER
 		
 		// apaga o arquivo com as informações de geração
-	  	FErase("CalcEstimado-"+cEmpAnt+".txt")
+	  	FErase("\custom_logs\fluxo\CalcEstimado-"+cEmpAnt+".txt")
 	else 
-		MsgBox("O Estimado já esta sendo processado por "+Chr(13)+Chr(10)+MemoRead("CalcEstimado"+cEmpAnt+".txt"))
+		MsgBox("O Estimado já esta sendo processado por "+Chr(13)+Chr(10)+MemoRead("\custom_logs\fluxo\CalcEstimado-"+cEmpAnt+".txt"))
 	endif
 		
 Return	
@@ -66,7 +66,7 @@ Static Function Confirma()
 
 	If !ChecaRev(ALLTRIM(cMes))
 		If ChecaRev(cMesAnt)
-			GravaLog("log-Estimado-"+cEmpAnt+".log","Iniciado com sucesso! RevIni:"+MV_PAR01+"RevFim:"+MV_PAR02)
+			GravaLog("\custom_logs\fluxo\log-Estimado-"+cEmpAnt+".log","Iniciado com sucesso! RevIni:"+MV_PAR01+"RevFim:"+MV_PAR02)
 			Processa( {|| IMPSZB() },"Importando Registros da Tabela SZB para a SZ0","Alterando Registro ..." )
 		Else
 			MsgBox("A Rev. ("+cMesAnt+") ainda está aberta! Portanto, a Rev ("+cMes+") não pode ser processada.")
@@ -223,7 +223,7 @@ Static Function ImpSZB()
 	
 	GrvProcd(cRevFim)
 
-	GravaLog("log-Estimado-"+cEmpAnt+".log","Finalizado com sucesso! RevIni:"+MV_PAR01+"RevFim:"+MV_PAR02)
+	GravaLog("\custom_logs\fluxo\log-Estimado-"+cEmpAnt+".log","Finalizado com sucesso! RevIni:"+MV_PAR01+"RevFim:"+MV_PAR02)
 	
 	MsgBox("Processo Finalizado !","Termino","INFO")
 	
@@ -245,9 +245,9 @@ Static Function GrvProcd(cRef)
     ENDCASE
 	
 	IF nResult = -1
-		GravaLog("log-cust-procedure-"+cEmpAnt+".log",'Erro na execução da Stored Procedure : '+TcSqlError())
+		GravaLog("\custom_logs\fluxo\log-cust-procedure-"+cEmpAnt+".log",'Erro na execução da Stored Procedure : '+TcSqlError())
 	Else
-		GravaLog("log-cust-procedure-"+cEmpAnt+".log","Execurado com sucesso! RevIni:"+MV_PAR01+"RevFim:"+MV_PAR02)
+		GravaLog("\custom_logs\fluxo\log-cust-procedure-"+cEmpAnt+".log","Executado com sucesso! RevIni:"+MV_PAR01+"RevFim:"+MV_PAR02)
 	Endif
  
 Return
@@ -257,7 +257,7 @@ Static function ChecaRev(cRev)
 	Local oFile
 	Local cLinha := ""
 	Local lRet := .F.
-	oFile := FWFileReader():New("log-Ctrl-Rev-Fluxo-"+cEmpAnt+".log")
+	oFile := FWFileReader():New("\custom_logs\fluxo\Ctrl-Rev-Fluxo-"+cEmpAnt+".log")
 	if (oFile:Open())
 	   while (oFile:hasLine())
 	   		cLinha := oFile:GetLine()

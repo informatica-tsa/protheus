@@ -24,9 +24,9 @@ User Function GERESTRM()
 	Local cPerg:="ESTSZB" 
 	Local aPerg:={}
 	
-	If !File("CalcEstimadoRM-"+cEmpAnt+".txt")              
+	If !File("\custom_logs\fluxo\CalcEstimadoRM-"+cEmpAnt+".txt")              
 	
-		nFile:=FCreate("CalcEstimadoRM-"+cEmpAnt+".txt")
+		nFile:=FCreate("\custom_logs\fluxo\CalcEstimadoRM-"+cEmpAnt+".txt")
 		FWrite(nFile,"Usuário:"+cUserName+Chr(13)+Chr(10))
 		FWrite(nFile,"Inicio do Calculo:"+Dtoc(Date())+" - "+Time()+Chr(13)+Chr(10))
 		FClose(nFile)          
@@ -50,9 +50,9 @@ User Function GERESTRM()
 		ACTIVATE DIALOG oDlg1 CENTER
 
 		// apaga o arquivo com as informações de geração
-	  	FErase("CalcEstimadoRM-"+cEmpAnt+".txt")
+	  	FErase("\custom_logs\fluxo\CalcEstimadoRM-"+cEmpAnt+".txt")
 	else 
-		MsgBox("O Estimado do RM já esta sendo processado por "+Chr(13)+Chr(10)+MemoRead("CalcEstimadoRM"+cEmpAnt+".txt"))
+		MsgBox("O Estimado do RM já esta sendo processado por "+Chr(13)+Chr(10)+MemoRead("\custom_logs\fluxo\CalcEstimadoRM-"+cEmpAnt+".txt"))
 	endif
 		
 Return
@@ -64,7 +64,7 @@ Static Function Confirma()
 
 	If !ChecaRev(ALLTRIM(cMes))
 		If ChecaRev(cMesAnt)
-			GravaLog("log-Estimado-"+cEmpAnt+".log","Iniciado com sucesso (RM) ! RevIni:"+MV_PAR01+"RevFim:"+MV_PAR02)
+			GravaLog("\custom_logs\fluxo\log-Estimado-"+cEmpAnt+".log","Iniciado com sucesso (RM) ! RevIni:"+MV_PAR01+"RevFim:"+MV_PAR02)
 				Processa( {|| GetRecRM() },"Importando Registros de Receitas das Tabela do Top RM para a SZ0","Alterando Registro ..." )
 				Processa( {|| GetEstRM() },"Importando Registros de Despesas das Tabela do Top RM para a SZ0","Alterando Registro ..." )
 		Else
@@ -81,7 +81,7 @@ Static function ChecaRev(cRev)
 	Local oFile
 	Local cLinha := ""
 	Local lRet := .F.
-	oFile := FWFileReader():New("log-Ctrl-Rev-Fluxo-"+cEmpAnt+".log")
+	oFile := FWFileReader():New("\custom_logs\fluxo\Ctrl-Rev-Fluxo-"+cEmpAnt+".log")
 	if (oFile:Open())
 	   while (oFile:hasLine())
 	   		cLinha := oFile:GetLine()

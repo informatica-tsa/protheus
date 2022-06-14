@@ -98,11 +98,11 @@ User Function AJUSTULMES()
 	
     MSGINFO( "Essa rotina ajusta os parametros MV_ULMES das filiais de acordo com a Tabela SB9", "Ajuste de parâmetro" ) 
     
-    If File("AjustaSb9-"+cEmpAnt+".txt") 
-        FErase("AjustaSb9-"+cEmpAnt+".txt")
+    If File("\custom_logs\estoque\log-ajustasb9-"+cEmpAnt+".txt") 
+        FErase("\custom_logs\estoque\log-ajustasb9-"+cEmpAnt+".txt")
     EndIf
 
-    nFile:=FCreate("AjustaSb9-"+cEmpAnt+".txt")
+    nFile:=FCreate("\custom_logs\estoque\log-ajustasb9-"+cEmpAnt+".txt")
     FWrite(nFile,"Usuário:"+cUserName+Chr(13)+Chr(10))
     FWrite(nFile,"Inicio do Ajuste:"+Dtoc(Date())+" - "+Time()+Chr(13)+Chr(10))
     
@@ -136,7 +136,7 @@ User Function AJUSTULMES()
 	dbSelectArea("ZSB9")
 	dbCloseArea()
     FClose(nFile)  
-    MSGINFO( "Ajuste realizado com sucesso! Arquivo de saida criado em system\AjustaSb9-"+cEmpAnt+".txt", "Ajuste de parâmetro" ) 
+    MSGINFO( "Ajuste realizado com sucesso! Arquivo de saida criado em protheus_data\custom_logs\estoque\log-ajustasb9-"+cEmpAnt+".txt", "Ajuste de parâmetro" ) 
 
 Return .T.
 

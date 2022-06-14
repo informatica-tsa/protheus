@@ -24,10 +24,10 @@ User Function EXEQUERY(cAno)
 ****
 Local cQuery:=""
 
-   	nFile:=FCreate("ExecQueryFluxo.txt")
+//   	nFile:=FCreate("\custom_logs\fluxo\execqueryfluxo.txt")
 //	FWrite(nFile,"Ano:"+cAno+Chr(13)+Chr(10))
-	FWrite(nFile,"Inicio do Calculo:"+Dtoc(Date())+" - "+Time()+Chr(13)+Chr(10))
-   	FClose(nFile)
+//	FWrite(nFile,"Inicio do Calculo:"+Dtoc(Date())+" - "+Time()+Chr(13)+Chr(10))
+//   	FClose(nFile)
 
 TcSqlExec(cQuery)
 //O grupo Gerencial já preenchido deve deve ser tratado separadamente

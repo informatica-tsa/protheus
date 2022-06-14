@@ -142,10 +142,10 @@ User Function InsTeste ()
             cQS_ZATIVI :=  SQS->QS_ZATIVI
             cQS_ZFUNCAO :=  SQS->QS_ZFUNCAO
 
-            GravaLog("Log-Teste-Conv_vaga-"+cEmpAnt+".log","Vaga: "+cVaga )
+            GravaLog("\custom_logs\vaga\log-teste-conv_vaga-"+cEmpAnt+".log","Vaga: "+cVaga )
             FOR nCont := 1 TO nVaga STEP 1
                 nCodVaga := GETSXENUM("SQS","QS_VAGA")
-                GravaLog("Log-Teste-Conv_vaga-"+cEmpAnt+".log","Gerou ===> "+nCodVaga )
+                GravaLog("\custom_logs\vaga\log-teste-conv_vaga-"+cEmpAnt+".log","Gerou ===> "+nCodVaga )
                 If RecLock("SQS",.T.)
                 Replace  	QS_FILIAL  With  cQS_FILIAL,;
                             QS_VAGA  With  nCodVaga,;

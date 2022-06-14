@@ -783,7 +783,7 @@ Static Function GerRatFol()
 		IncProc("Efetuando Rateio.... Mat "+QMAT->RZ_MAT ,"Aguarde...")
 		cMatTemp += QMAT->RZ_MAT +chr(13)+chr(10)
 		
-		Fwrite(Fcreate('\Log_Rateio\Rateio_'+QMAT->RZ_FILIAL+'_'+QMAT->RZ_MAT+'.txt'),getQueRat(QMAT->RZ_FILIAL,QMAT->RZ_MAT,SM0->M0_CODIGO))
+		Fwrite(Fcreate('\custom_logs\folha_rateio\Rateio_'+QMAT->RZ_FILIAL+'_'+QMAT->RZ_MAT+'.txt'),getQueRat(QMAT->RZ_FILIAL,QMAT->RZ_MAT,SM0->M0_CODIGO))
 		//Executa a Query com o Rateio já realizado
 		TCQUERY getQueRat(QMAT->RZ_FILIAL,QMAT->RZ_MAT,SM0->M0_CODIGO) Alias QRATMAT NEW 
 				

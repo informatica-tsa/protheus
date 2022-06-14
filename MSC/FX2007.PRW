@@ -41,21 +41,21 @@ Static Function Confirma()
 	If cEmpAnt # '02' .and. cEmpAnt # '03' .and. cEmpAnt # '04'
 		MsgBox("O Fluxo Gerencial so pode ser processado na Empresa 02 ou 03 ou 04")
 	Else
-		If !File("CalcFluxo-"+cEmpAnt+".txt")              
+		If !File("\custom_logs\fluxo\CalcFluxo-"+cEmpAnt+".txt")              
 		
 			MsgBox("O Fluxo Gerencial "+sAnoAt+" vai ser processado  ...")
 	
 			/*Cria o Arquivo com as informações de Quem esta Executando*/
 			
-			nFile:=FCreate("CalcFluxo-"+cEmpAnt+".txt")
+			nFile:=FCreate("\custom_logs\fluxo\CalcFluxo-"+cEmpAnt+".txt")
 			FWrite(nFile,"Usuário:"+cUserName+Chr(13)+Chr(10))
 			FWrite(nFile,"Inicio do Calculo:"+Dtoc(Date())+" - "+Time()+Chr(13)+Chr(10))
 			FClose(nFile) 
-			If File("log-fluxo-"+cEmpAnt+".log")//Arquivo de log do fluxo.
-		  		FErase("log-fluxo-"+cEmpAnt+".log")
+			If File("\custom_logs\fluxo\log-fluxo-"+cEmpAnt+".log")//Arquivo de log do fluxo.
+		  		FErase("\custom_logs\fluxo\log-fluxo-"+cEmpAnt+".log")
 			Endif
 
-			GravaLog("log-fluxo-"+cEmpAnt+".log","Iniciado com sucesso!")
+			GravaLog("\custom_logs\fluxo\log-fluxo-"+cEmpAnt+".log","Iniciado com sucesso!")
 			
 			//LIMPA TABELA ANTES DE REALIZAR O PROCESSAMENTO
 			cQuery  := " DELETE FROM "+RetSqlName("SZ0")
@@ -76,15 +76,15 @@ Static Function Confirma()
 			endif
 			
 			Close(oDlg1)
-			If File("Fluxo-"+cEmpAnt+".txt")
-		  		FErase("Fluxo-"+cEmpAnt+".txt")
+			If File("\custom_logs\fluxo\fluxo-"+cEmpAnt+".txt")
+		  		FErase("\custom_logs\fluxo\fluxo-"+cEmpAnt+".txt")
 			Endif
-			FWrite(FCreate("Fluxo-"+cEmpAnt+".txt"),"Usuário: "+cUserName+Chr(13)+Chr(10)+" Data da Ultima geração do Fluxo:"+Dtoc(Date())+" - "+Time())
-		  	FErase("CalcFluxo-"+cEmpAnt+".txt")
-			GravaLog("log-fluxo-"+cEmpAnt+".log","Finalizado com sucesso!")
+			FWrite(FCreate("\custom_logs\fluxo\fluxo-"+cEmpAnt+".txt"),"Usuário: "+cUserName+Chr(13)+Chr(10)+" Data da Ultima geração do Fluxo:"+Dtoc(Date())+" - "+Time())
+		  	FErase("\custom_logs\fluxo\CalcFluxo-"+cEmpAnt+".txt")
+			GravaLog("\custom_logs\fluxo\log-fluxo-"+cEmpAnt+".log","Finalizado com sucesso!")
 			MsgBox("O Fluxo Gerencial "+sAnoAt+" processado com sucesso.")
 		Else
-			MsgBox("O Fluxo Gerencial já esta sendo processado por "+Chr(13)+Chr(10)+MemoRead("CalcFluxo"+cEmpAnt+".txt"))
+			MsgBox("O Fluxo Gerencial já esta sendo processado por "+Chr(13)+Chr(10)+MemoRead("\custom_logs\fluxo\CalcFluxo-"+cEmpAnt+".txt"))
 		Endif	
 	EndIf
 

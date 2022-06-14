@@ -37,11 +37,11 @@ SC8->(dbSeek(xFilial("SC8")+cNumCot))
 		        SC8->C8_ITEMCTA :=  SC1->C1_ITEMCTA
 		        SC8->C8_CC  	   :=  SC1->C1_CC
 		    SC8->(MsUnlock())
-		    GravaLog("log-cust-cotacao-"+cEmpAnt+".log","A SOLICITACAO: "+SC8->C8_NUMSC+" E A COTACAO: "+cNumCot+" ITEM: "+SC1->C1_ITEM+" PRODUTO: "+SC1->C1_PRODUTO+" Gravado com sucesso!")
+		    GravaLog("\custom_logs\pedido\log-cust-cotacao-"+cEmpAnt+".log","A SOLICITACAO: "+SC8->C8_NUMSC+" E A COTACAO: "+cNumCot+" ITEM: "+SC1->C1_ITEM+" PRODUTO: "+SC1->C1_PRODUTO+" Gravado com sucesso!")
 		Else
 			cMsg := "EXISTE DIVERGENCIA ENTRE A SOLICITACAO: "+SC8->C8_NUMSC+" E A COTACAO: "+cNumCot+". GENTILEZA PROCURAR A CI ANTES DE SEGUIR COM O PROCESSO. ITEM: "+SC8->C8_ITEMSC+" PRODUTO: "+SC8->C8_PRODUTO
 			MSGALERT(cMsg)
-			GravaLog("log-cust-cotacao-"+cEmpAnt+".log",cMsg)
+			GravaLog("\custom_logs\pedido\log-cust-cotacao-"+cEmpAnt+".log",cMsg)
 		EndIf
 		SC8->(dbSkip())
 	End Do

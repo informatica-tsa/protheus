@@ -36,9 +36,9 @@ Static Function Confirma()
 * Botao de confirmacao
 *
 ***
-If !File("CalcFluxo-"+cEmpAnt+".txt")
+If !File("\custom_logs\fluxo\CalcFluxo-"+cEmpAnt+".txt")
 	//Cria o Arquivo com as informações de Quem esta Executando
-	nFile:=FCreate("CalcFluxo-"+cEmpAnt+".txt")
+	nFile:=FCreate("\custom_logs\fluxo\CalcFluxo-"+cEmpAnt+".txt")
 	FWrite(nFile,"Usuário:"+cUserName+Chr(13)+Chr(10))
 	FWrite(nFile,"Inicio do Calculo:"+Dtoc(Date())+" - "+Time()+Chr(13)+Chr(10))
 	FClose(nFile)
@@ -52,13 +52,13 @@ If !File("CalcFluxo-"+cEmpAnt+".txt")
 	Empr:= SM0->M0_CODIGO
 	TCSPExec(xProcedures("FX2006"),Empr)		
 	Close(oDlg1)
-	If File("Fluxo-"+cEmpAnt+".txt")
-  		FErase("Fluxo-"+cEmpAnt+".txt")
+	If File("\custom_logs\fluxo\fluxo-"+cEmpAnt+".txt")
+  		FErase("\custom_logs\fluxo\fluxo-"+cEmpAnt+".txt")
 	Endif
-	FWrite(FCreate("Fluxo-"+cEmpAnt+".txt"),"Data da Ultima geração do Fluxo:"+Dtoc(Date())+Time())
-  	FErase("CalcFluxo-"+cEmpAnt+".txt")
+	FWrite(FCreate("\custom_logs\fluxo\fluxo-"+cEmpAnt+".txt"),"Data da Ultima geração do Fluxo:"+Dtoc(Date())+Time())
+  	FErase("\custom_logs\fluxo\CalcFluxo-"+cEmpAnt+".txt")
 Else
-	MsgBox("O Fluxo Gerencial já esta sendo processado por "+Chr(13)+Chr(10)+MemoRead("CalcFluxo-"+cEmpAnt+".txt"))
+	MsgBox("O Fluxo Gerencial já esta sendo processado por "+Chr(13)+Chr(10)+MemoRead("\custom_logs\fluxo\CalcFluxo-"+cEmpAnt+".txt"))
 Endif	
 return()
 
