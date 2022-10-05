@@ -95,6 +95,13 @@ Local nXi
 		oSaldo:cCodFil 		:= 	xFilial("SC7")
 		oSaldo:cCodProj		:=  aCols[n,nPSC7Proj]
 		oSaldo:cCodTarefa 	:=  aCols[n,nPSC7Taref]
+
+		If Substr(Alltrim(aCols[n,nPSC7Taref]),1,2) == "ID"
+			oSaldo:cIDTarefa	:= 	aCols[n,nPSC7Taref]
+		Else
+			oSaldo:cIDTarefa	:= 	""	
+		Endif		
+	
 		oSaldo:dDtEnt		:=  aCols[n,nPSC7DtEnt]
 		oSaldo:cCodProc		:= "002"
 		oSaldo:cProcesso	:= "Pedido de Compras"

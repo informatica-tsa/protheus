@@ -25,6 +25,7 @@ Class Z_Saldo
 	Data cCodProj
 	Data cIDProj
 	Data cCodTarefa
+	Data cIDTarefa
 	Data aIDTarefa  As Array
 	Data dDtEnt
 	Data nSaldo
@@ -82,6 +83,7 @@ Method Ini() Class Z_Saldo
 	::cIDProj		:= ""
 	::cCodTarefa	:= ""
 	::aIDTarefa		:= {}
+	::cIDTarefa		:= ""
 	::cCodProc		:= ""
 	::cProcesso		:= ""
 	::cIdPeriodo	:= ""
@@ -106,6 +108,7 @@ Method Consulta() Class Z_Saldo
 	Local aPeriodo	:= {}	
 	Local aTarefa	:= {}
 	Local nXi		:= 0	
+	Local cIDTar	:= ""
 	
 	If !lErro
 		::cColigada := BuscaColigada(cEmpAnt,::cCodFil,@lErro,@cMsg)
@@ -116,13 +119,37 @@ Method Consulta() Class Z_Saldo
 	Endif
 	
 	If !lErro	
-		aTarefa := StrToKarr( ::cCodTarefa, ";" )
-		For nXi := 1 to len(aTarefa)
-			aadd(::aIDTarefa,BuscaIDTrf(::cColigada,::cIDProj, aTarefa[nXi],@lErro,@cMsg))
-		Next	
+		IF Empty(::cIDTarefa)
+			aTarefa := StrToKarr( ::cCodTarefa, ";" )
+			cIDTar 	:= ""
+
+			For nXi := 1 to len(aTarefa)
+				aadd(::aIDTarefa,BuscaIDTrf(::cColigada,::cIDProj, aTarefa[nXi],@lErro,@cMsg))
+			Next	
+
+			For nXi := 1 to len(::aIDTarefa)
+				cIDTar += Alltrim(::aIDTarefa[nXi])
+				If nXi < len(::aIDTarefa)
+					cIDTar += ";"
+				Endif
+			Next	
+
+
+		Else
+			cIDTar := StrTRan(::cIDTarefa,"ID","")
+			aTarefa := StrToKarr( cIDTar, ";" )
+
+			For nXi := 1 to len(aTarefa)
+				aadd(::aIDTarefa,aTarefa[nXi])
+			Next	
+
+		Endif	
 	Endif	
 	
 	If !lErro
+
+		::cIDTarefa := "ID"+cIDTar
+		
 		If len(aPeriodo  := BuscaPeriodo(::cColigada,::cIDProj,::dDtEnt,@lErro,@cMsg)) > 0
 			::cIdPeriodo 	:= aPeriodo[1]
 			::dIniPer 		:= aPeriodo[2]
@@ -344,6 +371,10 @@ Local cValExt		:= ""
 	
 	aResult := U_CONSSQLRM(cSentenca,cCodSistema,cParam,aCabec,@lErro,@cMsg)
 	
+	If ValType(aResult) != "A"
+		aResult := {}
+	Endif	
+
 	If len(aResult) > 0
 		cRet 	:= aResult[1,1] // VALORRM		
 	Endif

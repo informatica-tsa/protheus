@@ -46,12 +46,24 @@ Local nAbatFI		:= 0
 				oSaldo:cCodFil 		:= 	xFilial("SE2")
 				oSaldo:cCodProj		:=  M->E2_ZPRJ
 				oSaldo:cCodTarefa 	:=  M->E2_ZTARE
+
+				If Substr(Alltrim(M->E2_ZTARE),1,2) == "ID"
+					oSaldo:cIDTarefa	:= 	ALLTRIM(M->E2_ZTARE)
+				Else
+					oSaldo:cIDTarefa	:= 	""	
+				Endif
+				
 				oSaldo:dDtEnt		:=  M->E2_ZDTENT
 				oSaldo:cCodProc		:= "004"
 				oSaldo:cProcesso	:= "Contas a Pagar"
 			
 				oSaldo:ConsSaldo() 
 				oSaldo:Avalia()
+
+
+				IF !Empty(oSaldo:cIDTarefa)
+					M->E2_ZTARE 	:= Alltrim(oSaldo:cIDTarefa)
+				Endif				
 								
 				If !(oSaldo:lOk)                            
 					If !IsBlind()	                            

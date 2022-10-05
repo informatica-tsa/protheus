@@ -60,6 +60,13 @@ Local lRet			:= .t.
 			oSaldo:cCodFil 		:= 	xFilial("SD1")
 			oSaldo:cCodProj		:=  aCols[n,nPSD1Proj]
 			oSaldo:cCodTarefa 	:=  aCols[n,nPSD1Taref]
+
+			If Substr(Alltrim(aCols[n,nPSD1Taref]),1,2) == "ID"
+				oSaldo:cIDTarefa	:= 	aCols[n,nPSD1Taref]
+			Else
+				oSaldo:cIDTarefa	:= 	""	
+			Endif
+
 			oSaldo:dDtEnt		:=  aCols[n,nPSD1DtEnt]
 			oSaldo:cCodProc		:= "003"
 			oSaldo:cProcesso	:= "Documento de Entrada"

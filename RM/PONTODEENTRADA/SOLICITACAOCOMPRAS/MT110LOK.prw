@@ -37,6 +37,7 @@ Local lRet			:= .t.
 Local cFilSC1		:= xFilial("SC1")
 Local cLog			:= ""
 Local cTarefa		:= ""
+Local cIDTarefa		:= ""
 
 Local cMarca		:= ""
 Local cPrjVer			:= RTrim(PmsMsgUVer('PROJECT',			'PMSA200')) //Versão do Projeto
@@ -92,13 +93,22 @@ Local nXi
 		oSaldo:cCodFil 		:= 	xFilial("SC1")
 		oSaldo:cCodProj		:=  aCols[n,nPSC1Proj]
 		oSaldo:cCodTarefa 	:=  aCols[n,nPSC1Taref]
+		If Substr(Alltrim(aCols[n,nPSC1Taref]),1,2) == "ID"
+			oSaldo:cIDTarefa	:= 	aCols[n,nPSC1Taref]
+		Else
+			oSaldo:cIDTarefa	:= 	""	
+		Endif
 		oSaldo:dDtEnt		:=  aCols[n,nPSC1DtEnt]
 		oSaldo:cCodProc		:= "001"
 		oSaldo:cProcesso	:= "Solicitacao de Compras"
 	
 		oSaldo:ConsSaldo() 
 		oSaldo:Avalia()
-	
+
+		IF !Empty(oSaldo:cIDTarefa)
+			aCols[n,nPSC1Taref] := Alltrim(oSaldo:cIDTarefa)
+		Endif
+
 		If !(oSaldo:lOk)
 	        If !IsBlind()	                            
 	        	nDet := Aviso("Bloqueio de Saldo",oSaldo:cMensagem,{"Fechar"},3)

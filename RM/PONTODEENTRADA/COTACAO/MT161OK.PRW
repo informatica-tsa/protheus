@@ -54,12 +54,26 @@ Local nAbatSC		:= 0
 						oSaldo:cCodFil 		:= 	xFilial("SC8")
 						oSaldo:cCodProj		:=  cCodPrj
 						oSaldo:cCodTarefa 	:=  cCodTrf
+
+						If Substr(Alltrim(cCodTrf),1,2) == "ID"
+							oSaldo:cIDTarefa	:= 	Alltrim(cCodTrf)
+						Else
+							oSaldo:cIDTarefa	:= 	""	
+						Endif
+
 						oSaldo:dDtEnt		:=  dDtEnt
 						oSaldo:cCodProc		:= "002"
 						oSaldo:cProcesso	:= "Pedido de Compras"	
 						
 						oSaldo:ConsSaldo() 
 						oSaldo:Avalia()
+
+						IF !Empty(oSaldo:cIDTarefa)
+							RecLock('SC8',.F.)
+							SC8->C8_ZTARE 	:= Alltrim(oSaldo:cIDTarefa)
+							SC8->(MsUnlock())							
+						Endif
+
 						
 						If !(oSaldo:lOk)                            
 							If !IsBlind()	                            
