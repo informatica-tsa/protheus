@@ -253,19 +253,20 @@ While !(cAliasTemp)->(Eof()) .And. Iif(lImpAuto , (cAliasTemp)->(C7_FILIAL+C7_NU
    For nXi:=1 To MLCount(Alltrim((cAliasTemp)->C7_PRODUTO)+" - "+Alltrim((cAliasTemp)->C7_DESCRI),nQuebDesc,,.T.)
        If nXi == 1 // na Primeira linha fica as quantidades e valores
           nTotItens++
-          Aadd(aItensPC,{(cAliasTemp)->C7_ITEM,;
-                         Alltrim(Str((cAliasTemp)->C7_QUANT,14,0)) ,; // /*Alltrim(Transform((cAliasTemp)->C7_QUANT,"@E 99,999.99"))*/
-                         (cAliasTemp)->C7_UM,;
-                         Alltrim(MemoLine(Alltrim((cAliasTemp)->C7_PRODUTO)+" - "+Alltrim((cAliasTemp)->C7_DESCRI),nQuebDesc,nXi,,.t.)),;
-                         SB1->B1_POSIPI,;
-                         Alltrim(Str((cAliasTemp)->C7_ICMSRET,14,2)),;
-                         Alltrim(Transform((cAliasTemp)->C7_PRECO,"@E 999,999.99")),;
-                         '',;      
-                         Alltrim(Transform((cAliasTemp)->C7_PICM,"@E 99.99")),;
-                         Alltrim(Transform((cAliasTemp)->C7_IPI,"@E 99.99")),;
-                         Alltrim(Transform((cAliasTemp)->(C7_TOTAL+C7_VALFRE+C7_VALEMB+C7_DESPESA+C7_SEGURO+C7_VALIPI+C7_ICMSRET)-(cAliasTemp)->C7_VLDESC,"@E 999,999.99")),;
-                         (CALIASTEMP)->C7_DESTINA,;
-                         (CALIASTEMP)->C7_DATPRF })
+            //Alltrim(Str((cAliasTemp)->C7_QUANT,14,0)) ,; // /*Alltrim(Transform((cAliasTemp)->C7_QUANT,"@E 99,999.99")),;*/
+            Aadd(aItensPC,{(cAliasTemp)->C7_ITEM,;
+            Alltrim(Transform((cAliasTemp)->C7_QUANT,"@E 99,999.99")),;
+            (cAliasTemp)->C7_UM,;
+            Alltrim(MemoLine(Alltrim((cAliasTemp)->C7_PRODUTO)+" - "+Alltrim((cAliasTemp)->C7_DESCRI),nQuebDesc,nXi,,.t.)),;
+            SB1->B1_POSIPI,;
+            Alltrim(Str((cAliasTemp)->C7_ICMSRET,14,2)),;
+            Alltrim(Transform((cAliasTemp)->C7_PRECO,"@E 999,999.99")),;
+            '',;      
+            Alltrim(Transform((cAliasTemp)->C7_PICM,"@E 99.99")),;
+            Alltrim(Transform((cAliasTemp)->C7_IPI,"@E 99.99")),;
+            Alltrim(Transform((cAliasTemp)->(C7_TOTAL+C7_VALFRE+C7_VALEMB+C7_DESPESA+C7_SEGURO+C7_VALIPI+C7_ICMSRET)-(cAliasTemp)->C7_VLDESC,"@E 999,999.99")),;
+            (CALIASTEMP)->C7_DESTINA,;
+            (CALIASTEMP)->C7_DATPRF })
 
        Else
           nTotItens++
@@ -497,7 +498,7 @@ If nPgAtu == 1
 	oPrint:Say(0345,0070,OemToAnsi("CPNJ: ")+Iif(Len(Alltrim(SM0->M0_CGC))==14,Transform(SM0->M0_CGC,"@R 99.999.999/9999-99"),Transform(SM0->M0_CGC,"@R 999.999.999-99")),oFontRos,100)
 	oPrint:Say(0345,0780,OemToAnsi("Inscrição Estadual: ")+SM0->M0_INSC,oFontRos,100)
 	
-	oPrint:Say(0395,0070,"Comprador: "+sNameComp+"  "+OemToAnsi("Email: ")+GetNewpar("NM_MAILEMP","suprimentos@tsamg.com.br"),oFontRos,100)
+	oPrint:Say(0395,0070,"Comprador: "+sNameComp+"  "+OemToAnsi("Email: ")+GetNewpar("NM_MAILEMP","suprimentos@tsaengenharia.com"),oFontRos,100)
 	oPrint:Say(0395,08000,OemToAnsi("Email Nota Fiscal: ")+GetNewpar("NM_MAILNF","tsamg@tsamg.com.br"),oFontRos,100)
 	oPrint:Box(0445,0050,0447,1800)// Linha serador fornecedor
 	
@@ -580,7 +581,7 @@ oPrint:Say(nLinha-50,0060   ,OemToAnsi("A- DESCRIÇÃO DO FORNECIMENTO"),oFontCab,
 
 oPrint:Say(nLinha,0055   ,OemToAnsi("ITEM"),oFontCab,100)
 oPrint:Say(nLinha,0155   ,OemToAnsi("QTDE"),oFontCab,100)
-oPrint:Say(nLinha,0260   ,OemToAnsi("UND"),oFontCab,100)
+oPrint:Say(nLinha,0280   ,OemToAnsi("UND"),oFontCab,100)
 oPrint:Say(nLinha,0330   ,OemToAnsi("Descrição do Fornecimento (prod./serviço)"),oFontCab,100)
 oPrint:Say(nLinha,1180   ,OemToAnsi("C.Fiscal"),oFontCab,100) 
 oPrint:Say(nLinha,1380   ,OemToAnsi("Pr.Unit."),oFontCab,100)// Daqui para baixo
@@ -595,7 +596,7 @@ oPrint:Say(nLinha,2120   ,OemToAnsi("Prazo Entr"),oFontCab,100)
 
 // Linhas Verticais
 oPrint:Line(nLinha,0140,nLinha+1150,0140)
-oPrint:Line(nLinha,0240,nLinha+1150,0240)
+oPrint:Line(nLinha,0270,nLinha+1150,0270)
 oPrint:Line(nLinha,0320,nLinha+1150,0320)
 oPrint:Line(nLinha,1170,nLinha+1150,1170)
 oPrint:Line(nLinha,1340,nLinha+1150,1340) // Daqui para baixo
@@ -625,7 +626,7 @@ For nXi := 1 To 21
     If Len(aItensPC) >= nXi
        oPrint:Say(nLinha+50,0060   ,aItensPC[nXi][01],oFontIte,100)
        oPrint:Say(nLinha+50,0155   ,aItensPC[nXi][02],oFontIte,100)
-       oPrint:Say(nLinha+50,0260   ,aItensPC[nXi][03],oFontIte,100)
+       oPrint:Say(nLinha+50,0280   ,aItensPC[nXi][03],oFontIte,100)
        oPrint:Say(nLinha+50,0330   ,aItensPC[nXi][04],oFontIte,100)
        oPrint:Say(nLinha+50,1180   ,aItensPC[nXi][05],oFontIte,100)
        oPrint:Say(nLinha+50,1380   ,aItensPC[nXi][07],oFontIte,100)
