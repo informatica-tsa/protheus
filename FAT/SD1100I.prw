@@ -161,7 +161,7 @@ If ! lTituOK
    MsUnLock()
 EndIf
 
-
+/*
 //TROCA DATA DE DIGITAÇÃO PARA CONTABILIZAR COM A DATA DE EMISSÃO
 dbSelectArea("SD1")
 If RecLoCk("SD1",.F.)
@@ -170,7 +170,7 @@ If RecLoCk("SD1",.F.)
       Replace D1_DTDIGIT With SD1->D1_EMISSAO
    EndIf
    MsUnLock()
-EndIf
+EndIf*/
 
 DbSelectArea(aArqSD[1])
 DbSetOrder(aArqSD[2])
