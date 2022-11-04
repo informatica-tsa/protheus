@@ -2,7 +2,7 @@
 #include "topconn.ch"  
 #include "Ap5mail.ch"  
 
-User Function ContFolv2()
+User Function ContFol()
 
 	Private nLastKey := 0
 	Private cAnoMesFol  := GetMv("MV_FOLMES")
@@ -43,34 +43,36 @@ Static Function ProcFol()
 
 	//Criacao de arquivos de trabalho
 	Local lOK				:= .T.
-	Local lGerFIPFerias	:= .F.
+	Local lOKData			:= .T.
+	Local lGerFIPFerias		:= .F.
 	Local lGerFIPAuto		:= .F.
 	Local lVerSemFip		:= .F.
 	Local lGerRat			:= .F.
 	Local lGerContab		:= .F.
 	Local nXX				:= 0
+	Local nXY				:= 0
+	Local cEol:=Chr(13)+Chr(10)
+	Local aErrorMsg := {}
+	Local cErrorMsg := ""
 
 	Private oProc1, oProc2, oProc3, oProc4
 	Private _oDlg
-	Private lMostLanc		:= 1 
-	Private lAgluLanc		:= 1
-	Private cmail			:= ""
 	Private lMostLanc		:= (MV_PAR11==1) 
 	Private lAgluLanc		:= (MV_PAR12==1)
 	Private cmail			:= MV_PAR13
-	Private cContaF		:= MV_PAR14
+	Private cContaF			:= MV_PAR14
 	Private cContaAF		:= MV_PAR15
 	Private nHoraFip		:= MV_PAR16
 	Private lForcaFIP		:= (MV_PAR17==1)
-	Private lRecComplem	:= (MV_PAR18==1 .And. cEmpAnt<>'97')
-	Private cFilAux		:= cFilAnt
+	Private lRecComplem		:= (MV_PAR18==1 .And. cEmpAnt<>'97')
+	Private cFilAux			:= cFilAnt
 
 	Pergunte(cPerg,.F.)
 
 	cAnoMes			:= MV_PAR01
 	cFilDe			:= IIf(cFilAnt == '97','97',MV_PAR02)
 	cFilAte			:= IIf(cFilAnt == '97','97',MV_PAR03)
-	cCCDe				:= MV_PAR04
+	cCCDe			:= MV_PAR04
 	cCCAte			:= MV_PAR05
 	lGerFIPFerias	:= IIf(cFilAnt == '97',.F.,(MV_PAR06 == 1))
 	lGerFIPAuto		:= (MV_PAR07 == 1)
@@ -86,17 +88,25 @@ Static Function ProcFol()
 	dDataAte := Stod(cAnoFim+cMesFim+'25')
 	
 	If Left(Dtos(dDatabase),6)<>cAnoMes
-		Alert("A Data base do sistema deve ser compatível com o Ano e Mes Informado no parametro.")
-		lOK := .F.
+		AADD(aErrorMsg,'Error:  A Data base do sistema deve ser compatível com o Ano e Mes Informado no parametro.')
+		lOKData := .F.
 	Endif
-	
-	aRetF := FWArrFilAtu()
+
+	aRetF := FWAllFilial()
 	aFilProc := {}
 
 	For nXX := 1 To Len(aRetF)
 
-		If aRetF[nXX,05] >= cFilDe .And. aRetF[nXX,05] <= cFilAte
-			AADD(aFilProc,aRetF[nXX,05])
+		If aRetF[nXX] >= cFilDe .And. aRetF[nXX] <= cFilAte
+			AADD(aFilProc,aRetF[nXX])
+
+			If lGerContab
+				if ExisLote(aRetF[nXX])
+					lOKData := .F.
+					AADD(aErrorMsg,'Filial: '+aRetF[nXX]+' - O lote 008880 ja contabilizado para esta filial neste periodo('+cAnoMes+').'+cEol+'Exclua o lote antes se desejar contabilizar novamente. ')
+				EndIf
+			Endif
+
 		EndIf
 
 	Next nXX
@@ -105,47 +115,88 @@ Static Function ProcFol()
 		
 		cFilAnt := aFilProc[nXX]
 
-		If lGerFIPFerias
+		If lGerFIPFerias .and. lOKData
 			IncProc("Aguarde gerando FIP para Funcionários de Férias e Afastados - FILIAL: "+cFilAnt,"Aguarde...")
-			lOK := GerFIPFer()
+			GerFIPFer()
 		Endif
 
-		If lGerFIPAuto
+		If lGerFIPAuto .and. lOKData
 			IncProc("Aguarde Gerando lançamentos de FIP Automática - FILIAL: "+cFilAnt,"Aguarde...")
-			lOK := GerFipAuto()
+			GerFipAuto()
 		Endif
 
-		If lVerSemFip
+		If lVerSemFip .and. lOKData
 			IncProc("Verificando Funcionários SEM FIP - FILIAL: "+cFilAnt,"Aguarde...")
-			lOK := VerSemFIP()   
+			if ! VerSemFIP()
+				AADD(aErrorMsg,'Filial: '+cFilAnt+" - Error: Existe funcionarios sem fip. (Ver email)")
+				lOK := .F.
+			EndIf   
 		Endif
 
-		If lRecComplem
+		If lRecComplem .and. lOKData
 			IncProc("Processando Fun. Recisão Complementar - FILIAL: "+cFilAnt,"Aguarde...")
-			lOK := RecCompl()   
+			if ! RecCompl()
+				AADD(aErrorMsg,'Filial: '+cFilAnt+" - Error:  Problema com recisao complementar (Ver email)")
+				lOK := .F.
+			EndIf  
 		Endif
 
-		If lOK .And. lGerRat
+		If lOK .And. lGerRat .and. lOKData
 
-			lOK := ErrosDigit()
+			if ! ErrosDigit()
+				lOK := .F.
+			EndIf
 
 			If lOK
 				IncProc("Efetuando o Rateio.... - FILIAL: "+cFilAnt,"Aguarde...")
 				lOK := GerRatFol()
 			Else
-				MSGSTOP('Ocorreram erros de validação, consulte e-mail para mais detalhes.')
-			Endif	
+				AADD(aErrorMsg,'Filial: '+cFilAnt+" - Error:  Ocorreram erros de validação, consulte e-mail para mais detalhes.")
+			Endif
+
+			IF lOK .And. !lGerContab //Somente gera log aqui se não estiver contabilizando
+				ErroContb(.T.) //Envia Relatorio de contabilizacao
+			ENDIF	
 
 		Endif
 
-		If lOK .And. lGerContab
+		If lOK .And. lGerContab .and. lOKData
 			IncProc("Aguarde Contabilizando.... - FILIAL: "+cFilAnt,"Aguarde...")
-			ProcContab()
+			
+			lOK := ErroContb(.T.) //Envia Relatorio de contabilizacao
+
+			IF lOK
+				ProcContab()
+				lOK := ErroContb(.F.)
+
+				if ! lOK
+					AADD(aErrorMsg,'Filial: '+cFilAnt+' - Error:  Processo de contabilização foi concluido com Erros. '+cEol+'      Consulte e-mail para mais detalhes. '+cEol+'      Após correcao, exclua o lote 008880 e repita o processo.')
+				Endif
+			Else
+				AADD(aErrorMsg,'Filial: '+cFilAnt+' - Error:  Ocorreram erros que impedem a contabilizacao, consulte e-mail para mais detalhes.')
+			ENDIF
+
 		Endif
 
 	Next nXX
 
 	cFilAnt := cFilAux
+
+	if Empty(aErrorMsg)
+		MSGINFO('Processo concluido com sucesso!')
+	else
+		For nXY := 1 To Len(aErrorMsg)
+
+			if nXY != 1
+				cErrorMsg += cEol
+			ENDIF
+
+			cErrorMsg += aErrorMsg[nXY]+cEol
+			
+		Next nXX
+		MSGSTOP(cErrorMsg)
+	EndIf
+			
 
 Return(.T.)
 
@@ -164,7 +215,7 @@ Static Function VerSemFIP()
 	Local cSendBy   := cmail
 	Local cMens:=""
 	Local cConta:=""
-	Local lFerias:=.F.
+	Local lSend := .F.
 	                              
 	//Gera Fip para as pessoas que não precisam digitar a FIP
 	cQuery:=" SELECT RA_FILIAL,RA_CC,RA_MAT,RA_NOME,RA_FIPAUTO,RA_FIPSUBC,CTT.CTT_DESC01,"
@@ -176,7 +227,7 @@ Static Function VerSemFIP()
 	cQuery+=" LEFT OUTER JOIN "+RetSqlName("SZ2")+" SZ2 ON  (SZ2.Z2_SUBC=Right(FIP.FIPCUSTO,5) AND SZ2.Z2_COD=LEFT(FIP.FIPCUSTO,5) AND SZ2.Z2_FILIAL='"+Xfilial("SZ2")+"' AND SZ2.D_E_L_E_T_<>'*') "
 	cQuery+=" WHERE "
 	cQuery+="     RA_CC BETWEEN '"+cCCDe+"' AND '"+cCCAte+"'"
-//	cQuery+=" AND RA_FILIAL BETWEEN '"+cFilde+"' AND '"+cFilAte+"'"
+	//	cQuery+=" AND RA_FILIAL BETWEEN '"+cFilde+"' AND '"+cFilAte+"'"
 	cQuery+=" AND RA_FILIAL BETWEEN '"+cFilAnt+"' AND '"+cFilAnt+"'"
 	cQuery+=" AND RA_ADMISSA <='"+dtos(dDataAte)+"'"
 	cQuery+=" AND (RA_DEMISSA='' OR LEFT(RA_DEMISSA,6)>='"+cAnoMes+"') AND FIP.CHAPA IS NULL "
@@ -187,7 +238,7 @@ Static Function VerSemFIP()
 	 
 	cMens:=' <html> '+cEol
 	cMens+='	<head>'+cEol
-//	cMens+='		<TITLE>'+if(cEmpAnt='01','EPC-','TSA')+'-Lista de Funcionários Sem FIP </TITLE>'+cEol
+	//	cMens+='		<TITLE>'+if(cEmpAnt='01','EPC-','TSA')+'-Lista de Funcionários Sem FIP </TITLE>'+cEol
 	cMens+='		<TITLE>'+if(cEmpAnt='03','LYNX','TSA')+'-Lista de Funcionários Sem FIP </TITLE>'+cEol
 	cMens+='	</HEAD>'+cEol
 	cMens+='	<Table border=2 cellspacing=0 bordercolor="black" width=800 >'+cEol
@@ -199,7 +250,7 @@ Static Function VerSemFIP()
 	cMens+=' Parametros: <br>'
 	cMens+=' Ano Mes Referência:'+cAnoMes+'<br>'
 	cMens+=' C.Custo de:'+cCCDe+' Ate '+cCCAte+'<br>'
-//	cMens+=' Filial de:'+cFilDe+' Até '+cFilAte+'<br>'
+	//	cMens+=' Filial de:'+cFilDe+' Até '+cFilAte+'<br>'
 	cMens+=' Filial de:'+cFilAnt+' Até '+cFilAnt+'<br>'
 	cMens+='			</td>'+cEol
 	cMens+='		</tr>'+cEol
@@ -222,7 +273,7 @@ Static Function VerSemFIP()
 	dbGotop()
 
 	While !Eof()
-		
+		lSend := .T.
 		If cCusto<>QSFIP->RA_CC
 			cMens+='		<tr>'+cEol
 			cMens+='			<td align=center colspan=3 bgColor="Silver">'+AllTrim(QSFIP->RA_CC)+'-'+QSFIP->CTT_DESC01+'</td>'+cEol
@@ -309,12 +360,16 @@ Static Function VerSemFIP()
 	cMens+='	</table>'+cEol
 	
 	cMens+='</html> '+cEol
+
+	if lSend 
 	
-	CONNECT SMTP SERVER cCtaSmpt ACCOUNT cAccount PASSWORD cCtaPass 
-	
-	SEND MAIL FROM  cSendBy TO  cSendBy SUBJECT 'Processo de Rateio da FIP' BODY cMens 
-	
-	DISCONNECT SMTP SERVER
+		CONNECT SMTP SERVER cCtaSmpt ACCOUNT cAccount PASSWORD cCtaPass 
+		
+		SEND MAIL FROM  cSendBy TO  cSendBy SUBJECT 'Processo de Rateio da FIP' BODY cMens 
+		
+		DISCONNECT SMTP SERVER
+
+	ENDIF
 
 Return(lRet)
 
@@ -331,10 +386,11 @@ Static Function RecCompl()
 	Local cCtaSmpt	:= GetMv("MV_WFSMTP") 
 	Local cSendBy	:= cmail
 	Local cMens		:= ""
-	Local cConta	:= ""
+	//Local cConta	:= ""
 	Local cTipoHr	:= 'N'
 	Local cCodAtiv	:= '00'
 	Local cData		:= DToS(dDataAte)
+	Local lSend 	:= .F.
 	
 	cData := Left(cData,4)+'-'+SubStr(cData,5,2)+'-'+Right(cData,2)
 	//Gera Fip para as pessoas Com Recisão Complementar
@@ -360,7 +416,7 @@ Static Function RecCompl()
 	
 	cMens:=' <html> '+cEol
 	cMens+='	<head>'+cEol
-//  cMens+='		<TITLE>'+if(cEmpAnt='01','EPC-','TSA')+'-Lista de Funcionários Com Recisão Complementar </TITLE>'+cEol
+	//  cMens+='		<TITLE>'+if(cEmpAnt='01','EPC-','TSA')+'-Lista de Funcionários Com Recisão Complementar </TITLE>'+cEol
 	cMens+='		<TITLE>'+if(cEmpAnt='03','LYNX','TSA')+'-Lista de Funcionários Com Recisão Complementar </TITLE>'+cEol
 	cMens+='	</HEAD>'+cEol
 	cMens+='	<Table border=2 cellspacing=0 bordercolor="black" width=800 >'+cEol
@@ -372,7 +428,8 @@ Static Function RecCompl()
 	cMens+=' Parametros: <br>'
 	cMens+=' Ano Mes Referência:'+cAnoMes+'<br>'
 	cMens+=' C.Custo de:'+cCCDe+' Ate '+cCCAte+'<br>'
-	cMens+=' Filial de:'+cFilDe+' Até '+cFilAte+'<br>'
+	//	cMens+=' Filial de:'+cFilDe+' Até '+cFilAte+'<br>'
+	cMens+=' Filial de:'+cFilAnt+' Até '+cFilAnt+'<br>'
 	cMens+='			</td>'+cEol
 	cMens+='		</tr>'+cEol
 	cMens+='		<tr>'+cEol
@@ -394,7 +451,7 @@ Static Function RecCompl()
 	dbGotop()
 
 	While !Eof()
-	
+		lSend 	:= .T.
 		If cCusto<>QREC->RA_CC
 			cMens+='		<tr>'+cEol
 			cMens+='			<td align=center colspan=3 bgColor="Silver">'+AllTrim(QREC->RA_CC)+'-'+QREC->CTT_DESC01+'</td>'+cEol
@@ -431,16 +488,18 @@ Static Function RecCompl()
 	cMens+='	</table>'+cEol
 	
 	cMens+='</html> '+cEol
+
+	if lSend
 	
-	CONNECT SMTP SERVER cCtaSmpt ACCOUNT cAccount PASSWORD cCtaPass 
-	
-	SEND MAIL FROM  cSendBy TO  cSendBy SUBJECT 'Rateio da FIP(Recisão Complementar)' BODY cMens 
-	
-	DISCONNECT SMTP SERVER
+		CONNECT SMTP SERVER cCtaSmpt ACCOUNT cAccount PASSWORD cCtaPass 
+		
+		SEND MAIL FROM  cSendBy TO  cSendBy SUBJECT 'Rateio da FIP(Recisão Complementar)' BODY cMens 
+		
+		DISCONNECT SMTP SERVER
+
+	ENDIF
 
 Return(lRet)
-
-
 
 
                      
@@ -448,7 +507,7 @@ Static Function ErrosDigit()
 	
 	Local lRet:=.T.
 	Local cEol:=Chr(13)
-	Local cMat:='*'
+	//Local cMat:='*'
 	Local cCusto:="*"
 	Local cAccount  := GetMv("MV_WFACC") 
 	Local cCtaPass  := GetMv("MV_WFPASSW")
@@ -464,7 +523,8 @@ Static Function ErrosDigit()
 	cQuery+="     FIPANOMES='"+cAnoMes+"'"
 	cQuery+="     AND FIPEMPRESA = '"+SM0->M0_CODIGO+"'"
 	cQuery+=" AND RA_CC BETWEEN '"+cCCDe+"' AND '"+cCCAte+"'"
-	cQuery+=" AND RA_FILIAL BETWEEN '"+cFilde+"' AND '"+cFilAte+"'"
+	//cQuery+=" AND RA_FILIAL BETWEEN '"+cFilde+"' AND '"+cFilAte+"'"
+	cQuery+=" AND RA_FILIAL BETWEEN '"+cFilAnt+"' AND '"+cFilAnt+"'"
 	cQuery+=" AND RA_ADMISSA <='"+dtos(dDataAte)+"'"
 	cQuery+=" AND (RA_DEMISSA='' OR LEFT(RA_DEMISSA,6)='"+cAnoMes+"')"
 	cQuery+=" AND ((FIPHORAI>=FIPHORAF) OR "
@@ -478,7 +538,7 @@ Static Function ErrosDigit()
 	 
 	cMens:=' <html> '+cEol
 	cMens+='	<head>'+cEol
-//	cMens+='		<TITLE>'+if(cEmpAnt='01','EPC-','TSA')+'-Erros de Digitação da FIP</TITLE>'+cEol
+	//	cMens+='		<TITLE>'+if(cEmpAnt='01','EPC-','TSA')+'-Erros de Digitação da FIP</TITLE>'+cEol
 	cMens+='		<TITLE>'+if(cEmpAnt='03','LYNX','TSA')+'-Erros de Digitação da FIP</TITLE>'+cEol
 	cMens+='	</HEAD>'+cEol
 	cMens+='	<Table border=2 cellspacing=0 bordercolor="black" width=800 >'+cEol
@@ -488,7 +548,8 @@ Static Function ErrosDigit()
 	cMens+=' Parametros: <br>'
 	cMens+=' Ano Mes Referência:'+cAnoMes+'<br>'
 	cMens+=' C.Custo de:'+cCCDe+' Ate '+cCCAte+'<br>'
-	cMens+=' Filial de:'+cFilDe+' Até '+cFilAte+'<br>'
+	//cMens+=' Filial de:'+cFilDe+' Até '+cFilAte+'<br>'
+	cMens+=' Filial de:'+cFilAnt+' Até '+cFilAnt+'<br>'
 	cMens+='			</td>'+cEol
 	cMens+='		</tr>'+cEol
 	cMens+='		<tr>'+cEol
@@ -540,7 +601,8 @@ Static Function ErrosDigit()
 	cMens+='	</table>'+cEol
 	cMens+='</html> '+cEol
 	
-	nFile:=Fcreate("c:\SemFIP.html")
+	nFile:=Fcreate("\custom_logs\folha_contabilizacao\SemFIP-"+cEmpAnt+"-"+cFilAnt+".html")
+
 	Fwrite(nFile,cMens)
 	Fclose(nFile)                                         
 	
@@ -566,7 +628,7 @@ Static Function GERFIPFER()
 	cQuery+=" INNER JOIN "+RetSqlName("SRA")+" SRA ON (RA_MAT=R8_MAT AND SRA.D_E_L_E_T_<>'*') "
 	cQuery+=" WHERE "
 	cQuery+="         RA_CC BETWEEN '"+cCCDe+"' AND '"+cCCAte+"' AND " 
-//	cQuery+=" 		   RA_FILIAL BETWEEN '"+cFilde+"' AND '"+cFilAte+"' AND "
+	//	cQuery+=" 		   RA_FILIAL BETWEEN '"+cFilde+"' AND '"+cFilAte+"' AND "
 	cQuery+=" 		   RA_FILIAL BETWEEN '"+cFilAnt+"' AND '"+cFilAnt+"' AND "
 	cQuery+="       ((R8_DATAINI BETWEEN '"+Dtos(dDataDe)+"' AND '"+Dtos(dDataAte)+"') OR " 
 	cQuery+="        (R8_DATAFIM BETWEEN '"+Dtos(dDataDe)+"' AND '"+Dtos(dDataAte)+"') OR "
@@ -633,7 +695,8 @@ Static Function GerFipAuto()
 	cQuery+=" LEFT OUTER JOIN "+RetSqlName("SZ2")+" SZ2 ON  (SZ2.Z2_SUBC=Right(FIP.FIPCUSTO,5) AND SZ2.Z2_COD=LEFT(FIP.FIPCUSTO,5) AND SZ2.Z2_FILIAL='"+Xfilial("SZ2")+"' AND SZ2.D_E_L_E_T_<>'*') "
 	cQuery+=" WHERE "
 	cQuery+="     RA_CC    BETWEEN '"+cCCDe+"' AND '"+cCCAte+"'"
-	cQuery+=" AND RA_FILIAL BETWEEN '"+cFilde+"' AND '"+cFilAte+"'"
+	//cQuery+=" AND RA_FILIAL BETWEEN '"+cFilde+"' AND '"+cFilAte+"'"
+	cQuery+=" AND RA_FILIAL BETWEEN '"+cFilAnt+"' AND '"+cFilAnt+"'"
 	cQuery+=" AND (RA_DEMISSA='' OR LEFT(RA_DEMISSA,6)='"+cAnoMes+"')"
 	cQuery+=" AND SRA.RA_FIPAUTO='S' AND RA_FIPSUBC<>'' AND SRA.D_E_L_E_T_<>'*' "
 	
@@ -661,7 +724,7 @@ Static Function GerFipAuto()
 				//Executa a Procedure de Gravação dos Dados....
 				IncProc("Gravando os dados na FIP...") 
 				If SM0->M0_CODIGO == "03"
-				   IncFipeAuto(cMat,cData,nHorasFip,cAnoMes   ,cConta  ,cTipoHr    ,cCodAtiv)
+				   IncFipeAut(cMat,cData,nHorasFip,cAnoMes   ,cConta  ,cTipoHr    ,cCodAtiv)
 				Else
 				   TCSPExec( xProcedures("IMPFIP"),cMat  ,cData          ,nHorasFip      ,cAnoMes   ,cConta  ,cTipoHr    ,cCodAtiv,    0      ,  0    ,cEmpAnt,cFilAnt,'S','S','FIPAUTO')
 				EndIf
@@ -713,81 +776,81 @@ Return(lRet)
 
 Static Function getQueRat(FILIAL,MAT,CODIGO)
 
-Local StrQuery := ""
+	Local StrQuery := ""
 
-/*##RATEIO DE HORAS POR SUBCONTA NAS VERBAS DE HORAS NORMAIS########################################################*/
-StrQuery +="SELECT SRZ.RZ_FILIAL,SRZ.RZ_MAT,RA_NOME,RZ_CC,RZ_PD,SRV.RV_LPADRAO,FIP.FIPCUSTO,"
-/*##PEGA QUANTIDADE DE MINUTOS POR LANCAMENTO E POR LINHA###########################################################*/
-StrQuery +="SUM("
-StrQuery +="    (CAST(Left(Convert( VARCHAR(5),"
-StrQuery +="	 Cast(replace(CAST(FIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
-StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)*60)"
-StrQuery +="	+"
-StrQuery +="	 CAST(RIGHT(Convert( VARCHAR(5),"
-StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
-StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)"
-StrQuery +="	) as HORASFIP,"
-/*##PEGA TOTAL DE MINUTOS LANCADOS INDEPENDENTE DA SUBCONTAS########################################################*/
-StrQuery +="(SELECT SUM("
-StrQuery +="			(CAST(Left(Convert( VARCHAR(5),"
-StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
-StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)*60)"
-StrQuery +="			+"
-StrQuery +="			 CAST(RIGHT(Convert( VARCHAR(5),"
-StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
-StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)"
-StrQuery +="			)		"
-StrQuery +="	 FROM FIPEPC SUBFIP     "
-StrQuery +="	 INNER JOIN "+RetSqlName("SZ2")+" SZ2 ON (SUBFIP.FIPCUSTO = Substring(SZ2.Z2_COD,1,5) + '-' + Substring(SZ2.Z2_OS,1,2) + '-' + Substring(SZ2.Z2_SUBC,1,5))	"
-StrQuery +="	 WHERE SUBFIP.FIPEMPRESA = '"+CODIGO+"' AND SUBFIP.CHAPA='"+MAT+"' AND SUBFIP.FIPANOMES ='"+cAnoMes+"' AND 	 (SUBSTRING(FIPCUSTO,10,1)<>'9' OR RIGHT(FIPCUSTO,1) NOT IN ('F')) AND SUBFIP.FIPHORAI<SUBFIP.FIPHORAF AND SUBFIP.FIPATIVIDADES IS NOT NULL"
-StrQuery +=") as HORASTOT,"
-/*###################################################################################################################*/
-StrQuery +="RZ_VAL  "
-StrQuery +="FROM FIPEPC AS FIP  "
-StrQuery +="INNER JOIN "+RetSqlName("SZ2")+" SZ2 ON (FIP.FIPEMPRESA = '"+CODIGO+"' AND FIP.FIPCUSTO = Substring(SZ2.Z2_COD,1,5) + '-' + Substring(SZ2.Z2_OS,1,2) + '-' + Substring(SZ2.Z2_SUBC,1,5)) "
-StrQuery +="INNER JOIN "+RetSqlName("SRA")+" SRA ON (SRA.RA_MAT=FIP.CHAPA AND SRA.D_E_L_E_T_<>'*') "
-StrQuery +="INNER JOIN "+RetSqlName("SRZ")+" SRZ ON (SRZ.RZ_FILIAL=SRA.RA_FILIAL AND SRZ.RZ_MAT=CHAPA AND SRZ.D_E_L_E_T_<>'*') "
-StrQuery +="INNER JOIN "+RetSqlName("SRV")+" SRV ON (SRV.RV_FILIAL='"+Xfilial("SRV")+"' AND SRV.RV_COD=SRZ.RZ_PD AND SRV.RV_LPADRAO<>'' AND SRV.D_E_L_E_T_<>'*' AND SRV.RV_COD NOT IN (SELECT RV_COD FROM "+RetSqlName("SRV")+" WHERE RV_TIPORAT IN (2,3,4))) "
-StrQuery +="WHERE  CHAPA='"+MAT+"' AND  RA_FILIAL='"+FILIAL+"' AND  FIP.FIPANOMES ='"+cAnoMes+"' AND (SUBSTRING(FIPCUSTO,10,1)<>'9' OR RIGHT(FIPCUSTO,1) NOT IN ('F')) AND FIP.FIPHORAI<FIP.FIPHORAF and FIP.FIPATIVIDADES IS NOT NULL  "
-StrQuery +="GROUP BY RZ_FILIAL,RZ_MAT,RA_NOME,RZ_CC,RZ_PD,RV_LPADRAO,FIP.FIPCUSTO,RZ_VAL "
+	/*##RATEIO DE HORAS POR SUBCONTA NAS VERBAS DE HORAS NORMAIS########################################################*/
+	StrQuery +="SELECT SRZ.RZ_FILIAL,SRZ.RZ_MAT,RA_NOME,RZ_CC,RZ_PD,SRV.RV_LPADRAO,FIP.FIPCUSTO,"
+	/*##PEGA QUANTIDADE DE MINUTOS POR LANCAMENTO E POR LINHA###########################################################*/
+	StrQuery +="SUM("
+	StrQuery +="    (CAST(Left(Convert( VARCHAR(5),"
+	StrQuery +="	 Cast(replace(CAST(FIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
+	StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)*60)"
+	StrQuery +="	+"
+	StrQuery +="	 CAST(RIGHT(Convert( VARCHAR(5),"
+	StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
+	StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)"
+	StrQuery +="	) as HORASFIP,"
+	/*##PEGA TOTAL DE MINUTOS LANCADOS INDEPENDENTE DA SUBCONTAS########################################################*/
+	StrQuery +="(SELECT SUM("
+	StrQuery +="			(CAST(Left(Convert( VARCHAR(5),"
+	StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
+	StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)*60)"
+	StrQuery +="			+"
+	StrQuery +="			 CAST(RIGHT(Convert( VARCHAR(5),"
+	StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
+	StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)"
+	StrQuery +="			)		"
+	StrQuery +="	 FROM FIPEPC SUBFIP     "
+	StrQuery +="	 INNER JOIN "+RetSqlName("SZ2")+" SZ2 ON (SUBFIP.FIPCUSTO = Substring(SZ2.Z2_COD,1,5) + '-' + Substring(SZ2.Z2_OS,1,2) + '-' + Substring(SZ2.Z2_SUBC,1,5))	"
+	StrQuery +="	 WHERE SUBFIP.FIPEMPRESA = '"+CODIGO+"' AND SUBFIP.CHAPA='"+MAT+"' AND SUBFIP.FIPANOMES ='"+cAnoMes+"' AND 	 (SUBSTRING(FIPCUSTO,10,1)<>'9' OR RIGHT(FIPCUSTO,1) NOT IN ('F')) AND SUBFIP.FIPHORAI<SUBFIP.FIPHORAF AND SUBFIP.FIPATIVIDADES IS NOT NULL"
+	StrQuery +=") as HORASTOT,"
+	/*###################################################################################################################*/
+	StrQuery +="RZ_VAL  "
+	StrQuery +="FROM FIPEPC AS FIP  "
+	StrQuery +="INNER JOIN "+RetSqlName("SZ2")+" SZ2 ON (FIP.FIPEMPRESA = '"+CODIGO+"' AND FIP.FIPCUSTO = Substring(SZ2.Z2_COD,1,5) + '-' + Substring(SZ2.Z2_OS,1,2) + '-' + Substring(SZ2.Z2_SUBC,1,5)) "
+	StrQuery +="INNER JOIN "+RetSqlName("SRA")+" SRA ON (SRA.RA_MAT=FIP.CHAPA AND SRA.D_E_L_E_T_<>'*') "
+	StrQuery +="INNER JOIN "+RetSqlName("SRZ")+" SRZ ON (SRZ.RZ_FILIAL=SRA.RA_FILIAL AND SRZ.RZ_MAT=CHAPA AND SRZ.D_E_L_E_T_<>'*') "
+	StrQuery +="INNER JOIN "+RetSqlName("SRV")+" SRV ON (SRV.RV_FILIAL='"+Xfilial("SRV")+"' AND SRV.RV_COD=SRZ.RZ_PD AND SRV.RV_LPADRAO<>'' AND SRV.D_E_L_E_T_<>'*' AND SRV.RV_COD NOT IN (SELECT RV_COD FROM "+RetSqlName("SRV")+" WHERE RV_TIPORAT IN (2,3,4))) "
+	StrQuery +="WHERE  CHAPA='"+MAT+"' AND  RA_FILIAL='"+FILIAL+"' AND  FIP.FIPANOMES ='"+cAnoMes+"' AND (SUBSTRING(FIPCUSTO,10,1)<>'9' OR RIGHT(FIPCUSTO,1) NOT IN ('F')) AND FIP.FIPHORAI<FIP.FIPHORAF and FIP.FIPATIVIDADES IS NOT NULL  "
+	StrQuery +="GROUP BY RZ_FILIAL,RZ_MAT,RA_NOME,RZ_CC,RZ_PD,RV_LPADRAO,FIP.FIPCUSTO,RZ_VAL "
 
-StrQuery +=" UNION "
+	StrQuery +=" UNION "
 
-/*##RATEIO DE HORAS POR SUBCONTA NAS VERBAS DE HORAS EXTRAS#########################################################*/
-StrQuery +="SELECT SRZ.RZ_FILIAL,SRZ.RZ_MAT,RA_NOME,RZ_CC,RZ_PD,SRV.RV_LPADRAO,FIP.FIPCUSTO,"
-/*##PEGA QUANTIDADE DE MINUTOS POR LANCAMENTO E POR LINHA###########################################################*/
-StrQuery +="SUM("
-StrQuery +="    (CAST(Left(Convert( VARCHAR(5),"
-StrQuery +="	 Cast(replace(CAST(FIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
-StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)*60)"
-StrQuery +="	+"
-StrQuery +="	 CAST(RIGHT(Convert( VARCHAR(5),"
-StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
-StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)"
-StrQuery +="	) as HORASFIP,"
-/*##PEGA TOTAL DE MINUTOS LANCADOS INDEPENDENTE DA SUBCONTAS########################################################*/
-StrQuery +="(SELECT SUM("
-StrQuery +="			(CAST(Left(Convert( VARCHAR(5),"
-StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
-StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)*60)"
-StrQuery +="			+"
-StrQuery +="			 CAST(RIGHT(Convert( VARCHAR(5),"
-StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
-StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)"
-StrQuery +="			)		"
-StrQuery +="	 FROM FIPEPC SUBFIP     "
-StrQuery +="	 INNER JOIN "+RetSqlName("SZ2")+" SZ2 ON (SUBFIP.FIPCUSTO = Substring(SZ2.Z2_COD,1,5) + '-' + Substring(SZ2.Z2_OS,1,2) + '-' + Substring(SZ2.Z2_SUBC,1,5))	"
-StrQuery +="	 WHERE SUBFIP.FIPEMPRESA = '"+CODIGO+"' AND SUBFIP.CHAPA='"+MAT+"' AND SUBFIP.FIPANOMES ='"+cAnoMes+"' AND 	 (SUBSTRING(FIPCUSTO,10,1)<>'9' OR RIGHT(FIPCUSTO,1) NOT IN ('F')) AND SUBFIP.FIPHORAI<SUBFIP.FIPHORAF AND SUBFIP.FIPATIVIDADES IS NULL"
-StrQuery +=") as HORASTOT,"
-/*###################################################################################################################*/
-StrQuery +="RZ_VAL  "
-StrQuery +="FROM FIPEPC AS FIP  "
-StrQuery +="INNER JOIN "+RetSqlName("SZ2")+" SZ2 ON (FIP.FIPEMPRESA = '"+CODIGO+"' AND FIP.FIPCUSTO = Substring(SZ2.Z2_COD,1,5) + '-' + Substring(SZ2.Z2_OS,1,2) + '-' + Substring(SZ2.Z2_SUBC,1,5)) "
-StrQuery +="INNER JOIN "+RetSqlName("SRA")+" SRA ON (SRA.RA_MAT=FIP.CHAPA AND SRA.D_E_L_E_T_<>'*') "
-StrQuery +="INNER JOIN "+RetSqlName("SRZ")+" SRZ ON (SRZ.RZ_FILIAL=SRA.RA_FILIAL AND SRZ.RZ_MAT=CHAPA AND SRZ.D_E_L_E_T_<>'*') "
-StrQuery +="INNER JOIN "+RetSqlName("SRV")+" SRV ON (SRV.RV_FILIAL='"+Xfilial("SRV")+"' AND SRV.RV_COD=SRZ.RZ_PD AND SRV.RV_LPADRAO<>'' AND SRV.D_E_L_E_T_<>'*' AND SRV.RV_COD IN (SELECT RV_COD FROM "+RetSqlName("SRV")+" WHERE RV_TIPORAT IN (2,3,4))) "
-StrQuery +="WHERE  CHAPA='"+MAT+"' AND  RA_FILIAL='"+FILIAL+"' AND  FIP.FIPANOMES ='"+cAnoMes+"' AND (SUBSTRING(FIPCUSTO,10,1)<>'9' OR RIGHT(FIPCUSTO,1) NOT IN ('F')) AND FIP.FIPHORAI<FIP.FIPHORAF and FIP.FIPATIVIDADES IS NULL  "
-StrQuery +="GROUP BY RZ_FILIAL,RZ_MAT,RA_NOME,RZ_CC,RZ_PD,RV_LPADRAO,FIP.FIPCUSTO,RZ_VAL "
+	/*##RATEIO DE HORAS POR SUBCONTA NAS VERBAS DE HORAS EXTRAS#########################################################*/
+	StrQuery +="SELECT SRZ.RZ_FILIAL,SRZ.RZ_MAT,RA_NOME,RZ_CC,RZ_PD,SRV.RV_LPADRAO,FIP.FIPCUSTO,"
+	/*##PEGA QUANTIDADE DE MINUTOS POR LANCAMENTO E POR LINHA###########################################################*/
+	StrQuery +="SUM("
+	StrQuery +="    (CAST(Left(Convert( VARCHAR(5),"
+	StrQuery +="	 Cast(replace(CAST(FIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
+	StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)*60)"
+	StrQuery +="	+"
+	StrQuery +="	 CAST(RIGHT(Convert( VARCHAR(5),"
+	StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
+	StrQuery +="	 Cast(replace( CAST(FIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)"
+	StrQuery +="	) as HORASFIP,"
+	/*##PEGA TOTAL DE MINUTOS LANCADOS INDEPENDENTE DA SUBCONTAS########################################################*/
+	StrQuery +="(SELECT SUM("
+	StrQuery +="			(CAST(Left(Convert( VARCHAR(5),"
+	StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
+	StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)*60)"
+	StrQuery +="			+"
+	StrQuery +="			 CAST(RIGHT(Convert( VARCHAR(5),"
+	StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAF AS VarChar(5)) ,'.',':') as SmallDateTime)-"
+	StrQuery +="			 Cast(replace( CAST(SUBFIP.FIPHORAI AS VarChar(5)) ,'.',':') as SmallDateTime),108),2) AS NUMERIC)"
+	StrQuery +="			)		"
+	StrQuery +="	 FROM FIPEPC SUBFIP     "
+	StrQuery +="	 INNER JOIN "+RetSqlName("SZ2")+" SZ2 ON (SUBFIP.FIPCUSTO = Substring(SZ2.Z2_COD,1,5) + '-' + Substring(SZ2.Z2_OS,1,2) + '-' + Substring(SZ2.Z2_SUBC,1,5))	"
+	StrQuery +="	 WHERE SUBFIP.FIPEMPRESA = '"+CODIGO+"' AND SUBFIP.CHAPA='"+MAT+"' AND SUBFIP.FIPANOMES ='"+cAnoMes+"' AND 	 (SUBSTRING(FIPCUSTO,10,1)<>'9' OR RIGHT(FIPCUSTO,1) NOT IN ('F')) AND SUBFIP.FIPHORAI<SUBFIP.FIPHORAF AND SUBFIP.FIPATIVIDADES IS NULL"
+	StrQuery +=") as HORASTOT,"
+	/*###################################################################################################################*/
+	StrQuery +="RZ_VAL  "
+	StrQuery +="FROM FIPEPC AS FIP  "
+	StrQuery +="INNER JOIN "+RetSqlName("SZ2")+" SZ2 ON (FIP.FIPEMPRESA = '"+CODIGO+"' AND FIP.FIPCUSTO = Substring(SZ2.Z2_COD,1,5) + '-' + Substring(SZ2.Z2_OS,1,2) + '-' + Substring(SZ2.Z2_SUBC,1,5)) "
+	StrQuery +="INNER JOIN "+RetSqlName("SRA")+" SRA ON (SRA.RA_MAT=FIP.CHAPA AND SRA.D_E_L_E_T_<>'*') "
+	StrQuery +="INNER JOIN "+RetSqlName("SRZ")+" SRZ ON (SRZ.RZ_FILIAL=SRA.RA_FILIAL AND SRZ.RZ_MAT=CHAPA AND SRZ.D_E_L_E_T_<>'*') "
+	StrQuery +="INNER JOIN "+RetSqlName("SRV")+" SRV ON (SRV.RV_FILIAL='"+Xfilial("SRV")+"' AND SRV.RV_COD=SRZ.RZ_PD AND SRV.RV_LPADRAO<>'' AND SRV.D_E_L_E_T_<>'*' AND SRV.RV_COD IN (SELECT RV_COD FROM "+RetSqlName("SRV")+" WHERE RV_TIPORAT IN (2,3,4))) "
+	StrQuery +="WHERE  CHAPA='"+MAT+"' AND  RA_FILIAL='"+FILIAL+"' AND  FIP.FIPANOMES ='"+cAnoMes+"' AND (SUBSTRING(FIPCUSTO,10,1)<>'9' OR RIGHT(FIPCUSTO,1) NOT IN ('F')) AND FIP.FIPHORAI<FIP.FIPHORAF and FIP.FIPATIVIDADES IS NULL  "
+	StrQuery +="GROUP BY RZ_FILIAL,RZ_MAT,RA_NOME,RZ_CC,RZ_PD,RV_LPADRAO,FIP.FIPCUSTO,RZ_VAL "
 
 return (StrQuery)
 
@@ -802,7 +865,8 @@ Static Function GerRatFol()
 	cQueryMat+=" INNER JOIN "+RetSqlName("SRA")+" SRA ON (RA_MAT=RZ_MAT AND RA_FILIAL=RZ_FILIAL AND SRA.D_E_L_E_T_<>'*') "
 	cQueryMat+=" WHERE  "
 	cQueryMat+="     RZ_CC    BETWEEN '"+cCCDe+"' AND '"+cCCAte+"'"
-	cQueryMat+=" AND RA_FILIAL BETWEEN '"+cFilde+"' AND '"+cFilAte+"'"
+	//cQueryMat+=" AND RA_FILIAL BETWEEN '"+cFilde+"' AND '"+cFilAte+"'"
+	cQueryMat+=" AND RA_FILIAL BETWEEN '"+cFilAnt+"' AND '"+cFilAnt+"'"
 	cQueryMat+=" AND SRZ.D_E_L_E_T_<>'*'"
 	cQueryMat+=" ORDER BY RZ_FILIAL,RZ_MAT "
 	
@@ -817,7 +881,7 @@ Static Function GerRatFol()
 		cQueryDel:=" DELETE "+RetSqlName("SZ7")+" WHERE Z7_MAT='"+QMAT->RZ_MAT+"' AND (Z7_DTLANC='' OR Left(Z7_DTLANC,6)='"+cAnoMes+"') AND Z7_FILMAT = '"+QMAT->RZ_FILIAL+"' "
 		TcSQLExec(cQueryDel)
 		
-		IncProc("Efetuando Rateio.... Mat "+QMAT->RZ_MAT ,"Aguarde...")
+		IncProc("Filial:"+cFilAnt+" | Efetuando Rateio.... Mat "+QMAT->RZ_MAT ,"Aguarde...")
 		cMatTemp += QMAT->RZ_MAT +chr(13)+chr(10)
 		
 		Fwrite(Fcreate('\custom_logs\folha_rateio\Rateio_'+QMAT->RZ_FILIAL+'_'+QMAT->RZ_MAT+'.txt'),getQueRat(QMAT->RZ_FILIAL,QMAT->RZ_MAT,SM0->M0_CODIGO))
@@ -855,7 +919,7 @@ Static Function GerRatFol()
 		
 	EndDo	
 	
-//	AVISO("TESTE3",cMatTemp,{"Ok"},3)	
+	//	AVISO("TESTE3",cMatTemp,{"Ok"},3)	
 	
 	dbSelectArea("QMAT")
 	dbCloseArea()
@@ -885,7 +949,9 @@ Static Function ProcContab()
 	cMsgRegua := "Gerando Lancamentos Contabeis ..."
 	dbSelectArea("SZ7")          
 	
-	cKey := "Z7_CC >= '"+cCCDe+"' .And. Z7_CC <= '"+cCCAte+"'"
+	//cFilAnt
+
+	cKey := "Z7_CC >= '"+cCCDe+"' .And. Z7_CC <= '"+cCCAte+"' .And. Z7_FILMAT == '"+cFilAnt+"' .And. Empty(Z7_CONTASN) "
 	cIndex:= CriaTrab(NIL,.F.)
 	IndRegua("SZ7",cIndex,"Z7_MAT",,cKey,"Selecionando Registros ...")
 	
@@ -897,7 +963,7 @@ Static Function ProcContab()
 	
 		IncProc(cMsgRegua)  //Incrementa a posicao da regua de relatorios
 		
-		If (!Empty(Z7_CONTASN)) .or. (SZ7->Z7_CC< cCCDe .or. SZ7->Z7_CC > cCCAte) .or. (SZ7->Z7_FILMAT< cFilDe .or. SZ7->Z7_FILMAT > cFilAte)
+		If (!Empty(Z7_CONTASN)) .or. (SZ7->Z7_CC< cCCDe .or. SZ7->Z7_CC > cCCAte) .or. (SZ7->Z7_FILMAT != cFilAnt)
 			dbSelectArea("SZ7")
 			dbSkip()
 			Loop
@@ -941,53 +1007,192 @@ Return()
 
 
 
-Static Function IncFipeAuto(cMat,cData,nHorasFip,cAnoMes   ,cConta  ,cTipoHr    ,cCodAtiv)
+Static Function IncFipeAut(cMat,cData,nHorasFip,cAnoMes   ,cConta  ,cTipoHr    ,cCodAtiv)
 
-Local lGeraReg      := .F.
-Local cQuery        := ""
-Local aAreaOld      := GetArea()
-Local cSubContaComp := ""
-Local cAliasTemp    := GetNextAlias()  
+	Local lGeraReg      := .F.
+	Local cQuery        := ""
+	Local aAreaOld      := GetArea()
+	Local cSubContaComp := ""
+	Local cAliasTemp    := GetNextAlias()  
 
-cQuery := "SELECT COUNT(*) NREG from FIPEPC WHERE FIPEMPRESA = '"+cEmpAnt+"' AND CHAPA = '"+cMat+"' and FIPANOMES =  '"+cAnoMes+"'"
+	cQuery := "SELECT COUNT(*) NREG from FIPEPC WHERE FIPEMPRESA = '"+cEmpAnt+"' AND CHAPA = '"+cMat+"' and FIPANOMES =  '"+cAnoMes+"'"
+	TcQuery cQuery Alias &cAliasTemp New
 
-dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQuery),cAliasTemp,,.T.,.T.)
+	dbSelectArea(cAliasTemp)
+	(cAliasTemp)->(dbGotop())
+	If (cAliasTemp)->NREG <= 0
+		lGeraReg      := .t.
+	EndIf
+	dbSelectArea(cAliasTemp)
+	(cAliasTemp)->(dbCloseArea())
 
-dbSelectArea(cAliasTemp)
+	If lGeraReg
 
-(cAliasTemp)->(dbGotop())
+		cQuery := "(SELECT Z2_COD+'-'+Z2_OS+'-'+Z2_SUBC SUBTOTAL FROM "+RetSqlName("SZ2")+" WHERE Z2_SUBC='"+cConta+"')"
+		
+		TcQuery cQuery Alias &cAliasTemp New
+		dbSelectArea(cAliasTemp)
+		(cAliasTemp)->(dbGotop())
+		If !(cAliasTemp)->(Eof())
+			cSubContaComp := (cAliasTemp)->SUBTOTAL 
+		EndIf
+		dbSelectArea(cAliasTemp)
+		(cAliasTemp)->(dbCloseArea())   
 
-If (cAliasTemp)->NREG <= 0
-   lGeraReg      := .t.
-EndIf
+		
+		cQuery := "INSERT INTO FIPEPC (CHAPA     ,FIPCUSTO,FIPDATA,FIPCRONOGRAMA,FIPATIVIDADES,FIPDOCUMENTOS,FIPHORAI,FIPHORAF,FIPANOMES,FIPESCOPO,FIPFATURAVEL,FIPEXTRAS,FIPSITUACAO,FIPGERADO,FIPICONTROLE,FIPANOMESDATA,FIPEMPRESA,FIPFILIAL,FIPORIGEM,FIPPD) "
+		cQuery += "             VALUES('"+cMat+"','"+cSubContaComp+"',getdate(),'00000-00-00000','"+cCodAtiv+"','00000000000000-0','8.00','18.00','"+cAnoMes+"','S','N','N','01','D',5,'"+cAnoMes+"','"+cEmpAnt+"','"+cFilAnt+"','FAC','') "
+		TcSqlExec(cQuery)
 
-dbSelectArea(cAliasTemp)
+	Endif 
 
-(cAliasTemp)->(dbCloseArea())
-
-If lGeraReg
-
-   cQuery := "(SELECT Z2_COD+'-'+Z2_OS+'-'+Z2_SUBC SUBTOTAL FROM "+RetSqlName("SZ2")+" WHERE Z2_SUBC='"+cConta+"')"
-   
-   dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQuery),cAliasTemp,,.T.,.T.)
-   dbSelectArea(cAliasTemp)
-   
-   (cAliasTemp)->(dbGotop())
-   
-   If !(cAliasTemp)->(Eof())
-      cSubContaComp := (cAliasTemp)->SUBTOTAL 
-   EndIf
-
-   dbSelectArea(cAliasTemp)
-   (cAliasTemp)->(dbCloseArea())   
-
-   
-   cQuery := "INSERT INTO FIPEPC (CHAPA     ,FIPCUSTO,FIPDATA,FIPCRONOGRAMA,FIPATIVIDADES,FIPDOCUMENTOS,FIPHORAI,FIPHORAF,FIPANOMES,FIPESCOPO,FIPFATURAVEL,FIPEXTRAS,FIPSITUACAO,FIPGERADO,FIPICONTROLE,FIPANOMESDATA,FIPEMPRESA,FIPFILIAL,FIPORIGEM,FIPPD) "
-   cQuery += "             VALUES('"+cMat+"','"+cSubContaComp+"',getdate(),'00000-00-00000','"+cCodAtiv+"','00000000000000-0','8.00','18.00','"+cAnoMes+"','S','N','N','01','D',5,'"+cAnoMes+"','"+cEmpAnt+"','"+cFilAnt+"','FAC','') "
-   TcSqlExec(cQuery)
-
-Endif 
-
-RestArea(aAreaOld)
+	RestArea(aAreaOld)
 
 Return
+
+
+
+Static Function ErroContb(lpreContab)
+	
+	Local lRet:=.T.
+	Local cEol:=Chr(13)
+	Local cAccount  := GetMv("MV_WFACC") 
+	Local cCtaPass  := GetMv("MV_WFPASSW")
+	Local cCtaSmpt  := GetMv("MV_WFSMTP") 
+	Local cSendBy   := cmail
+	Local cMens:=""
+	Local cMotivo:=""
+	Local cComplete := ""
+
+	if lpreContab
+		cComplete := " AND Z7_DTLANC = '' "
+	else
+		cComplete := " AND Z7_DTLANC LIKE '"+cAnoMes+"%' "
+	ENDIF
+	
+
+	cQuery =" SELECT (SELECT TOP 1 RA_NOME FROM "+RetSqlName("SRA")+" WHERE RC_MAT = RA_MAT) AS COLABORADOR ,* FROM "
+    cQuery+=" ("
+	cQuery+=" SELECT RC_FILIAL, RC_PD, RC_MAT, SUM(RC_VALOR) AS VALOR, RV_LPADRAO, RV_LCTOP, RV_TIPORAT FROM "+RetSqlName("SRC")+"  AS SRC"
+	cQuery+=" INNER JOIN "+RetSqlName("SRV")+" AS SRV ON SRV.RV_COD = SRC.RC_PD"
+	cQuery+=" WHERE SRC.D_E_L_E_T_ = '' AND SRV.D_E_L_E_T_ = '' AND RC_PERIODO = '"+cAnoMes+"' AND (SRV.RV_LPADRAO <> '' OR (SRV.RV_LPADRAO = '' AND SRV.RV_LCTOP = '' AND RV_TIPOCOD NOT IN (3,4)) )"
+	cQuery+=" GROUP BY RC_FILIAL,RC_MAT,RC_PD,RV_LPADRAO,RV_LCTOP,RV_TIPORAT"
+	cQuery+=" ) AS SRC"
+	cQuery+=" LEFT JOIN"
+	cQuery+=" ( "
+	cQuery+=" SELECT Z7_FILMAT, Z7_PD, Z7_MAT, SUM(Z7_VLRAT) AS VALOR FROM "+RetSqlName("SZ7")+" AS SZ7  "
+	cQuery+=" INNER JOIN "+RetSqlName("SRV")+" AS SRV ON SRV.RV_COD = SZ7.Z7_PD "
+	cQuery+=" WHERE SZ7.D_E_L_E_T_ = '' AND SRV.D_E_L_E_T_ = ''  AND (SRV.RV_LPADRAO <> '')  "+cComplete
+	cQuery+=" GROUP BY Z7_FILMAT,Z7_MAT, Z7_PD "
+	cQuery+=" ) AS SZ7 ON Z7_FILMAT = RC_FILIAL AND Z7_PD = RC_PD AND Z7_MAT = RC_MAT "
+	//cQuery+=" WHERE Z7_FILMAT IS NULL AND RC_FILIAL BETWEEN '"+cFilde+"' AND '"+cFilAte+"'"; "
+	cQuery+=" WHERE Z7_FILMAT IS NULL AND RC_FILIAL BETWEEN '"+cFilAnt+"' AND '"+cFilAnt+"'"; "
+
+	TcQuery cQuery Alias QSFIP New
+	 
+	cMens:=' <html> '+cEol
+	cMens+='	<head>'+cEol
+	cMens+='		<TITLE>'+if(cEmpAnt='03','LYNX','TSA')+'- Erros de contabilizacao da folha</TITLE>'+cEol
+	cMens+='	</head>'+cEol
+	cMens+='	<Table border=2 cellspacing=0 bordercolor="black" width=800 >'+cEol
+	cMens+='		<tr>'+cEol
+	cMens+='			<td align="Left" colspan=6  bgColor="Red" >'+cEol
+	cMens+='				<B> Segue abaixo a lista de erros de contabilizacao.</B><br>'+cEol
+	cMens+=' 				Parametros: <br>'
+	cMens+=' 				Ano Mes Referência:'+cAnoMes+'<br>'
+	cMens+=' 				Filial de:'+cFilAnt+' Até '+cFilAnt+'<br><br>'
+	cMens+='				<B> Consideracoes importantes:</B><br>'+cEol
+	cMens+='				&nbsp;&nbsp;* Se houve verba de rateio de hora extra listada, confira o rateio da mesma para o colaborador indicado.<br>'+cEol
+	cMens+='				&nbsp;&nbsp;* Se houve verba de rateio de horas normais listada, confira se o profissional lancou horas no periodo no redmine.<br>'+cEol
+	cMens+='				&nbsp;&nbsp;* Se todos os registros da verba foram listados, confira as parametrizacoes de rateio da verba em questao.<br>'+cEol
+	cMens+='			</td>'+cEol
+	cMens+='		</tr>'+cEol
+	cMens+='		<tr>'+cEol
+	cMens+='			<td colspan=6 > </td>'+cEol
+	cMens+='		</tr>'+cEol
+	cMens+='		<tr>'+cEol
+	cMens+='			<td align=center colspan=6  bgColor="Red">'+cEol
+	cMens+='				<P>Lista de Funcionários'+cEol
+	cMens+='			</td>'+cEol
+	cMens+='		</tr>'+cEol
+	cMens+='		<tr>'+cEol
+	cMens+='			<td bgColor="Silver">Filial</td>'+cEol
+	cMens+='			<td bgColor="Silver">Funcionário</td>'+cEol
+	cMens+='			<td bgColor="Silver">Matricula</td>'+cEol
+	cMens+='			<td bgColor="Silver">Verba</td>'+cEol
+	cMens+='			<td bgColor="Silver">Valor</td>'+cEol
+	cMens+='			<td bgColor="Silver">Provavel motivo</td>'+cEol
+	cMens+='		</tr>'+cEol
+
+	dbSelectArea("QSFIP")
+	dbGotop()
+
+	While !Eof()
+
+		if Empty(QSFIP->RV_LPADRAO)
+			cMotivo := "Verba sem Lancamento Padrao"
+		elseif QSFIP->RV_TIPORAT == '1'
+			cMotivo := "Sem RAC no Redmine"
+		elseif QSFIP->RV_TIPORAT == '2'
+			cMotivo := "Rateio de Hora extra inexistente ou incompleto"
+		else
+			cMotivo := ""
+		endif
+		
+		cMens+='		<tr>'+cEol	
+		cMens+='			<td>'+QSFIP->RC_FILIAL+'</td>'+cEol
+		cMens+='			<td>'+QSFIP->COLABORADOR+'</td>'+cEol
+	    cMens+='			<td>'+QSFIP->RC_MAT+'</td>'+cEol
+		cMens+='			<td>'+QSFIP->RC_PD+'</td>'+cEol
+		cMens+='			<td>'+cvaltochar(QSFIP->VALOR)+'</td>'+cEol
+		cMens+='			<td>'+cMotivo+'</td>'+cEol
+		cMens+='		</tr>'+cEol   
+		lRet:=.F.
+		
+		dbSelectArea("QSFIP")
+		dbSkip()
+
+	EndDo
+
+	dbSelectArea("QSFIP")
+	dbCloseArea()
+	
+	cMens+='	</table>'+cEol
+	cMens+='</html> '+cEol
+	
+	nFile:=Fcreate("\custom_logs\folha_contabilizacao\logContabilizacao-"+cEmpAnt+"-"+cFilAnt+".html")
+	Fwrite(nFile,cMens)
+	Fclose(nFile)                                         
+	
+	if (!lRet)
+	
+		CONNECT SMTP SERVER cCtaSmpt ACCOUNT cAccount PASSWORD cCtaPass 
+	
+		SEND MAIL FROM  cSendBy TO  cSendBy SUBJECT '[Restrito] Relatorio de contabilizacao da folha ('+cAnoMes+') ' BODY cMens 
+	
+		DISCONNECT SMTP SERVER
+	endif
+
+Return(lRet)
+
+
+
+Static Function ExisLote(cFilProc)
+	
+	Local lRet		:= .F.
+	Local cQuery	:= "SELECT DISTINCT CT2_FILIAL,CT2_DATA FROM "+RetSqlName("CT2")+"  WHERE D_E_L_E_T_ = '' AND CT2_LOTE = '008880' AND CT2_DATA LIKE '"+cAnoMes+"%' AND CT2_FILIAL = '"+cFilProc+"'"
+
+	
+	TcQuery cQuery Alias QTMP New
+	dbSelectArea("QTMP")
+	dbGotop()
+
+	if !Eof()                                 
+		lRet := .T.
+	EndIf
+	
+	dbSelectArea("QTMP")
+	dbCloseArea()
+
+	
+Return(lRet)
