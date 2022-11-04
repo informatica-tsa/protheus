@@ -132,7 +132,7 @@ If RecLock("SF1",.F.)
 
 	Replace SF1->F1_DTENT   With SF1->F1_DTDIGIT
 	
-	If SF1->F1_EMISSAO > GetMv("MV_ULMES") //data de fechamento do estoque
+	/*If SF1->F1_EMISSAO > GetMv("MV_ULMES") //data de fechamento do estoque
 		
 		Replace SF1->F1_DTDIGIT With SF1->F1_EMISSAO
 		
@@ -161,7 +161,7 @@ If RecLock("SF1",.F.)
 			
 			dbSkip()
 		EndDo
-	EndIf
+	EndIf*/
 	
 	Replace SF1->F1_VRETISS With nVretIss
 	Replace SF1->F1_VRETPIS With nVretPis
