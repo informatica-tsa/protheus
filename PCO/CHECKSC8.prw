@@ -88,7 +88,7 @@ User Function CHECKSC7(nValor)
 	DbSelectArea("QRAKD")
 	dbclosearea()
 
-	nRvalor := IF(!EMPTY(SC8->C8_NUMSC) .AND. SC8->C8_XPCO=="S" .AND. lControl .AND. EMPTY(SC8->C8_ZPRJ), nValor ,0)
+	nRvalor := IF(!EMPTY(SC8->C8_NUMSC) .AND. SC8->C8_XPCO=="S" .AND. lControl , nValor ,0)
 
 Return nRvalor
 
@@ -125,14 +125,14 @@ User Function DCHECKSD1()
 							( ;
 								!EMPTY(dtsolic), dtsolic, dpedido;
 							)  ,;
-						D1_EMISSAO ;
+						SD1->D1_EMISSAO ;
 					)
 
 Return dDate
 
-
+/*
 //TEMPORARIO
-/*User Function CTBNFEDT()
+User Function CTBNFEDT()
 
 	Local aItems		:= {'DIGITACAO','EMISSAO'}
 	Local lok 			:= .F.
