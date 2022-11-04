@@ -116,6 +116,7 @@ User Function MT010INC()
 					SB1->(MsUnlock())
 
 					//FORÇA UMA ATUALIZAÇÃO PARA INTEGRAR TCOP
+					U_TMata010(aProdIMPA)
 					U_TMata010(aProdAAOA)
 					U_TMata010(aProdDEQA)
 					U_TMata010(aProdDERA)
@@ -141,6 +142,7 @@ User Function MT010INC()
 					SB1->(MsUnlock())
 
 					//FORÇA UMA ATUALIZAÇÃO PARA INTEGRAR TCOP
+					U_TMata010(aProdAAOA)
 					U_TMata010(aProdIMPA)
 					U_TMata010(aProdDEQA)
 					U_TMata010(aProdDERA)
