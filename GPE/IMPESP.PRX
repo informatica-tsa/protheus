@@ -3,9 +3,8 @@
 #INCLUDE "PROTHEUS.CH"
 #INCLUDE "RPTDEF.CH"  
 #INCLUDE "FWPrintSetup.ch"
-
-
- 
+#Include "TopConn.ch"
+#include 'fileio.ch
 #INCLUDE "TBICONN.CH"
 
 #IFNDEF DEFAULT
@@ -3487,27 +3486,30 @@ Static Function GetMarcDes(aMarcacoes, aMarcDes)
 	
 Return
 
-/*/{Protheus.doc} GetHeDia
-	Busca as Horas Extras dia a dia utilizando as regras e funcoes do RDMAKE IMPESP para gravar o realizado de Horas.
-	@type  User Function
-	@author Thiago Santos
-	@since 08/11/2022
-/*/
-User Function GetHeDia()
+
+/*
+Para as customizações abaixo, adicionar as includes abaixo
+#Include "TopConn.ch"
+#include 'fileio.ch
+#INCLUDE "TBICONN.CH"
+
+*/
+Static Function Confirma()
 	
-	//lImpAcum := ( dPerFim < dIniPonMes )
-	Local lImpAcum := .F.
-	Local dInicio := Ctod("26/09/22")
-	Local dFim := Ctod("25/10/22")
-	Local cPerg    := 'PNR010'
+	Local lImpAcum 		:= .F.
+	Local dInicio 		:= Ctod("26/09/22")
+	Local dFim 			:= Ctod("25/10/22")
+	Local cPerg    		:= 'PNR010'
 	Local cSituacao		:= ""
 	Local cCategoria	:= ""
 	Local nX			:= 0
 	Local cWhere		:= ""
 	Local lRet			:= .T.
+	Local nAtual := 0
+    Local nTotal := 0
 
 	// Verifica as perguntas selecionadas
-	Pergunte( cPerg, .T. )
+	Pergunte( cPerg, .F. )
 	
 	// Carregando variaveis MV_PAR?? para Variaveis do Sistema.
 	FilialDe	:= MV_PAR01			//Filial  De
@@ -3522,10 +3524,24 @@ User Function GetHeDia()
 	NomAte		:= MV_PAR10			//Nome Ate
 	cSit		:= MV_PAR11			//Situacao
 	cCat		:= MV_PAR12			//Categoria
+	dInicio     := MV_PAR19			//Data Contendo o Inicio do Periodo de Apontamento
+	dFim     	:= MV_PAR20			//Data Contendo o Fim  do Periodo de Apontamento
 	DeptoDe		:= MV_PAR25			//Departamento De
 	DeptoAte	:= MV_PAR26			//Departamento Ate
 	RegDe		:= MV_PAR31			//Regra De
 	RegAte		:= MV_PAR32			//Regra Ate
+	
+	GravaLog("\custom_logs\folha\log-folha-"+cEmpAnt+".log","Iniciado com sucesso! Periodo : "+DTOC(dInicio)+" - "+DTOC(dFim)) 
+	GravaLog("\custom_logs\folha\log-folha-"+cEmpAnt+".log","Parametros: ") 
+	GravaLog("\custom_logs\folha\log-folha-"+cEmpAnt+".log","  Filial De '" + FilialDe + "' Ate '"+ FilialAte+"'")
+	GravaLog("\custom_logs\folha\log-folha-"+cEmpAnt+".log","  CC De '" + CCDe + "' Ate '"+ CCAte+"'")
+	GravaLog("\custom_logs\folha\log-folha-"+cEmpAnt+".log","  Turno De '" + TurDe + "' Ate '"+ TurAte+"'")
+	GravaLog("\custom_logs\folha\log-folha-"+cEmpAnt+".log","  Matricula '" + MatDe + "' Ate '"+ MatAte+"'")
+	GravaLog("\custom_logs\folha\log-folha-"+cEmpAnt+".log","  Nome'" + NomDe + "' Ate '"+ NomAte +"'")
+	GravaLog("\custom_logs\folha\log-folha-"+cEmpAnt+".log","  Regra '" + RegDe + "' Ate '"+RegAte+"'")
+	GravaLog("\custom_logs\folha\log-folha-"+cEmpAnt+".log","  Departamento '" + DeptoDe+"' Ate '"+ DeptoAte + "'")
+
+
 
 	For nX:=1 to Len(cSit)
 		If Subs(cSit,nX,1) <> "*"
@@ -3553,6 +3569,9 @@ User Function GetHeDia()
 		cCategoria := Subs(cCategoria,1,Len(cCategoria)-1)
 	EndIf
 
+	GravaLog("\custom_logs\folha\log-folha-"+cEmpAnt+".log","  Situacao Folha IN ( " + cSituacao + ") " )
+	GravaLog("\custom_logs\folha\log-folha-"+cEmpAnt+".log","  Categoria IN ( " + cCategoria + ") ")
+
 	cWhere += "%"
 	cWhere += "SRA.RA_FILIAL >= '" + FilialDe + "' AND "
 	cWhere += "SRA.RA_FILIAL <= '" + FilialAte + "' AND "
@@ -3576,9 +3595,8 @@ User Function GetHeDia()
 	If !Empty(cCategoria)
 		cWhere += " AND SRA.RA_CATFUNC IN ( " + cCategoria + ") "
 	EndIf
-	cWhere += " AND SRA.D_E_L_E_T_ = ' ' " 
+	cWhere += " AND SRA.D_E_L_E_T_ = ' ' AND ( RA_DEMISSA = '' OR RA_DEMISSA BETWEEN '"+DTOS(dInicio)+"' AND '"+DTOS(dFim)+"' ) " 
 	cWhere += "%"
-	
 	
 	BeginSql Alias cAliasSRA
 		
@@ -3601,8 +3619,11 @@ User Function GetHeDia()
 			%Table:SRA% SRA
 		WHERE %Exp:cWhere%
 	EndSql
-	
-	SetRegua( (cAliasQTD)->QTDREG )
+
+	//ConOut("Quantidade de registros: "+CVALTOCHAR((cAliasQTD)->QTDREG))
+
+	nTotal := (cAliasQTD)->QTDREG 
+    ProcRegua(nTotal)
 	(cAliasQTD)->(DbCloseArea())
 
 
@@ -3618,15 +3639,29 @@ User Function GetHeDia()
 		//Posiciona no funcionário atual
 		SRA->(DbSeek((cAliasSRA)->RA_FILIAL + (cAliasSRA)->RA_MAT))
 
-			/*
-			ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-			³Incrementa a R‚gua de Impress„o							   ³
-			ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
-			IncRegua()
+		/*
+		ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		³Incrementa a R‚gua de Impress„o							   ³
+		ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
+
+		nAtual++
+		IncProc("Processando registro " + cValToChar(nAtual) + " de " + cValToChar(nTotal) + "...")
+		
+		//ConOut("Processando : "+SRA->RA_NOME)
+
+		if !VldPeriod(GetCompet(dInicio))
+			//ConOut("     Skip - Filial com periodo Fechado : "+SRA->RA_FILIAL)
+			(cAliasSRA)->( dbSkip() )
+			Loop
+		EndIf
 
 		( aTabPadrao := {}, aResult := {}, aMarcacoes := {} , aTabCalend := {} , aTurnos := {}, aMarcDes := {} )
 
 		fTabTurno(@aTabPadrao, NIL,,, SRA->RA_TNOTRAB)
+
+		//Exclui os registros desta matricula para o periodo selecionado
+		cQueryDel:=" DELETE "+RetSqlName("Z01")+" WHERE Z01_MAT='"+SRA->RA_MAT+"' AND Z01_DATA BETWEEN '"+DTOS(dInicio)+"' AND '"+DTOS(dFim)+"' AND D_E_L_E_T_ = '' "
+		TcSQLExec(cQueryDel)
 
 		If !GetMarcacoes(	@aMarcacoes					,;	//Marcacoes dos Funcionarios
 							@aTabCalend					,;	//Calendario de Marcacoes
@@ -3635,10 +3670,10 @@ User Function GetHeDia()
 							dInicio 					,;	//Periodo Inicial
 							dFim						,;	//Periodo Final
 							SRA->RA_FILIAL				,;	//Filial
-							SRA->RA_MAT				,;	//Matricula
-							SRA->RA_TNOTRAB			,;	//Turno
-							SRA->RA_SEQTURN			,;	//Sequencia de Turno
-							SRA->RA_CC				,;	//Centro de Custo
+							SRA->RA_MAT					,;	//Matricula
+							SRA->RA_TNOTRAB				,;	//Turno
+							SRA->RA_SEQTURN				,;	//Sequencia de Turno
+							SRA->RA_CC					,;	//Centro de Custo
 							If(lImpAcum,"SPG","SP8")	,;	//Alias para Carga das Marcacoes
 							NIL							,;	//Se carrega Recno em aMarcacoes
 							.T.							,;	//Se considera Apenas Ordenadas
@@ -3652,15 +3687,21 @@ User Function GetHeDia()
 							.T.							,;  //22 -> Se carrega as marcacoes desconsideradas (Uso com lPort1510)
 							NIL							 ;  //23 -> Se carrega as marcacoes das duas tabelas SP8 e SPG
 					)
+
+					//ConOut("     Skip - Sem horas para processar")
+					(cAliasSRA)->( dbSkip() )
 					Loop
-					//MsgInfo("Marcacoes nao localizadas", "Valida marcacao")
+
 		EndIf
 
 		//Carrega as marcações desconsideradas no aMarcDes e as excluí do aMarcacoes
 		GetMarcDes(@aMarcacoes, @aMarcDes)
 
+		//Preenche array aResult
 		fGetApo(@aResult, dInicio, dFim, lImpAcum, aTabCalend, aMarcacoes)
-		MsgInfo("Matricula: "+SRA->RA_MAT+" Processada com sucesso!", "Realizado de H.E")
+		
+		//Insere na Tabela Z01
+		InsHoras(aResult)
 
 		(cAliasSRA)->( dbSkip() )
 
@@ -3670,3 +3711,114 @@ User Function GetHeDia()
 
 Return lRet
 
+static function InsHoras(aResult)
+	Local lRet 	:= .T.
+	Local nX 	:= 0
+
+
+	for nX := 1 to len(aResult) 
+
+			//GRAVA OS DADOS NA TABELA
+			
+			dbSelectArea("Z01")
+			RecLock("Z01",.T.)
+				Replace Z01_FILIAL  With xFilial("Z01")  						// FILIAL
+				Replace Z01_MAT     With SRA->RA_MAT							// MATRICULA
+				Replace Z01_DATA    With STOD(aResult[nX][1])					// DATA DA HORA EXTRA
+				Replace Z01_COMPET  WITH GetCompet(STOD(aResult[nX][1]))		// COMPETENCIA
+				Replace Z01_HORAS   WITH aResult[nX][3]							// QTD DE HORAS EXTRAS
+				Replace Z01_TIPO    WITH "1"									// HORA EXTRA
+			MsUnlock()
+		
+	next nX
+
+return lRet
+
+static Function VldPeriod(dPeriodo)
+
+	Local lRet := .F.
+	Local cQuery := "SELECT RCH_STATUS FROM RCH020 WHERE RCH_DTINI = '"+DTOS(dPeriodo)+"' AND RCH_ROTEIR = 'FOL' AND RCH_PROCES = '00001' AND RCH_FILIAL = '"+SRA->RA_FILIAL+"'"
+
+	TcQuery cQuery Alias "RHCVLD" New
+
+
+	dbSelectArea("RHCVLD")
+	dbGoTop()           
+	If !Eof()
+		if RHCVLD->RCH_STATUS == "0"
+			lRet = .T.
+		EndIf
+	EndIf
+	dbCloseArea()
+
+return lRet
+
+Static Function GetCompet(dDate)
+
+	IF Day(dDate) >= 26
+		dDate := MonthSum(dDate,1)
+	ENDIF
+	
+Return STOD(AnoMes(dDate)+"01")
+
+Static Function GravaLog(cArq,cMsg )
+ 	
+	If !File(cArq)
+		nHandle := FCreate(cArq)
+	else
+		nHandle := fopen(cArq , FO_READWRITE + FO_SHARED )
+	Endif
+
+	If nHandle == -1
+		MsgStop('Erro de abertura : FERROR '+str(ferror(),4))
+	Else
+		FSeek(nHandle, 0, FS_END) 
+		FWrite(nHandle, Dtoc(Date())+" - "+Time()+" : "+cUserName+" : "+cMsg+Chr(13)+Chr(10))
+		fclose(nHandle) 
+	Endif
+	
+ 
+return
+
+/*/{Protheus.doc} GetHeDia
+	Busca as Horas Extras dia a dia utilizando as regras e funcoes do RDMAKE IMPESP para gravar o realizado de Horas.
+	@type Function
+	@author Thiago Santos
+	@since 08/11/2022
+/*/
+User Function GetHeDia()
+  
+	//PREPARE ENVIRONMENT EMPRESA "02" FILIAL "01" MODULO "PON"
+
+	If !File("\custom_logs\folha\CalcHoraExtra-"+cEmpAnt+".txt")              
+	
+		//Cria o Arquivo com as informações de Quem esta Executando
+		nFile:=FCreate("\custom_logs\folha\CalcHoraExtra-"+cEmpAnt+".txt")
+		FWrite(nFile,"Usuário:"+cUserName+Chr(13)+Chr(10))
+		FWrite(nFile,"Inicio do Calculo:"+Dtoc(Date())+" - "+Time()+Chr(13)+Chr(10))
+		FClose(nFile)  
+
+		    
+	
+		@ 0,0 TO 180,450 DIALOG oDlg1 TITLE "Gerador de Horas Extras"
+		@ 04,05 TO 55,220 OF oDlg1 PIXEL
+		@ 10,10 SAY "Baseado no RDMAKE IMPESP (Espelho de Ponto)." OF oDlg1 PIXEL
+		@ 20,10 SAY "Essa rotina tem o intuito de gerar o realizado de H.E (tabela: Z01 )." OF oDlg1 PIXEL
+		@ 30,10 SAY "O seu processamento podera demandar alguns minutos." OF oDlg1 PIXEL
+		@ 40,10 SAY "Clique em <OK> para confirmar  ou <Cancela> para Cancelar." OF oDlg1 PIXEL
+
+
+		@ 65,120 BMPBUTTON TYPE 01 ACTION (Processa({|| Confirma()}, "Aguarde...", "Executando rotina..."),Close(oDlg1)) 
+		@ 65,148 BMPBUTTON TYPE 02 ACTION Close(oDlg1)
+		@ 65,178 BMPBUTTON TYPE 05 ACTION Pergunte('PNR010',.T.)
+		
+		ACTIVATE DIALOG oDlg1 CENTER
+		
+		GravaLog("\custom_logs\folha\log-folha-"+cEmpAnt+".log","Finalizado com sucesso!")    
+		// apaga o arquivo com as informações de geração
+	  	FErase("\custom_logs\folha\CalcHoraExtra-"+cEmpAnt+".txt")
+	else 
+		MsgBox("O Estimado já esta sendo processado por "+Chr(13)+Chr(10)+MemoRead("\custom_logs\folha\CalcHoraExtra-"+cEmpAnt+".txt"))
+	endif
+		
+Return	
