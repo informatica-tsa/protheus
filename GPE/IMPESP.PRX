@@ -6,6 +6,7 @@
 #Include "TopConn.ch"
 #include 'fileio.ch
 #INCLUDE "TBICONN.CH"
+#INCLUDE "RESTFUL.CH"
 
 #IFNDEF DEFAULT
 	#xcommand DEFAULT	<uVar1> := <uVal1> ;
@@ -3495,7 +3496,7 @@ Para as customizações abaixo, adicionar as includes abaixo
 
 */
 Static Function Confirma()
-	
+		
 	Local lImpAcum 		:= .F.
 	Local dInicio 		:= Ctod("26/09/22")
 	Local dFim 			:= Ctod("25/10/22")
@@ -3505,8 +3506,46 @@ Static Function Confirma()
 	Local nX			:= 0
 	Local cWhere		:= ""
 	Local lRet			:= .T.
-	Local nAtual := 0
-    Local nTotal := 0
+	Local nAtual 		:= 0
+    Local nTotal 		:= 0
+	Local cAliasSRA 	:= GetNextAlias()
+	Local cAliasQTD		:= GetNextAlias()
+
+
+	// Define Variaveis Private(Programa) Compatibilidade
+	Private dPerIni  := Ctod("//")
+	Private dPerFim  := Ctod("//")
+	Private cMenPad1 := Space(30)
+	Private cMenPad2 := Space(19)
+	Private cLocal	 := ""
+	Private cFilSPA	 := xFilial("SPA", SRA->RA_FILIAL)
+	Private nOrdem   := 1
+	Private aInfo    := {}
+	Private aTurnos  := {}
+	Private aPrtTurn := {}
+	Private nColunas := 0
+	Private aNaES	 := {}
+	Private nCol	 := 0
+	Private nColTot	 := 0
+	Private nLinTot	 := 0
+	Private aMargRel := {}
+	Private nLin	 := 0
+	Private nPxData	 :=	0
+	Private nPxSemana:= 0
+	Private nPxAbonos:= 0
+	Private nPxHe	 := 0
+	Private nPxHrVal := 0
+	Private nPxJor	 := 0
+	Private nPxFalta := 0
+	Private nPxAdnNot:= 0
+	Private nPxObser := 0
+	Private lImpMarc := .T.
+	Private lImpHrVal:= .F.
+	Private lCodeBar := .F.
+	Private lBigLine := .T.
+	Private nTamRAMAT := TamSx3("RA_MAT")[1]
+	Private lPort671 := SuperGetMV("MV_PORT671",, .F.)
+
 
 	// Verifica as perguntas selecionadas
 	Pergunte( cPerg, .F. )
@@ -3524,13 +3563,16 @@ Static Function Confirma()
 	NomAte		:= MV_PAR10			//Nome Ate
 	cSit		:= MV_PAR11			//Situacao
 	cCat		:= MV_PAR12			//Categoria
+	nImpAut		:= MV_PAR14			//Demonstrar horas Autoriz/Nao Autorizadas
 	dInicio     := MV_PAR19			//Data Contendo o Inicio do Periodo de Apontamento
 	dFim     	:= MV_PAR20			//Data Contendo o Fim  do Periodo de Apontamento
 	DeptoDe		:= MV_PAR25			//Departamento De
 	DeptoAte	:= MV_PAR26			//Departamento Ate
 	RegDe		:= MV_PAR31			//Regra De
 	RegAte		:= MV_PAR32			//Regra Ate
-	
+	lSexagenal  := (MV_PAR21==1)	//Horas em  (Sexagenal/Centesimal)
+	oObjEmail := JsonObject():new()
+
 	GravaLog("\custom_logs\folha\log-folha-"+cEmpAnt+".log","Iniciado com sucesso! Periodo : "+DTOC(dInicio)+" - "+DTOC(dFim)) 
 	GravaLog("\custom_logs\folha\log-folha-"+cEmpAnt+".log","Parametros: ") 
 	GravaLog("\custom_logs\folha\log-folha-"+cEmpAnt+".log","  Filial De '" + FilialDe + "' Ate '"+ FilialAte+"'")
@@ -3651,6 +3693,7 @@ Static Function Confirma()
 
 		if !VldPeriod(GetCompet(dInicio))
 			//ConOut("     Skip - Filial com periodo Fechado : "+SRA->RA_FILIAL)
+			showResult("[Info] Matricula : "+SRA->RA_MAT+" ("+SRA->RA_NOME+") '"+DTOS(dInicio)+"' AND '"+DTOS(dFim)+"' (Periodo ja Fechado)")
 			(cAliasSRA)->( dbSkip() )
 			Loop
 		EndIf
@@ -3660,8 +3703,8 @@ Static Function Confirma()
 		fTabTurno(@aTabPadrao, NIL,,, SRA->RA_TNOTRAB)
 
 		//Exclui os registros desta matricula para o periodo selecionado
-		cQueryDel:=" DELETE "+RetSqlName("Z01")+" WHERE Z01_MAT='"+SRA->RA_MAT+"' AND Z01_DATA BETWEEN '"+DTOS(dInicio)+"' AND '"+DTOS(dFim)+"' AND D_E_L_E_T_ = '' "
-		TcSQLExec(cQueryDel)
+		//cQueryDel:=" DELETE "+RetSqlName("Z01")+" WHERE Z01_MAT='"+SRA->RA_MAT+"' AND Z01_DATA BETWEEN '"+DTOS(dInicio)+"' AND '"+DTOS(dFim)+"' AND D_E_L_E_T_ = '' "
+		//TcSQLExec(cQueryDel)
 
 		If !GetMarcacoes(	@aMarcacoes					,;	//Marcacoes dos Funcionarios
 							@aTabCalend					,;	//Calendario de Marcacoes
@@ -3699,40 +3742,177 @@ Static Function Confirma()
 
 		//Preenche array aResult
 		fGetApo(@aResult, dInicio, dFim, lImpAcum, aTabCalend, aMarcacoes)
+
+		(nSaldoAnt := 0.00,	nSaldoAtu := 0.00, nCredito	:= 0.00, nDebito := 0.00, nTotHrVal	:= 0.00)
+
+		//Para compatibilidade com a Função Pnr010ImpBh
+		dPerIni := dInicio
+		dPerFim := dFim
+
+		//Pega os absenteismos, bancos e abonos para gerar os totais.
+		Pnr010ImpBh(@nSaldoAnt, @nSaldoAtu, @nCredito, @nDebito, @nTotHrVal)
 		
 		//Insere na Tabela Z01
-		InsHoras(aResult)
+		if !Empty(aResult)
+			InsHoras(aResult,nSaldoAnt, nSaldoAtu, nCredito, nDebito, nTotHrVal,@oObjEmail)
+		EndIf
 
 		(cAliasSRA)->( dbSkip() )
 
 	EndDo
 
 	(cAliasSRA)->(DbCloseArea())
+	FreeObj(oObjEmail)
 
 Return lRet
 
-static function InsHoras(aResult)
+static function getEmail(cDepTo)
+
+	Local cEmail := ""
+
+	cQuery:= " SELECT SQB.QB_MATRESP,SRA.RA_EMAIL FROM "+RetSqlName("SQB")+" AS SQB "
+	cQuery+= " INNER JOIN "+RetSqlName("SRA")+" AS SRA ON SRA.RA_MAT = SQB.QB_MATRESP "
+	cQuery+= " WHERE SQB.QB_DEPTO = '"+cDepTo+"' AND SQB.D_E_L_E_T_ = '' AND SRA.D_E_L_E_T_ = '' AND SRA.RA_DEMISSA = ''"
+
+	TcQuery cQuery Alias DEMAIL New	
+
+	dbSelectArea("DEMAIL")
+	dbGotop()
+
+	if !Eof()
+		cEmail := DEMAIL->RA_EMAIL
+	endif
+
+	dbSelectArea("DEMAIL")
+	dbCloseArea()
+
+return cEmail 
+
+static function InsHoras(aResult,nSaldoAnt, nSaldoAtu, nCredito, nDebito, nTotHrVal, oObjEmail)
 	Local lRet 	:= .T.
 	Local nX 	:= 0
+	Local nY 	:= 0
+	Local cRet  := ""
+	Local cJSON := ""
+	Local cJSON0 := ""
+	Local nContr:= 0 //CONTROLE HE
+	Local nContraD := 0 //CONTROLE AD. N
+	Local cEmail := ""
 
+	Local dtemp := CTOD('  /  /  ')
+	Local oObjJson0 := JsonObject():new() //JSON DE AD. N
+	Local oObjJson1 := JsonObject():new() //JSON DE HE
+	Local oObjJson2 := JsonObject():new() //ARRAY LIMPO DE HE
+	Local oObjJson3 := JsonObject():new() //ARRAY LIMPO DE AD. N
 
-	for nX := 1 to len(aResult) 
+	//ENVIA PARA APROVACAO APENAS FUNCIONARIOS COM CREDITO EM BANCO OU FOLHA
+	if nSaldoAtu > 0 
+		//CRIA ARRAY LIMPO SEM DIAS DUPLICADOS. HE
+		for nY := 1 to len(aResult)
+			if aResult[nY][2] == "1"
+				if oObjJson2[aResult[nY][1]]
+					oObjJson2[aResult[nY][1]] := SomaHoras(oObjJson2[aResult[nY][1]],aResult[nY][3])
+				Else
+					oObjJson2[aResult[nY][1]] := aResult[nY][3]
+				EndIf
+			Elseif aResult[nY][2] == "3"
+				if oObjJson3[aResult[nY][1]]
+					oObjJson3[aResult[nY][1]] := SomaHoras(oObjJson3[aResult[nY][1]],aResult[nY][3])
+				Else
+					oObjJson3[aResult[nY][1]] := aResult[nY][3]
+				EndIf
+			EndIf
+		next nY
 
-			//GRAVA OS DADOS NA TABELA
+		//CRIA ARRAY LIMPO SEM DIAS DUPLICADOS. AD. N
+		for nY := 1 to len(aResult)
 			
-			dbSelectArea("Z01")
-			RecLock("Z01",.T.)
-				Replace Z01_FILIAL  With xFilial("Z01")  						// FILIAL
-				Replace Z01_MAT     With SRA->RA_MAT							// MATRICULA
-				Replace Z01_DATA    With STOD(aResult[nX][1])					// DATA DA HORA EXTRA
-				Replace Z01_COMPET  WITH GetCompet(STOD(aResult[nX][1]))		// COMPETENCIA
-				Replace Z01_HORAS   WITH aResult[nX][3]							// QTD DE HORAS EXTRAS
-				Replace Z01_TIPO    WITH "1"									// HORA EXTRA
-			MsUnlock()
+		next nY
+
+		//PREPARA OBJETOS JSON 
+		for nX := 1 to len(aResult) 
+			if aResult[nX][2] == "1" //1- Horas extra/
+				
+				dtemp := GetCompet(STOD(aResult[nX][1]))
+				if nContr == 0
+					oObjJson1['matricula'] := SRA->RA_MAT
+					oObjJson1['justificativa'] := ""
+					oObjJson1['competencia'] := Month2Str(dtemp)+"/"+Year2Str(dtemp)
+					oObjJson1['tipo'] := "HE"
+					oObjJson1['saldoanterior'] := zVal2Hora(nSaldoAnt,":")+":00"
+					oObjJson1['debito'] := zVal2Hora(nDebito,":")+":00"
+					nContr++
+				endIf
+				
+				
+				oObjJson1['dia'+Day2Str(STOD(aResult[nX][1]))] := zVal2Hora(oObjJson2[aResult[nX][1]],":")+":00"
+
+			Elseif aResult[nX][2] == "3" //3-Adicional noturno
+				
+				dtemp := GetCompet(STOD(aResult[nX][1]))
+				if nContraD == 0
+					oObjJson0['matricula'] := SRA->RA_MAT
+					oObjJson0['justificativa'] := ""
+					oObjJson0['competencia'] := Month2Str(dtemp)+"/"+Year2Str(dtemp)
+					oObjJson0['tipo'] := "ADN"
+					nContraD++
+				endIf
+				
+				
+				oObjJson0['dia'+Day2Str(STOD(aResult[nX][1]))] := zVal2Hora(oObjJson3[aResult[nX][1]],":")+":00"
+
+			EndIf
+		next nX
+
+		cJSON := oObjJson1:toJSON() // HE
+		cJSON0 := oObjJson0:toJSON() // AD. N
+
+		if cJSON != "{}"
+			cRet := IHEReali(cJSON,"herealizada","POST")
+			showResult("[Info] Matricula : "+SRA->RA_MAT+" ("+SRA->RA_NOME+") ("+oObjJson1['competencia']+") : "+cRet)
+		EndIf
+
+		if cJSON0 != "{}"
+			cRet := IHEReali(cJSON0,"herealizada","POST")
+			showResult("[Info] Matricula : "+SRA->RA_MAT+" ("+SRA->RA_NOME+") ("+oObjJson0['competencia']+") : "+cRet)
+		EndIf
+
+	EndIf
+
+	if nContraD > 0 .or. nContr > 0
+		cEmail := getEmail(SRA->RA_DEPTO)
+
+		if(!empty(cEmail))
+			oObjEmail[cEmail] := cEmail
+		Endif
 		
-	next nX
+	endif
+
+	FreeObj(oObjJson0)
+	FreeObj(oObjJson1)
+	FreeObj(oObjJson2)
+	FreeObj(oObjJson3)
 
 return lRet
+
+Static Function zVal2Hora(nValor, cSepar)
+    Local cHora := ""
+    Default cSepar := ":"
+     
+
+        cHora := Alltrim(Transform(nValor, "@E 9999.99"))
+         
+        //Se o tamanho da hora for menor que 5, adiciona zeros a esquerda
+        If Len(cHora) < 5
+            cHora := Replicate('0', 5-Len(cHora)) + cHora
+        EndIf
+         
+        
+        //Atualizando o separador
+        cHora := replace(cHora, ',', cSepar)
+    	ConOut("Converter: "+cVALTOCHAR(nValor)+" para: "+cHora)
+
+Return cHora
 
 static Function VldPeriod(dPeriodo)
 
@@ -3822,3 +4002,81 @@ User Function GetHeDia()
 	endif
 		
 Return	
+
+//-------------------------------------------------------------------
+/*/{Protheus.doc} IHEReali
+Função para post inserir horas extras realizadas baseada no RDMAKE IMPESP
+@sample U_IHEReali()
+@author Thiago Santos
+@since 17/11/2022
+@version 1.0
+/*/
+//-------------------------------------------------------------------
+Static function IHEReali(cJSON,cModulo,cMethod)
+
+	local oRestClient as object
+	local cUrl := GetMv("ZZ_INTHOST")
+	local cRet as character
+	local cPath as char
+	local aHeadOut as array
+	local lRet := .F.
+	local cResult := ""
+	Local cKey	:= GetMv("ZZ_INTKEY")
+	//local cJSON := '{   "matricula":"002577", "competencia":"11/2022",   "dia26":"02:00:00",   "dia27":null,   "dia28":null,   "dia29":null,   "dia30":"00:30:00",   "dia31":null,   "dia01":null,   "dia02":null,   "dia03":null,   "dia04":null,   "dia05":null,   "dia06":null,   "dia07":null,   "dia08":null,   "dia09":null,   "dia10":null,   "dia11":null,   "dia12":null,   "dia13":null,   "dia14":null,   "dia15":null,   "dia16":null,   "dia17":null,   "dia18":null,   "dia19":null,   "dia20":null,   "dia21":null,   "dia22":null,   "dia23":null,   "dia24":null,   "dia25":null,   "justificativa":"teste api"}'
+
+	//PREPARE ENVIRONMENT EMPRESA "02" FILIAL "01" MODULO "FIN"
+
+	cPath := "/"+cModulo+"/api
+	aHeadOut := {}
+
+	oObjJson := JsonObject():new()
+    cRet := oObjJson:fromJSON( cJSON )
+	if cRet != NIL 
+      return "[Error] Falha ao deserializar o JSON"
+  	endif
+	
+	Aadd(aHeadOut, "key:"+cKey)
+	Aadd(aHeadOut, "empresa:"+RIGHT(cEmpAnt,1))
+	Aadd(aHeadOut, "Content-Type: application/json")
+
+    oRestClient := FWRest():New(cUrl)
+    oRestClient:SetPath(cPath)  
+
+	DO CASE
+		CASE cMethod = "GET"
+			lRet := oRestClient:Get(aHeadOut)
+
+		CASE cMethod = "POST"
+			oRestClient:SetPostParams(cJSON)
+			lRet := oRestClient:Post(aHeadOut)
+
+		CASE cMethod = "PUT"
+			oRestClient:SetPostParams(cJSON)
+			lRet := oRestClient:Put(aHeadOut)
+
+		CASE cMethod = "DELETE"
+			oRestClient:SetPostParams(cJSON)
+			lRet := oRestClient:Delete(aHeadOut)
+	ENDCASE
+
+	if lRet
+        cResult := oRestClient:GetResult()
+    else
+        cResult := oRestClient:GetLastError()
+    endif
+ 
+    FreeObj(oRestClient)
+	FreeObj(oObjJson)
+	
+
+return cResult
+ 
+
+static function showResult(cValue)
+	if IsBlind()
+		Conout(cValue)
+	else
+		GravaLog("\custom_logs\folha\log-herealizada-"+cEmpAnt+".log",cValue)
+		//MsgInfo(cValue)
+	endif
+return
