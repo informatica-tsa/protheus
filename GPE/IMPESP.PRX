@@ -3568,6 +3568,7 @@ Static Function Confirma()
 	dFim     	:= MV_PAR20			//Data Contendo o Fim  do Periodo de Apontamento
 	DeptoDe		:= MV_PAR25			//Departamento De
 	DeptoAte	:= MV_PAR26			//Departamento Ate
+	lImpBh 		:= MV_PAR30==1		//Imprime banco de horas
 	RegDe		:= MV_PAR31			//Regra De
 	RegAte		:= MV_PAR32			//Regra Ate
 	lSexagenal  := (MV_PAR21==1)	//Horas em  (Sexagenal/Centesimal)
@@ -3751,7 +3752,13 @@ Static Function Confirma()
 
 		//Pega os absenteismos, bancos e abonos para gerar os totais.
 		Pnr010ImpBh(@nSaldoAnt, @nSaldoAtu, @nCredito, @nDebito, @nTotHrVal)
-		
+
+		//Se nao for para considerar banco, ele desconsidera o valor do banco e atualiza o saldo atual
+		if 	!lImpBh 
+			nSaldoAtu := __TimeSub(nCredito,nDebito)
+			nSaldoAnt := 0.00
+		EndIf
+
 		//Insere na Tabela Z01
 		if !Empty(aResult)
 			InsHoras(aResult,nSaldoAnt, nSaldoAtu, nCredito, nDebito, nTotHrVal,@oObjEmail)
@@ -3805,78 +3812,76 @@ static function InsHoras(aResult,nSaldoAnt, nSaldoAtu, nCredito, nDebito, nTotHr
 	Local oObjJson2 := JsonObject():new() //ARRAY LIMPO DE HE
 	Local oObjJson3 := JsonObject():new() //ARRAY LIMPO DE AD. N
 
-	//ENVIA PARA APROVACAO APENAS FUNCIONARIOS COM CREDITO EM BANCO OU FOLHA
-	if nSaldoAtu > 0 
-		//CRIA ARRAY LIMPO SEM DIAS DUPLICADOS. HE
-		for nY := 1 to len(aResult)
-			if aResult[nY][2] == "1"
-				if oObjJson2[aResult[nY][1]]
-					oObjJson2[aResult[nY][1]] := SomaHoras(oObjJson2[aResult[nY][1]],aResult[nY][3])
-				Else
-					oObjJson2[aResult[nY][1]] := aResult[nY][3]
-				EndIf
-			Elseif aResult[nY][2] == "3"
-				if oObjJson3[aResult[nY][1]]
-					oObjJson3[aResult[nY][1]] := SomaHoras(oObjJson3[aResult[nY][1]],aResult[nY][3])
-				Else
-					oObjJson3[aResult[nY][1]] := aResult[nY][3]
-				EndIf
+	//CRIA ARRAY LIMPO SEM DIAS DUPLICADOS. HE
+	for nY := 1 to len(aResult)
+		if aResult[nY][2] == "1"
+			if oObjJson2[aResult[nY][1]]
+				oObjJson2[aResult[nY][1]] := SomaHoras(oObjJson2[aResult[nY][1]],aResult[nY][3])
+			Else
+				oObjJson2[aResult[nY][1]] := aResult[nY][3]
 			EndIf
-		next nY
+		Elseif aResult[nY][2] == "3"
+			if oObjJson3[aResult[nY][1]]
+				oObjJson3[aResult[nY][1]] := SomaHoras(oObjJson3[aResult[nY][1]],aResult[nY][3])
+			Else
+				oObjJson3[aResult[nY][1]] := aResult[nY][3]
+			EndIf
+		EndIf
+	next nY
 
-		//CRIA ARRAY LIMPO SEM DIAS DUPLICADOS. AD. N
-		for nY := 1 to len(aResult)
+	//CRIA ARRAY LIMPO SEM DIAS DUPLICADOS. AD. N
+	for nY := 1 to len(aResult)
+		
+	next nY
+
+	//PREPARA OBJETOS JSON 
+	for nX := 1 to len(aResult) 
+		if aResult[nX][2] == "1" //1- Horas extra/
 			
-		next nY
+			dtemp := GetCompet(STOD(aResult[nX][1]))
+			if nContr == 0
+				oObjJson1['matricula'] := SRA->RA_MAT
+				oObjJson1['justificativa'] := ""
+				oObjJson1['competencia'] := Month2Str(dtemp)+"/"+Year2Str(dtemp)
+				oObjJson1['tipo'] := "HE"
+				oObjJson1['saldoanterior'] := zVal2Hora(nSaldoAnt,":")+":00"
+				oObjJson1['debito'] := zVal2Hora(nDebito,":")+":00"
+				nContr++
+			endIf
+			
+			
+			oObjJson1['dia'+Day2Str(STOD(aResult[nX][1]))] := zVal2Hora(oObjJson2[aResult[nX][1]],":")+":00"
 
-		//PREPARA OBJETOS JSON 
-		for nX := 1 to len(aResult) 
-			if aResult[nX][2] == "1" //1- Horas extra/
-				
-				dtemp := GetCompet(STOD(aResult[nX][1]))
-				if nContr == 0
-					oObjJson1['matricula'] := SRA->RA_MAT
-					oObjJson1['justificativa'] := ""
-					oObjJson1['competencia'] := Month2Str(dtemp)+"/"+Year2Str(dtemp)
-					oObjJson1['tipo'] := "HE"
-					oObjJson1['saldoanterior'] := zVal2Hora(nSaldoAnt,":")+":00"
-					oObjJson1['debito'] := zVal2Hora(nDebito,":")+":00"
-					nContr++
-				endIf
-				
-				
-				oObjJson1['dia'+Day2Str(STOD(aResult[nX][1]))] := zVal2Hora(oObjJson2[aResult[nX][1]],":")+":00"
+		Elseif aResult[nX][2] == "3" //3-Adicional noturno
+			
+			dtemp := GetCompet(STOD(aResult[nX][1]))
+			if nContraD == 0
+				oObjJson0['matricula'] := SRA->RA_MAT
+				oObjJson0['justificativa'] := ""
+				oObjJson0['competencia'] := Month2Str(dtemp)+"/"+Year2Str(dtemp)
+				oObjJson0['tipo'] := "ADN"
+				nContraD++
+			endIf
+			
+			
+			oObjJson0['dia'+Day2Str(STOD(aResult[nX][1]))] := zVal2Hora(oObjJson3[aResult[nX][1]],":")+":00"
 
-			Elseif aResult[nX][2] == "3" //3-Adicional noturno
-				
-				dtemp := GetCompet(STOD(aResult[nX][1]))
-				if nContraD == 0
-					oObjJson0['matricula'] := SRA->RA_MAT
-					oObjJson0['justificativa'] := ""
-					oObjJson0['competencia'] := Month2Str(dtemp)+"/"+Year2Str(dtemp)
-					oObjJson0['tipo'] := "ADN"
-					nContraD++
-				endIf
-				
-				
-				oObjJson0['dia'+Day2Str(STOD(aResult[nX][1]))] := zVal2Hora(oObjJson3[aResult[nX][1]],":")+":00"
-
-			EndIf
-		next nX
-
-		cJSON := oObjJson1:toJSON() // HE
-		cJSON0 := oObjJson0:toJSON() // AD. N
-
-		if cJSON != "{}"
-			cRet := IHEReali(cJSON,"herealizada","POST")
-			showResult("[Info] Matricula : "+SRA->RA_MAT+" ("+SRA->RA_NOME+") ("+oObjJson1['competencia']+") : "+cRet)
 		EndIf
+	next nX
 
-		if cJSON0 != "{}"
-			cRet := IHEReali(cJSON0,"herealizada","POST")
-			showResult("[Info] Matricula : "+SRA->RA_MAT+" ("+SRA->RA_NOME+") ("+oObjJson0['competencia']+") : "+cRet)
-		EndIf
+	cJSON := oObjJson1:toJSON() // HE
+	cJSON0 := oObjJson0:toJSON() // AD. N
 
+	//ENVIA PARA APROVACAO APENAS FUNCIONARIOS COM SALDO DE HORAS POSITIVO
+	if cJSON != "{}" .and. nSaldoAtu > 0 
+		cRet := IHEReali(cJSON,"herealizada","POST")
+		showResult("[Info] Matricula : "+SRA->RA_MAT+" ("+SRA->RA_NOME+") ("+oObjJson1['competencia']+") : "+cRet)
+	EndIf
+
+	//ADN VAI SEMPRE QUE HOUVER
+	if cJSON0 != "{}"
+		cRet := IHEReali(cJSON0,"herealizada","POST")
+		showResult("[Info] Matricula : "+SRA->RA_MAT+" ("+SRA->RA_NOME+") ("+oObjJson0['competencia']+") : "+cRet)
 	EndIf
 
 	if nContraD > 0 .or. nContr > 0
@@ -3960,6 +3965,27 @@ Static Function GravaLog(cArq,cMsg )
  
 return
 
+Static Function Confirma2()
+	
+	//-> Declaração de variáveis.
+	Local bError 
+
+	//-> Recupera e/ou define um bloco de código para ser avaliado quando ocorrer um erro em tempo de execução.
+	bError := ErrorBlock( {|e| cError := e:Description } ) //, Break(e) } )
+	
+	//-> Inicia sequencia.
+	BEGIN SEQUENCE
+		Confirma()		
+	RECOVER
+		
+		//-> Recupera e apresenta o erro.
+		ErrorBlock( bError )
+		MsgStop( cError )
+		
+	END SEQUENCE
+	
+Return
+
 /*/{Protheus.doc} GetHeDia
 	Busca as Horas Extras dia a dia utilizando as regras e funcoes do RDMAKE IMPESP para gravar o realizado de Horas.
 	@type Function
@@ -3988,7 +4014,7 @@ User Function GetHeDia()
 		@ 40,10 SAY "Clique em <OK> para confirmar  ou <Cancela> para Cancelar." OF oDlg1 PIXEL
 
 
-		@ 65,120 BMPBUTTON TYPE 01 ACTION (Processa({|| Confirma()}, "Aguarde...", "Executando rotina..."),Close(oDlg1)) 
+		@ 65,120 BMPBUTTON TYPE 01 ACTION (Processa({|| Confirma2()}, "Aguarde...", "Executando rotina..."),Close(oDlg1)) 
 		@ 65,148 BMPBUTTON TYPE 02 ACTION Close(oDlg1)
 		@ 65,178 BMPBUTTON TYPE 05 ACTION Pergunte('PNR010',.T.)
 		
